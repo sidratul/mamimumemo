@@ -1,0 +1,23 @@
+{
+  "name": "daycare-monorepo",
+  "private": true,
+  "version": "1.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "start": "npm run admin:start",
+    "admin:start": "npm run start -w @mami/admin-app",
+    "admin:check": "npm run check -w @mami/admin-app",
+    "admin:build:ios:preview": "npm run build:ios:preview -w @mami/admin-app",
+    "admin:build:android:preview": "npm run build:android:preview -w @mami/admin-app",
+    "admin:build:android:preview:local": "npm run build:android:preview:local -w @mami/admin-app",
+    "admin:build:ios:production": "npm run build:ios:production -w @mami/admin-app",
+    "admin:build:android:production": "npm run build:android:production -w @mami/admin-app",
+    "admin:build:android:production:local": "npm run build:android:production:local -w @mami/admin-app",
+    "owner:start": "npm run start -w @mami/owner-app",
+    "daycare:start": "npm run start -w @mami/daycare-app",
+    "build:packages": "npm run build -w @mami/core && npm run build -w @mami/ui && npm run build -w @mami/graphql"
+  }
+}

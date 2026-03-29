@@ -1,0 +1,106 @@
+Implementation Checklist
+
+Dokumen ini dipakai untuk melacak status implementasi feature nyata lintas backend dan aplikasi mobile. File ini berbeda dari SPECIFICATION dan TDD karena fokusnya adalah progres eksekusi, bukan desain.
+
+Status Legend
+
+- Not Started: Belum dikerjakan
+- In Progress: Sedang dikerjakan
+- FE Done: UI/UX sudah ada, belum tentu tersambung penuh ke backend
+- BE Done: Backend sudah ada, belum tentu dipakai app
+- Integrated: Frontend dan backend sudah tersambung
+- Tested: Sudah terintegrasi dan sudah diverifikasi/test
+- Placeholder: Baru shell atau target app/module kosong
+
+Snapshot Saat Ini
+
+| Feature | Admin App | Daycare App | Owner App | API | Status | Notes |
+|---|---|---|---|---|---|---|
+| Admin login | FE Done | - | - | BE Done | In Progress | Login admin sekarang memverifikasi role SUPER_ADMIN |
+| Daycare owner registration | - | FE Done | - | BE Done | Integrated | Daycare app register owner, login, create draft, lalu submit registration |
+| Daycare registration draft | - | FE Done | - | BE Done | Integrated | Sudah lewat createDaycareDraft |
+| Submit daycare registration | - | FE Done | - | BE Done | Integrated | Sudah lewat submitDaycareRegistration |
+| Daycare approval queue | FE Done | - | - | BE Done | Integrated | Admin app sudah pakai query backend nyata |
+| Daycare approval detail | FE Done | - | - | BE Done | Integrated | Detail status, profil, legal docs, history |
+| Update daycare approval status | FE Done | - | - | BE Done | Integrated | Admin app sudah pakai mutation backend nyata |
+| Approval history | FE Done | - | - | BE Done | Integrated | History ditarik dari backend |
+| Daycare registration status | - | FE Done | - | BE Done | Integrated | Owner bisa melihat status daycare miliknya |
+| Daycare operational dashboard | - | FE Done | - | BE Done | Integrated | Approved daycare sekarang punya layar operasional dasar |
+| Parent onboarding | - | FE Done | - | BE Done | Integrated | Owner/daycare bisa register akun parent lalu link ke daycare |
+| Child onboarding | - | FE Done | - | BE Done | Integrated | Flow parent pertama + child pertama sudah tersambung |
+| Attendance harian | - | FE Done | - | BE Done | Integrated | Check-in dan check-out child sudah masuk daily care |
+| Daily activity log | - | FE Done | - | BE Done | Integrated | Quick activity log untuk operasional harian sudah ada |
+| Owner app foundation | - | - | Placeholder | - | Placeholder | mami-owner-app masih placeholder |
+
+Backend Modules
+
+| Module | Status | Notes |
+|---|---|---|
+| Auth | BE Done | Register, login, profile sudah ada |
+| Daycare Admin | BE Done | Draft, submit, queue, detail, approval update, owner registration status sudah ada |
+| Children | BE Done | Sudah ada source dan test file |
+| Medical Records | BE Done | Sudah ada source dan test file |
+| Activities | BE Done | Sudah ada source dan test file |
+| Parents | BE Done | Contract role Parent sudah dinormalkan agar konsisten dengan GraphQL |
+| Children Daycare | BE Done | Input/output gender dan object id sudah dinormalkan untuk GraphQL |
+| Contracts | BE Done | Source dan test file ada |
+| Daily Care Records | BE Done | Source dan test file ada |
+| Master Activities | BE Done | Source dan test file ada |
+| Schedule Templates | BE Done | Source dan test file ada |
+| Weekly Schedules | BE Done | Source dan test file ada |
+| Invoices | BE Done | Source dan test file ada |
+| Staff Payments | BE Done | Source dan test file ada |
+| Menus | BE Done | Source dan test file ada |
+| Gallery | BE Done | Source dan test file ada |
+| Notifications | BE Done | Source dan test file ada |
+
+Mobile Apps
+
+apps/mami-admin-app
+
+| Area | Status | Notes |
+|---|---|---|
+| App shell / routing | FE Done | Sudah ada auth/app layout dan tab |
+| Session token | FE Done | SecureStore + provider sudah ada |
+| GraphQL access | FE Done | Sudah aktif |
+| Admin login guard | FE Done | Login sekarang verifikasi role SUPER_ADMIN |
+| Dashboard | FE Done | Masih mostly presentational |
+| Daycare approval flow | Integrated | Sudah tersambung ke API nyata |
+| Audit log | Placeholder | UI ada, backend belum disambungkan |
+| Role access | Placeholder | UI ada, backend belum disambungkan |
+
+apps/mami-daycare-app
+
+| Area | Status | Notes |
+|---|---|---|
+| App shell / routing | FE Done | Routing auth dan daycare sudah ada |
+| GraphQL connection | FE Done | Menggunakan lightweight fetch client |
+| Owner registration flow | Integrated | Register -> login -> draft -> submit |
+| Session persistence | FE Done | SecureStore + provider sudah ada |
+| Registration status screen | Integrated | Sudah ada layar status daycare milik owner |
+| Daycare operations | Integrated | Ada roster parent/child dan onboarding keluarga pertama |
+| Children management | In Progress | Sudah ada create dan list dasar, edit/deactivate belum dibuat |
+| Attendance | Integrated | Ada flow check-in dan check-out di layar daily care |
+| Daily care records | Integrated | Ada layar daily care dan quick activity log |
+
+apps/mami-owner-app
+
+| Area | Status | Notes |
+|---|---|---|
+| App foundation | Placeholder | Baru package dan README |
+| Owner dashboard | Not Started | Belum dibuat |
+| Invoice view | Not Started | Belum dibuat |
+| Contract view | Not Started | Belum dibuat |
+| Daycare status tracking | Not Started | Belum dibuat |
+
+Recommended Next Steps
+
+1. mami-api + mami-daycare-app: mulai children_daycare
+2. mami-daycare-app: tambah edit/deactivate untuk parent dan child
+3. mami-daycare-app: tambah ringkasan harian atau timeline per child
+4. mami-admin-app: sambungkan audit log dan role access jika modul backend siap
+5. mami-owner-app: tentukan dulu apakah benar-benar perlu app terpisah untuk MVP
+
+Maintenance Rule
+
+Saat sebuah feature berubah status, update file ini bersama perubahan kodenya.

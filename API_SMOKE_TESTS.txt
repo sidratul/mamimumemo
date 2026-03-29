@@ -1,0 +1,429 @@
+DAYCARE API SMOKE TESTS
+
+Tujuan:
+- Cek cepat API MVP yang dipakai admin app dan daycare app
+- Jalankan di GraphQL Playground setelah backend hidup
+- Untuk query yang butuh auth, tambahkan header:
+  {
+    "Authorization": "Bearer <ACCESS_TOKEN>"
+  }
+
+
+1. HEALTH
+
+query {
+  health
+}
+
+
+2. LOGIN ADMIN
+
+mutation LoginAdmin {
+  login(input: {
+    email: "admin@mami.com"
+    password: "admin123"
+  }) {
+    accessToken
+    refreshToken
+  }
+}
+
+Expected:
+- dapat accessToken
+- dapat refreshToken
+
+
+3. PROFILE ADMIN
+
+query AdminProfile {
+  profile {
+    id
+    name
+    email
+    role
+  }
+}
+
+Expected:
+- role = SUPER_ADMIN
+
+
+4. LIST DAYCARE QUEUE
+
+query SystemDaycares {
+  systemDaycares(limit: 20, offset: 0) {
+    total
+    items {
+      id
+      name
+      lid
+      city
+      approvalStatus
+      approvalNote
+      submittedAt
+      ownerName
+      ownerEmail
+      isActive
+    }
+  }
+}
+
+
+5. GET ONE DAYCARE DETAIL
+
+query SystemDaycareDetail {
+  systemDaycare(id: "<DAYCARE_ID>") {
+    id
+    name
+    lid
+    city
+    address
+    description
+    approvalStatus
+    approvalNote
+    submittedAt
+    approvedAt
+    isActive
+    ownerName
+    ownerEmail
+    legalDocuments {
+      type
+      url
+      verified
+    }
+    approval {
+      history {
+        status
+        note
+        changedAt
+        changedBy {
+          userId
+          name
+        }
+      }
+    }
+  }
+}
+
+
+6. UPDATE DAYCARE STATUS TO IN_REVIEW
+
+mutation ReviewDaycare {
+  updateDaycareApprovalStatus(
+    id: "<DAYCARE_ID>"
+    input: {
+      status: IN_REVIEW
+      note: "Dokumen sedang direview admin."
+    }
+  ) {
+    id
+    approvalStatus
+    approvalNote
+    isActive
+  }
+}
+
+
+7. UPDATE DAYCARE STATUS TO APPROVED
+
+mutation ApproveDaycare {
+  updateDaycareApprovalStatus(
+    id: "<DAYCARE_ID>"
+    input: {
+      status: APPROVED
+      note: "Daycare disetujui."
+    }
+  ) {
+    id
+    approvalStatus
+    approvalNote
+    approvedAt
+    isActive
+  }
+}
+
+
+8. LOGIN OWNER
+
+mutation LoginOwner {
+  login(input: {
+    email: "<OWNER_EMAIL>"
+    password: "<OWNER_PASSWORD>"
+  }) {
+    accessToken
+    refreshToken
+  }
+}
+
+Expected:
+- dapat accessToken owner
+
+
+9. GET MY DAYCARE REGISTRATION
+
+query MyDaycareRegistration {
+  myDaycareRegistration {
+    id
+    name
+    lid
+    city
+    approvalStatus
+    approvalNote
+    submittedAt
+    approvedAt
+    isActive
+  }
+}
+
+
+10. CREATE PARENT
+
+mutation CreateParent {
+  createParent(input: {
+    daycareId: "<DAYCARE_ID>"
+    user: {
+      userId: "<PARENT_USER_ID>"
+      name: "Budi Santoso"
+      email: "budi.parent@example.com"
+      phone: "081234567890"
+      role: PARENT
+    }
+    customData: {
+      notes: "Orang tua anak trial"
+    }
+  }) {
+    id
+    active
+    user {
+      userId
+      name
+      email
+      phone
+      role
+    }
+    customData {
+      notes
+    }
+  }
+}
+
+
+11. LIST DAYCARE PARENTS
+
+query DaycareParents {
+  daycareParents(daycareId: "<DAYCARE_ID>", active: true) {
+    id
+    active
+    user {
+      userId
+      name
+      email
+      phone
+      role
+    }
+    customData {
+      notes
+    }
+    childrenIds
+  }
+}
+
+
+12. CREATE CHILD IN DAYCARE
+
+mutation CreateChild {
+  createChildrenDaycare(input: {
+    daycareId: "<DAYCARE_ID>"
+    parentId: "<PARENT_ID>"
+    profile: {
+      name: "Cici"
+      birthDate: "2021-05-10T00:00:00.000Z"
+      gender: FEMALE
+    }
+    customData: {
+      notes: "Perlu observasi adaptasi minggu pertama"
+    }
+  }) {
+    id
+    parentId
+    active
+    profile {
+      name
+      birthDate
+      gender
+    }
+    customData {
+      notes
+    }
+  }
+}
+
+
+13. LIST DAYCARE CHILDREN
+
+query DaycareChildren {
+  daycareChildren(daycareId: "<DAYCARE_ID>", active: true) {
+    id
+    parentId
+    active
+    profile {
+      name
+      birthDate
+      gender
+    }
+    customData {
+      notes
+    }
+  }
+}
+
+
+14. CHECK IN CHILD
+
+mutation CheckInChild {
+  checkInChild(input: {
+    daycareId: "<DAYCARE_ID>"
+    childId: "<CHILD_ID>"
+    date: "2026-03-29T00:00:00.000Z"
+    checkIn: {
+      time: "08:00"
+      photo: "https://placehold.co/1200x800/png?text=Check-In"
+      by: {
+        userId: "<OWNER_OR_STAFF_USER_ID>"
+        name: "<OWNER_OR_STAFF_NAME>"
+      }
+    }
+  }) {
+    id
+    date
+    totalChildren
+    children {
+      childId
+      childName
+      attendance {
+        status
+        checkIn {
+          time
+          by {
+            userId
+            name
+          }
+        }
+      }
+    }
+  }
+}
+
+
+15. LOG DAILY ACTIVITY
+
+mutation LogDailyActivity {
+  logDailyActivity(input: {
+    daycareId: "<DAYCARE_ID>"
+    childId: "<CHILD_ID>"
+    date: "2026-03-29T00:00:00.000Z"
+    activity: {
+      activityName: "Snack Pagi"
+      category: MEAL
+      startTime: "09:30"
+      description: "Snack habis"
+    }
+  }) {
+    id
+    date
+    children {
+      childId
+      childName
+      activities {
+        activityName
+        category
+        startTime
+        description
+        loggedAt
+      }
+    }
+  }
+}
+
+
+16. CHECK TODAY DAILY CARE
+
+query TodayDailyCare {
+  todayDailyCare(daycareId: "<DAYCARE_ID>") {
+    id
+    date
+    totalChildren
+    children {
+      childId
+      childName
+      notes
+      attendance {
+        status
+        checkIn {
+          time
+          by {
+            userId
+            name
+          }
+        }
+        checkOut {
+          time
+          by {
+            userId
+            name
+          }
+        }
+      }
+      activities {
+        activityName
+        category
+        startTime
+        description
+        loggedAt
+      }
+    }
+  }
+}
+
+
+17. CHECK OUT CHILD
+
+mutation CheckOutChild {
+  checkOutChild(input: {
+    daycareId: "<DAYCARE_ID>"
+    childId: "<CHILD_ID>"
+    date: "2026-03-29T00:00:00.000Z"
+    checkOut: {
+      time: "16:00"
+      photo: "https://placehold.co/1200x800/png?text=Check-Out"
+      by: {
+        userId: "<OWNER_OR_STAFF_USER_ID>"
+        name: "<OWNER_OR_STAFF_NAME>"
+      }
+    }
+  }) {
+    id
+    date
+    children {
+      childId
+      childName
+      attendance {
+        status
+        checkIn {
+          time
+        }
+        checkOut {
+          time
+        }
+      }
+    }
+  }
+}
+
+
+CATATAN
+
+- Jalankan urut dari atas supaya ID yang dibutuhkan sudah ada.
+- Untuk owner flow, owner harus punya daycare yang sudah dibuat atau disubmit.
+- Untuk parent flow, user parent bisa dibuat dengan mutation register biasa sebelum createParent.
+- Kalau ada error, catat query mana yang gagal dan pesan GraphQL-nya.
