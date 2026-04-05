@@ -56,7 +56,6 @@ query SystemDaycares {
     items {
       id
       name
-      lid
       city
       approvalStatus
       approvalNote
@@ -75,7 +74,6 @@ query SystemDaycareDetail {
   systemDaycare(id: "<DAYCARE_ID>") {
     id
     name
-    lid
     city
     address
     description
@@ -165,7 +163,6 @@ query MyDaycareRegistration {
   myDaycareRegistration {
     id
     name
-    lid
     city
     approvalStatus
     approvalNote

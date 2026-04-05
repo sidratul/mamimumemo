@@ -21,7 +21,6 @@ export type DaycareApprovalHistory = {
 export type AdminDaycare = {
   id: string;
   name: string;
-  lid: string;
   ownerName: string;
   ownerEmail: string;
   city: string;
@@ -63,7 +62,6 @@ type UpdateDaycareApprovalStatusResponse = {
 type DaycareApiNode = {
   id: string;
   name: string;
-  lid: string;
   ownerName: string;
   ownerEmail: string;
   city: string;
@@ -95,7 +93,6 @@ const SYSTEM_DAYCARE_FIELDS = gql`
   fragment SystemDaycareFields on Daycare {
     id
     name
-    lid
     ownerName
     ownerEmail
     city
@@ -178,7 +175,6 @@ function mapDaycare(node: DaycareApiNode): AdminDaycare {
   return {
     id: node.id,
     name: node.name,
-    lid: node.lid,
     ownerName: node.ownerName,
     ownerEmail: node.ownerEmail,
     city: node.city,

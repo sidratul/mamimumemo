@@ -63,7 +63,7 @@ export function DaycareQueueContainer() {
       <Text variant="title">Daycare</Text>
 
       <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="sm">
-        <TextInput mode="outlined" placeholder="Cari nama/LID/owner" value={search} onChangeText={setSearch} />
+        <TextInput mode="outlined" placeholder="Cari nama daycare, kota, atau owner" value={search} onChangeText={setSearch} />
         <ScrollView horizontal showsHorizontalScrollIndicator={false}>
           <Box flexDirection="row" gap="sm">
             {statusOptions.map((option) => {

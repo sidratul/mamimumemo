@@ -24,7 +24,7 @@ export function DaycareListItem({ daycare, onPress }: DaycareListItemProps) {
         <Box flexDirection="row" justifyContent="space-between" alignItems="center">
           <Box flex={1} gap="xs" paddingRight="md">
             <Text variant="cardValue">{daycare.name}</Text>
-            <Text color="textSecondary">{daycare.lid} • {daycare.city}</Text>
+            <Text color="textSecondary">{daycare.city}</Text>
           </Box>
           <ApprovalStatusBadge status={daycare.approvalStatus} />
         </Box>

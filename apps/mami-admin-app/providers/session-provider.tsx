@@ -1,6 +1,11 @@
 import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 
-import { clearSessionToken, getSessionToken, setSessionToken } from '../services/storage/session';
+import {
+  clearSessionToken,
+  getStoredSession,
+  setSessionToken,
+  subscribeSession,
+} from '../services/storage/session';
 
 type SessionContextValue = {
   isLoading: boolean;
@@ -22,14 +27,18 @@ export function SessionProvider({ children }: SessionProviderProps) {
   useEffect(() => {
     async function hydrate() {
       try {
-        const storedToken = await getSessionToken();
-        setToken(storedToken);
+        const storedSession = await getStoredSession();
+        setToken(storedSession.accessToken);
       } finally {
         setIsLoading(false);
       }
     }
 
     void hydrate();
+
+    return subscribeSession((session) => {
+      setToken(session.accessToken);
+    });
   }, []);
 
   const value = useMemo<SessionContextValue>(

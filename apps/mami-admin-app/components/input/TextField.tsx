@@ -1,5 +1,5 @@
 import { KeyboardTypeOptions } from 'react-native';
-import { TextInput } from 'react-native-paper';
+import { TextInput as SharedTextInput } from '@mami/ui';
 
 import { useAppTheme } from '../../theme/theme';
 import { InputComponentProps } from '../form/form.types';
@@ -21,17 +21,16 @@ export function TextField({
   const theme = useAppTheme();
 
   return (
-    <TextInput
+    <SharedTextInput
       value={value ?? ''}
-      mode="outlined"
       disabled={disabled}
-      outlineStyle={{ borderRadius: 10 }}
       placeholder={placeholder}
       keyboardType={keyboardType}
       autoCapitalize={autoCapitalize}
       onChangeText={onChange}
       textColor={theme.colors.textPrimary}
-      style={{ backgroundColor: theme.colors.surface }}
+      backgroundColor={theme.colors.surface}
+      borderRadius={10}
     />
   );
 }

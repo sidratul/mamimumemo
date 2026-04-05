@@ -126,7 +126,7 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
     <ScreenContainer>
       <Box gap="xs">
         <Text variant="title">{daycare.name}</Text>
-        <Text variant="subtitle">{daycare.lid} | {daycare.city}</Text>
+        <Text variant="subtitle">{daycare.city}</Text>
       </Box>
 
       <Box backgroundColor="surface" borderColor="border" borderWidth={1} borderRadius="lg" padding="lg" gap="md">

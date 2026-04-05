@@ -1,4 +1,4 @@
-import { TextInput } from 'react-native-paper';
+import { TextAreaInput as SharedTextAreaInput } from '@mami/ui';
 
 import { useAppTheme } from '../../theme/theme';
 import { InputComponentProps } from '../form/form.types';
@@ -12,17 +12,15 @@ export function TextAreaField({ value, placeholder, onChange, disabled, numberOf
   const theme = useAppTheme();
 
   return (
-    <TextInput
+    <SharedTextAreaInput
       value={value ?? ''}
-      mode="outlined"
-      multiline
       numberOfLines={numberOfLines}
       disabled={disabled}
-      outlineStyle={{ borderRadius: 10 }}
       placeholder={placeholder}
       onChangeText={onChange}
       textColor={theme.colors.textPrimary}
-      style={{ backgroundColor: theme.colors.surface }}
+      backgroundColor={theme.colors.surface}
+      borderRadius={10}
     />
   );
 }
