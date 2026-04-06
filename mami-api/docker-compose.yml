@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # MongoDB Database
+  mongo:
+    image: mongo:7.0
+    container_name: mami-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+      - mongo-config:/data/configdb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mami-admin
+      MONGO_INITDB_ROOT_PASSWORD: mami-password-2026
+      MONGO_INITDB_DATABASE: mami-db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      - mami-network
+    command: mongod --bind_ip_all
+
+  # Deno GraphQL API
+  deno-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mami-api
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - MONGO_URI=mongodb://mami-admin:mami-password-2026@mongo:27017/mami-db?authSource=admin
+      - JWT_SECRET=${JWT_SECRET:-your-super-secret-jwt-key-change-in-production}
+    depends_on:
+      mongo:
+        condition: service_healthy
+    networks:
+      - mami-network
+    volumes:
+      - .:/app
+    command: deno task start
+
+# Persistent volumes
+volumes:
+  mongo-data:
+    driver: local
+  mongo-config:
+    driver: local
+
+# Network
+networks:
+  mami-network:
+    driver: bridge
