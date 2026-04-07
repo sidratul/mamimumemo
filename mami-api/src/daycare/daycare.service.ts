@@ -2,10 +2,10 @@ import { GraphQLError } from "graphql";
 
 import { AppContext } from "#shared/config/context.ts";
 import { runInTransaction } from "#shared/database/transaction.ts";
-import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
 import { UserRole } from "#shared/enums/enum.ts";
-import AuthService from "@/auth/auth.service.ts";
+import { ObjectId } from "#shared/types/objectid.type.ts";
+import UsersService from "@/users/users.service.ts";
 import { DaycareApprovalStatus } from "./daycare.enum.ts";
 import { DaycareFilter, DaycareQueryOptions } from "./daycare.d.ts";
 import { DaycareRepository } from "./daycare.repository.ts";
@@ -17,7 +17,7 @@ import {
 } from "./daycare.validation.ts";
 
 const repository = new DaycareRepository();
-const authService = new AuthService();
+const usersService = new UsersService();
 
 const REVIEW_REQUIRED_STATUSES = [
   DaycareApprovalStatus.NEEDS_REVISION,
@@ -45,22 +45,17 @@ const ADMIN_TRANSITIONS: Partial<Record<DaycareApprovalStatus, DaycareApprovalSt
 export class DaycareService {
   async listDaycares(
     options: DaycareQueryOptions,
-    context: AppContext,
   ) {
-    this.requireSuperAdmin(context);
     return await repository.list(options);
   }
 
   async countDaycares(
     filter: DaycareFilter | undefined,
-    context: AppContext,
   ) {
-    this.requireSuperAdmin(context);
     return await repository.count(filter);
   }
 
-  async getDaycare(id: string, context: AppContext) {
-    this.requireSuperAdmin(context);
+  async getDaycare(id: ObjectId) {
     const daycare = await repository.findViewById(id);
     if (!daycare) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
@@ -69,17 +64,12 @@ export class DaycareService {
   }
 
   async getMyDaycareRegistration(context: AppContext) {
-    isAuthenticated(context);
-    if (!context.user) {
+    const user = context.user;
+    if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const allowedRoles = [UserRole.DAYCARE_OWNER, UserRole.SUPER_ADMIN];
-    if (!allowedRoles.includes(context.user.role as UserRole)) {
-      throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
-    }
-
-    const daycare = await repository.findViewByOwnerId(context.user.id);
+    const daycare = await repository.findViewByOwnerId(user._id);
     if (!daycare) {
       return null;
     }
@@ -89,7 +79,7 @@ export class DaycareService {
 
   async registerDaycare(input: typeof registerDaycareInput._type, context: AppContext) {
     return await runInTransaction(context, async (session) => {
-      const owner = await authService.createUser({
+      const owner = await usersService.createUser({
         name: input.owner.name,
         email: input.owner.email,
         password: input.owner.password,
@@ -136,21 +126,14 @@ export class DaycareService {
   }
 
   async updateDaycareDocuments(
-    id: string,
+    id: ObjectId,
     input: typeof updateDaycareDocumentsInput._type,
-    context: AppContext,
   ) {
-    isAuthenticated(context);
-    if (!context.user) {
-      throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
-    }
-
     const daycare = await repository.findByIdForUpdate(id);
     if (!daycare) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
 
-    this.requireDaycareOwnerOrSuperAdmin(daycare.owner._id.toString(), context);
     daycare.set("legalDocuments", this.mapLegalDocuments(input.legalDocuments));
 
     await daycare.save();
@@ -161,12 +144,19 @@ export class DaycareService {
     };
   }
 
+  async getDaycareForUpdate(id: ObjectId) {
+    const daycare = await repository.findByIdForUpdate(id);
+    if (!daycare) {
+      throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
+    }
+    return daycare;
+  }
+
   async updateDaycareApprovalStatus(
-    id: string,
+    id: ObjectId,
     input: typeof updateDaycareApprovalInput._type,
     context: AppContext,
   ) {
-    this.requireSuperAdmin(context);
     const daycare = await repository.findByIdForUpdate(id);
     if (!daycare) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
@@ -188,7 +178,7 @@ export class DaycareService {
     daycare.approval.status = nextStatus;
     daycare.approval.note = reviewNote;
     daycare.approval.reviewedBy = {
-      userId: context.user!.id,
+      userId: context.user!._id,
       name: context.user!.name,
     };
     daycare.approval.reviewedAt = new Date();
@@ -206,7 +196,7 @@ export class DaycareService {
       status: nextStatus,
       note: reviewNote,
       changedBy: {
-        userId: context.user!.id,
+        userId: context.user!._id,
         name: context.user!.name,
       },
       changedAt: new Date(),
@@ -221,10 +211,9 @@ export class DaycareService {
   }
 
   async deleteDaycare(
-    id: string,
+    id: ObjectId,
     context: AppContext,
   ) {
-    this.requireSuperAdmin(context);
     const daycare = await repository.findByIdIncludingDeletedForUpdate(id);
     if (!daycare || daycare.deletedAt) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
@@ -232,7 +221,7 @@ export class DaycareService {
 
     daycare.deletedAt = new Date();
     daycare.deletedBy = {
-      userId: context.user!.id,
+      userId: context.user!._id,
       name: context.user!.name,
     };
     daycare.isActive = false;
@@ -246,22 +235,20 @@ export class DaycareService {
   }
 
   async purgeDaycare(
-    id: string,
+    id: ObjectId,
     input: typeof purgeDaycareInput.shape.input._type,
-    context: AppContext,
   ) {
-    this.requireSuperAdmin(context);
     const daycare = await repository.findByIdIncludingDeletedForUpdate(id);
     if (!daycare) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
 
-    const ownerId = daycare.owner._id?.toString();
+    const ownerId = daycare.owner._id;
     const ownerEmail = daycare.owner.email;
     await repository.hardDeleteById(id);
 
     if (input?.deleteOwner) {
-      await authService.deleteUserByIdOrEmail({
+      await usersService.deleteUserByIdOrEmail({
         id: ownerId,
         email: ownerEmail,
       });
@@ -273,16 +260,6 @@ export class DaycareService {
         ? "Daycare dan owner berhasil dihapus permanen."
         : "Daycare berhasil dihapus permanen.",
     };
-  }
-
-  private requireSuperAdmin(context: AppContext) {
-    isAuthenticated(context);
-    if (!context.user) {
-      throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
-    }
-    if (context.user.role !== UserRole.SUPER_ADMIN) {
-      throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
-    }
   }
 
   private defaultStatusNote(status: DaycareApprovalStatus) {
@@ -306,13 +283,5 @@ export class DaycareService {
       url: document.url,
       verified: document.verified ?? false,
     }));
-  }
-
-  private requireDaycareOwnerOrSuperAdmin(ownerId: string, context: AppContext) {
-    const isOwner = ownerId === context.user!.id;
-    const isSuperAdmin = context.user!.role === UserRole.SUPER_ADMIN;
-    if (!isOwner && !isSuperAdmin) {
-      throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
-    }
   }
 }

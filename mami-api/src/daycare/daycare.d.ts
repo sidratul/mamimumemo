@@ -1,5 +1,5 @@
 import { HydratedDocument } from "mongoose";
-import { PaginationOptions, SortOptions } from "#shared/index.ts";
+import { ObjectId, PaginationOptions, SortOptions } from "#shared/index.ts";
 import { DaycareApprovalStatus } from "./daycare.enum.ts";
 import type { UserSubDoc } from "@/auth/auth.d.ts";
 
@@ -10,7 +10,7 @@ export type DaycareLegalDocument = {
 };
 
 export type DaycareApprovalHistoryActor = {
-  userId?: string;
+  userId?: ObjectId;
   name: string;
 };
 
@@ -30,7 +30,7 @@ export type DaycareApproval = {
 };
 
 export type DaycareDeletedBy = {
-  userId: string;
+  userId: ObjectId;
   name: string;
 };
 
@@ -58,7 +58,7 @@ export type DaycareCreateData = Omit<
 >;
 
 export type DaycareRecord = DaycareDocShape & {
-  _id: string;
+  _id: ObjectId;
   id?: string;
 };
 
@@ -66,7 +66,7 @@ export type DaycareDoc = HydratedDocument<DaycareDocShape>;
 
 export interface DaycareFilter {
   statuses?: DaycareApprovalStatus[];
-  ownerIds?: string[];
+  ownerIds?: ObjectId[];
   cities?: string[];
   isActive?: boolean;
   search?: string;

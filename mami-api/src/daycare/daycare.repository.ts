@@ -1,5 +1,6 @@
 import DaycareModel from "./daycare.schema.ts";
 import { ClientSession, FilterQuery } from "mongoose";
+import { ObjectId } from "#shared/types/objectid.type.ts";
 import { DaycareCreateData, DaycareDocShape, DaycareFilter, DaycareQueryOptions, DaycareRecord } from "./daycare.d.ts";
 
 export class DaycareRepository {
@@ -64,26 +65,26 @@ export class DaycareRepository {
     return await DaycareModel.countDocuments(this.buildFilter(filter)).exec();
   }
 
-  async findByIdForUpdate(id: string) {
+  async findByIdForUpdate(id: ObjectId) {
     return await DaycareModel.findOne({ _id: id, deletedAt: { $exists: false } }).exec();
   }
 
-  async findByIdIncludingDeletedForUpdate(id: string) {
+  async findByIdIncludingDeletedForUpdate(id: ObjectId) {
     return await DaycareModel.findById(id).exec();
   }
 
-  async hardDeleteById(id: string) {
+  async hardDeleteById(id: ObjectId) {
     return await DaycareModel.findByIdAndDelete(id).exec();
   }
 
-  async findViewById(id: string): Promise<DaycareRecord | null> {
+  async findViewById(id: ObjectId): Promise<DaycareRecord | null> {
     return await DaycareModel.findOne({
       _id: id,
       deletedAt: { $exists: false },
     }).lean<DaycareRecord | null>().exec();
   }
 
-  async findViewByOwnerId(ownerId: string): Promise<DaycareRecord | null> {
+  async findViewByOwnerId(ownerId: ObjectId): Promise<DaycareRecord | null> {
     return await DaycareModel.findOne({
       "owner._id": ownerId,
       deletedAt: { $exists: false },

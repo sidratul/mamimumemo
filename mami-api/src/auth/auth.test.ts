@@ -4,64 +4,66 @@
  * Run with: deno test -A src/auth/auth.test.ts
  */
 
-import { assertEquals, assertRejects, assertExists } from "jsr:@std/assert";
+import { assertEquals, assertRejects, assertExists } from "@std/assert";
 import { AuthService } from "./auth.service.ts";
-import { connectTestDatabase, teardownTestDatabase, createTestUser } from "../../tests/test-utils.ts";
-import { mockUsers } from "../../mocks/index.ts";
+import { UsersService } from "@/users";
+import UserModel from "@/users/users.schema.ts";
+import { clearTestDatabase, connectTestDatabase, teardownTestDatabase, createMockContext, createTestUser } from "../../tests/test-utils.ts";
 
 const authService = new AuthService();
+const usersService = new UsersService();
 
 // Test setup
 Deno.test({
   name: "Auth Module",
   fn: async (t) => {
     await connectTestDatabase();
+    await clearTestDatabase();
     
     await t.step("Registration", async (step) => {
-      await step.test("should register new user successfully", async () => {
+      await step.step("should register new user successfully", async () => {
         const input = createTestUser();
         
-        const result = await authService.register(input);
+        const user = await usersService.createUser(input);
         
-        assertExists(result.id);
-        assertEquals(result.message, "Registrasi berhasil");
+        assertExists(user.id);
       });
       
-      await step.test("should fail when email already exists", async () => {
+      await step.step("should fail when email already exists", async () => {
         const input = createTestUser();
         
         // First registration
-        await authService.register(input);
+        await usersService.createUser(input);
         
         // Second registration with same email
         await assertRejects(
-          async () => await authService.register(input),
+          async () => await usersService.createUser(input),
           Error,
-          "Email sudah terdaftar"
+          "sudah terdaftar"
         );
       });
       
-      await step.test("should fail with invalid email", async () => {
+      await step.step("should fail with invalid email", async () => {
         const input = {
           ...createTestUser(),
           email: "invalid-email",
         };
         
         await assertRejects(
-          async () => await authService.register(input),
+          async () => await usersService.createUser(input),
           Error,
           "Invalid email"
         );
       });
       
-      await step.test("should fail with short password", async () => {
+      await step.step("should fail with short password", async () => {
         const input = {
           ...createTestUser(),
           password: "123", // Less than 6 characters
         };
         
         await assertRejects(
-          async () => await authService.register(input),
+          async () => await usersService.createUser(input),
           Error,
           "Password must be at least 6 characters"
         );
@@ -69,11 +71,11 @@ Deno.test({
     });
     
     await t.step("Login", async (step) => {
-      await step.test("should login successfully", async () => {
+      await step.step("should login successfully", async () => {
         const input = createTestUser();
         
         // Register first
-        await authService.register(input);
+        await usersService.createUser(input);
         
         // Login
         const result = await authService.login(input);
@@ -84,11 +86,11 @@ Deno.test({
         assertEquals(typeof result.refreshToken, "string");
       });
       
-      await step.test("should fail with wrong password", async () => {
+      await step.step("should fail with wrong password", async () => {
         const input = createTestUser();
         
         // Register first
-        await authService.register(input);
+        await usersService.createUser(input);
         
         // Login with wrong password
         await assertRejects(
@@ -98,7 +100,7 @@ Deno.test({
         );
       });
       
-      await step.test("should fail with non-existent email", async () => {
+      await step.step("should fail with non-existent email", async () => {
         const input = {
           email: "nonexistent@example.com",
           password: "password123",
@@ -113,40 +115,29 @@ Deno.test({
     });
     
     await t.step("Profile", async (step) => {
-      await step.test("should get user profile", async () => {
-        // Create test user
+      await step.step("should get user profile", async () => {
         const input = createTestUser();
-        await authService.register(input);
+        await usersService.createUser(input);        
+        const user = await UserModel.findOne({ email: input.email }).exec();
+        assertExists(user);
+
+        const context = createMockContext(user);
         
-        // Login to ensure auth flow works before reading profile
-        const loginResult = await authService.login(input);
-        assertExists(loginResult.accessToken);
-        
-        // Create mock context with token
-        const context = {
-          user: {
-            id: mockUsers.parent._id,
-            name: mockUsers.parent.name,
-            email: mockUsers.parent.email,
-            role: mockUsers.parent.role,
-          },
-        };
-        
-        const profile = await authService.getProfile(context as any);
+        const profile = await authService.getProfile(context);
         
         assertExists(profile._id);
-        assertEquals(profile.name, mockUsers.parent.name);
-        assertEquals(profile.email, mockUsers.parent.email);
-        assertEquals(profile.role, mockUsers.parent.role);
+        assertEquals(profile.name, input.name);
+        assertEquals(profile.email, input.email);
+        assertEquals(profile.role, input.role);
       });
       
-      await step.test("should fail without authentication", async () => {
-        const context = { user: null };
+      await step.step("should fail without authentication", async () => {
+        const context = createMockContext();
         
         await assertRejects(
-          async () => await authService.getProfile(context as any),
+          async () => await authService.getProfile(context),
           Error,
-          "Akses tidak sah"
+          "Authentication required"
         );
       });
     });

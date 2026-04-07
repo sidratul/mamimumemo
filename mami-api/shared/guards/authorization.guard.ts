@@ -1,6 +1,7 @@
 import { AppContext } from "#shared/config/context.ts";
 import { AuthorizationError, AuthenticationError } from "#shared/errors/custom-errors.ts";
 import { RoleType } from "#shared/enums/enum.ts";
+import { ObjectId } from "#shared/types/objectid.type.ts";
 
 /**
  * Checks if user is authenticated
@@ -33,10 +34,29 @@ export function requireRole(roles: RoleType[]) {
 /**
  * Owner check - verifies if the user is the owner of a resource
  */
-export function isOwner(context: AppContext, ownerId: string): boolean {
+export function isOwner(context: AppContext, ownerId: ObjectId): boolean {
   isAuthenticated(context);
   if (!context.user || context.user._id.toString() !== ownerId.toString()) {
     throw new AuthorizationError("You can only access your own resources");
   }
+  return true;
+}
+
+export function requireOwnerOrRole(
+  context: AppContext,
+  ownerId: ObjectId,
+  roles: RoleType[],
+): boolean {
+  isAuthenticated(context);
+
+  const userId = context.user?._id?.toString();
+  const userRole = context.user?.role;
+  const isResourceOwner = userId === ownerId.toString();
+  const hasAllowedRole = !!userRole && roles.includes(userRole);
+
+  if (!isResourceOwner && !hasAllowedRole) {
+    throw new AuthorizationError();
+  }
+
   return true;
 }

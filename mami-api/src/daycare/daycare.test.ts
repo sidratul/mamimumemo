@@ -4,13 +4,18 @@
  * Run with: deno test -A src/daycare/daycare.test.ts
  */
 
-import { assertEquals, assertRejects, assertExists } from "jsr:@std/assert";
+import { assertEquals, assertRejects, assertExists } from "@std/assert";
 
 import { DaycareService } from "./daycare.service.ts";
 import { DaycareApprovalStatus } from "./daycare.enum.ts";
 import DaycareModel from "./daycare.schema.ts";
 import AuthModel from "@/auth/auth.schema.ts";
-import { clearTestDatabase, connectTestDatabase, teardownTestDatabase, createMockContext } from "../../tests/test-utils.ts";
+import {
+  clearTestDatabase,
+  connectTestDatabase,
+  teardownTestDatabase,
+  createContextFromUser,
+} from "../../tests/test-utils.ts";
 import { UserRole } from "#shared/enums/enum.ts";
 
 const daycareService = new DaycareService();
@@ -29,12 +34,7 @@ Deno.test({
       role: UserRole.SUPER_ADMIN,
     }).save();
 
-    const superAdminContext = createMockContext({
-      id: superAdmin.id,
-      name: superAdmin.name,
-      email: superAdmin.email,
-      role: superAdmin.role,
-    });
+    const superAdminContext = createContextFromUser(superAdmin);
 
     await t.step("Registration", async (step) => {
       await step.step("should register daycare with owner successfully", async () => {
@@ -52,7 +52,7 @@ Deno.test({
             city: "Jakarta Selatan",
             legalDocuments: [],
           },
-        }, superAdminContext as any);
+        }, superAdminContext);
 
         assertExists(result.id);
         assertEquals(result.message, "Registrasi daycare berhasil dikirim.");
@@ -68,12 +68,7 @@ Deno.test({
       throw new Error("Owner should exist after registration");
     }
 
-    const ownerContext = createMockContext({
-      id: owner.id,
-      name: owner.name,
-      email: owner.email,
-      role: owner.role,
-    });
+    const ownerContext = createContextFromUser(owner);
 
     await t.step("System Admin Review", async (step) => {
       await step.step("should list system daycares for super admin", async () => {
@@ -85,10 +80,10 @@ Deno.test({
           },
           page: 1,
           limit: 10,
-        }, superAdminContext as any);
+        }, superAdminContext);
         const total = await daycareService.countDaycares({
           statuses: [DaycareApprovalStatus.SUBMITTED],
-        }, superAdminContext as any);
+        }, superAdminContext);
 
         assertEquals(Array.isArray(result), true);
         assertEquals(result.length, 1);
@@ -100,7 +95,7 @@ Deno.test({
         const updated = await daycareService.updateDaycareApprovalStatus(daycare!._id.toString(), {
           status: DaycareApprovalStatus.IN_REVIEW,
           note: "Dokumen sedang diverifikasi",
-        }, superAdminContext as any);
+        }, superAdminContext);
 
         assertEquals(updated.message, `Status daycare berhasil diubah ke ${DaycareApprovalStatus.IN_REVIEW}.`);
       });
@@ -109,7 +104,7 @@ Deno.test({
         const daycare = await DaycareModel.findOne({ name: "Mami Daycare Kemang" }).exec();
         const updated = await daycareService.updateDaycareApprovalStatus(daycare!._id.toString(), {
           status: DaycareApprovalStatus.APPROVED,
-        }, superAdminContext as any);
+        }, superAdminContext);
 
         assertEquals(updated.message, `Status daycare berhasil diubah ke ${DaycareApprovalStatus.APPROVED}.`);
 
@@ -136,7 +131,7 @@ Deno.test({
               verified: false,
             },
           ],
-        }, ownerContext as any);
+        }, ownerContext);
 
         assertEquals(result.message, "Dokumen daycare berhasil diperbarui.");
 
@@ -167,7 +162,7 @@ Deno.test({
         await assertRejects(
           async () => await daycareService.updateDaycareApprovalStatus(submittedDaycare._id.toString(), {
             status: DaycareApprovalStatus.APPROVED,
-          }, superAdminContext as any),
+          }, superAdminContext),
           Error,
           "Transisi status tidak valid",
         );
@@ -175,7 +170,7 @@ Deno.test({
 
       await step.step("should reject non admin system query", async () => {
         await assertRejects(
-          async () => await daycareService.listDaycares({}, ownerContext as any),
+          async () => await daycareService.listDaycares({}, ownerContext),
           Error,
           "Akses dilarang",
         );
@@ -196,7 +191,7 @@ Deno.test({
               address: "Jl. Pondok Indah No. 2",
               city: "Jakarta Selatan",
             },
-          }, superAdminContext as any),
+          }, superAdminContext),
           Error,
           "sudah terdaftar",
         );
@@ -204,17 +199,17 @@ Deno.test({
 
       await step.step("should soft delete daycare and hide it from default queries", async () => {
         const daycare = await DaycareModel.findOne({ name: "Mami Daycare Kemang" }).exec();
-        const result = await daycareService.deleteDaycare(daycare!._id.toString(), superAdminContext as any);
+        const result = await daycareService.deleteDaycare(daycare!._id.toString(), superAdminContext);
 
         assertEquals(result.message, "Daycare berhasil dihapus.");
 
         await assertRejects(
-          async () => await daycareService.getDaycare(daycare!._id.toString(), superAdminContext as any),
+          async () => await daycareService.getDaycare(daycare!._id.toString(), superAdminContext),
           Error,
           "tidak ditemukan",
         );
 
-        const total = await daycareService.countDaycares({}, superAdminContext as any);
+        const total = await daycareService.countDaycares({}, superAdminContext);
         assertEquals(total, 1);
       });
 
@@ -247,7 +242,7 @@ Deno.test({
         const result = await daycareService.purgeDaycare(
           purgeDaycare._id.toString(),
           { deleteOwner: true },
-          superAdminContext as any,
+          superAdminContext,
         );
 
         assertEquals(result.message, "Daycare dan owner berhasil dihapus permanen.");

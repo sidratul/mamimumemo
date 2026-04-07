@@ -1,55 +1,18 @@
-import AuthModel from "./auth.schema.ts";
-import { registerInput, loginInput, refreshTokenInput } from "./auth.validation.ts";
+import { loginInput, refreshTokenInput } from "./auth.validation.ts";
 import { GraphQLError } from "graphql";
 import bcrypt from "bcrypt";
-import { ClientSession } from "mongoose";
 import { createAccessToken, createRefreshToken, verifyRefreshToken } from "#shared/utils/jwt.ts";
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
-import { UserRole } from "#shared/enums/enum.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
-import { AuthDoc } from "./auth.d.ts";
-import authRepository from "./auth.repository.ts";
+import UsersService from "@/users/users.service.ts";
+
+const usersService = new UsersService();
 
 export class AuthService {
-  async createUser(
-    input: typeof registerInput._type,
-    options?: { session?: ClientSession },
-  ): Promise<AuthDoc> {
-    const existingUserOrNull = await AuthModel.findOne({ email: input.email }).exec();
-    if (existingUserOrNull) {
-      throw new GraphQLError(MESSAGES.AUTH.EMAIL_EXISTS);
-    }
-
-    const hashedPassword = await bcrypt.hash(input.password, 10);
-    const user = new AuthModel({
-      ...input,
-      phone: input.phone || "",
-      password: hashedPassword,
-      role: input.role || UserRole.PARENT,
-    });
-    await user.save(options);
-    return user;
-  }
-
-  async register(input: typeof registerInput._type) {
-    const user = await this.createUser(input);
-
-    return {
-      id: user.id,
-      message: MESSAGES.AUTH.REGISTER_SUCCESS,
-    };
-  }
-
-  async deleteUserByIdOrEmail(
-    input: { id?: string; email?: string },
-    options?: { session?: ClientSession },
-  ) {
-    return await authRepository.deleteByIdOrEmail(input, options);
-  }
-
   async login(input: typeof loginInput._type) {
-    const userOrNull = await AuthModel.findOne({ email: input.email }).exec();
+    loginInput.parse(input);
+    const userOrNull = await usersService.findUserByEmail(input.email);
     if (!userOrNull) {
       throw new GraphQLError(MESSAGES.AUTH.INVALID_CREDENTIALS);
     }
@@ -78,6 +41,7 @@ export class AuthService {
   }
 
   async refreshToken(input: typeof refreshTokenInput._type) {
+    refreshTokenInput.parse(input);
     let payload: string | { _id?: string; tokenType?: string };
 
     try {
@@ -90,7 +54,7 @@ export class AuthService {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const userOrNull = await AuthModel.findById(payload._id).exec();
+    const userOrNull = await usersService.findUserById(payload._id);
     if (!userOrNull) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }

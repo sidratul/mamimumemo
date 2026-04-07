@@ -1,5 +1,8 @@
 import { AppContext } from "#shared/config/context.ts";
-import { Types } from "mongoose";
+import { AdminGuard, AuthGuard } from "#shared/guards/auth.guard.ts";
+import { hasRole, requireOwnerOrRole } from "#shared/guards/authorization.guard.ts";
+import { UserRole } from "#shared/enums/enum.ts";
+import { ObjectId } from "#shared/types/objectid.type.ts";
 import {
   deleteDaycareInput,
   purgeDaycareInput,
@@ -14,11 +17,10 @@ import { DaycareFilter } from "./daycare.d.ts";
 import { PaginationOptions, SortInput } from "#shared/index.ts";
 
 const daycareService = new DaycareService();
-const normalizeObjectId = (value: Types.ObjectId) => value.toString();
 
 export const resolvers = {
   Query: {
-    daycares: (
+    daycares: async (
       _: unknown,
       args: {
         filter?: DaycareFilter;
@@ -27,26 +29,31 @@ export const resolvers = {
       },
       context: AppContext,
     ) => {
+      await AdminGuard(context);
       listDaycaresInput.parse(args);
       const options = {
         ...(args.filter ?? {}),
         ...(args.sort ? { sort: args.sort } : {}),
         ...(args.pagination ?? {}),
       };
-      return daycareService.listDaycares(options, context);
+      return daycareService.listDaycares(options);
     },
-    daycareCount: (
+    daycareCount: async (
       _: unknown,
       args: { filter?: DaycareFilter },
       context: AppContext,
     ) => {
+      await AdminGuard(context);
       daycareCountInput.parse(args);
-      return daycareService.countDaycares(args.filter, context);
+      return daycareService.countDaycares(args.filter);
     },
-    daycare: (_: unknown, { id }: { id: string }, context: AppContext) => {
-      return daycareService.getDaycare(id, context);
+    daycare: async (_: unknown, { id }: { id: ObjectId }, context: AppContext) => {
+      await AdminGuard(context);
+      return daycareService.getDaycare(id);
     },
-    myDaycareRegistration: (_: unknown, __: unknown, context: AppContext) => {
+    myDaycareRegistration: async (_: unknown, __: unknown, context: AppContext) => {
+      await AuthGuard(context);
+      hasRole(context, [UserRole.DAYCARE_OWNER, UserRole.SUPER_ADMIN]);
       return daycareService.getMyDaycareRegistration(context);
     },
   },
@@ -59,40 +66,46 @@ export const resolvers = {
       registerDaycareInput.parse(input);
       return daycareService.registerDaycare(input, context);
     },
-    updateDaycareDocuments: (
+    updateDaycareDocuments: async (
       _: unknown,
-      { id, input }: { id: string; input: typeof updateDaycareDocumentsInput._type },
+      { id, input }: { id: ObjectId; input: typeof updateDaycareDocumentsInput._type },
       context: AppContext,
     ) => {
+      await AuthGuard(context);
       updateDaycareDocumentsInput.parse(input);
-      return daycareService.updateDaycareDocuments(id, input, context);
+      const daycare = await daycareService.getDaycareForUpdate(id);
+      requireOwnerOrRole(context, daycare.owner._id, [UserRole.SUPER_ADMIN]);
+      return daycareService.updateDaycareDocuments(id, input);
     },
-    updateDaycareApprovalStatus: (
+    updateDaycareApprovalStatus: async (
       _: unknown,
-      { id, input }: { id: string; input: typeof updateDaycareApprovalInput._type },
+      { id, input }: { id: ObjectId; input: typeof updateDaycareApprovalInput._type },
       context: AppContext,
     ) => {
+      await AdminGuard(context);
       updateDaycareApprovalInput.parse(input);
       return daycareService.updateDaycareApprovalStatus(id, input, context);
     },
-    deleteDaycare: (
+    deleteDaycare: async (
       _: unknown,
-      { id }: { id: Types.ObjectId },
+      { id }: { id: ObjectId },
       context: AppContext,
     ) => {
+      await AdminGuard(context);
       deleteDaycareInput.parse({ id });
-      return daycareService.deleteDaycare(normalizeObjectId(id), context);
+      return daycareService.deleteDaycare(id, context);
     },
-    purgeDaycare: (
+    purgeDaycare: async (
       _: unknown,
       {
         id,
         input,
-      }: { id: Types.ObjectId; input?: typeof purgeDaycareInput.shape.input._type },
+      }: { id: ObjectId; input?: typeof purgeDaycareInput.shape.input._type },
       context: AppContext,
     ) => {
+      await AdminGuard(context);
       purgeDaycareInput.parse({ id, input });
-      return daycareService.purgeDaycare(normalizeObjectId(id), input, context);
+      return daycareService.purgeDaycare(id, input);
     },
   },
 };

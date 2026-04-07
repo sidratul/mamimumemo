@@ -4,6 +4,8 @@ import { resolvers as healthResolvers } from "@/health/health.resolver.ts";
 import { typeDefs as healthTypeDefs } from "@/health/health.typedef.ts";
 import { resolvers as AuthResolvers } from "@/auth/auth.resolver.ts";
 import { typeDefs as AuthTypeDefs } from "@/auth/auth.typedef.ts";
+import { resolvers as UsersResolvers } from "@/users/users.resolver.ts";
+import { typeDefs as UsersTypeDefs } from "@/users/users.typedef.ts";
 import { resolvers as ChildrenResolvers } from "@/children/children.resolver.ts";
 import { typeDefs as ChildrenTypeDefs } from "@/children/children.typedef.ts";
 import { resolvers as MedicalRecordsResolvers } from "@/medical_records/medical_records.resolver.ts";
@@ -51,6 +53,7 @@ const schema = makeExecutableSchema({
     scalarResolvers,
     healthResolvers,
     AuthResolvers,
+    UsersResolvers,
     ChildrenResolvers,
     MedicalRecordsResolvers,
     ActivitiesResolvers,
@@ -74,6 +77,7 @@ const schema = makeExecutableSchema({
     baseTypeDefs,
     healthTypeDefs,
     AuthTypeDefs,
+    UsersTypeDefs,
     ChildrenTypeDefs,
     MedicalRecordsTypeDefs,
     ActivitiesTypeDefs,

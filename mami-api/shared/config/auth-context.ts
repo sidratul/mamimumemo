@@ -1,7 +1,10 @@
 import { verifyAccessToken } from "#shared/utils/jwt.ts";
 import { YogaInitialContext } from "graphql-yoga";
-import AuthModel from "@/auth/auth.schema.ts";
+import { Types } from "mongoose";
 import { AuthDoc } from "@/auth/auth.d.ts";
+import UsersService from "@/users/users.service.ts";
+
+const usersService = new UsersService();
 
 /**
  * Creates the application context for each GraphQL request with authentication.
@@ -14,7 +17,10 @@ export async function createAuthContext({ request }: YogaInitialContext) {
   if (token) {
     try {
       const payload = verifyAccessToken(token) as { _id?: string };
-      const userOrNull = payload._id ? await AuthModel.findById(payload._id) : null;
+      const userId = payload._id && Types.ObjectId.isValid(payload._id)
+        ? new Types.ObjectId(payload._id)
+        : null;
+      const userOrNull = userId ? await usersService.findUserById(userId) : null;
       // Hanya gunakan user jika ditemukan
       user = userOrNull || undefined;
     } catch (error: unknown) {

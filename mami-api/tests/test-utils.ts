@@ -1,4 +1,6 @@
 import { AppContext } from "../shared/config/context.ts";
+import { UserRole } from "../shared/enums/enum.ts";
+import { AuthDoc } from "../src/auth/auth.d.ts";
 
 export const TEST_CONFIG = {
   mongoUri: Deno.env.get("TEST_MONGO_URI") ||
@@ -6,6 +8,10 @@ export const TEST_CONFIG = {
   jwtSecret: Deno.env.get("TEST_JWT_SECRET") || "test-secret-key",
   port: parseInt(Deno.env.get("TEST_PORT") || "8001"),
 };
+
+Deno.env.set("JWT_SECRET", Deno.env.get("JWT_SECRET") || TEST_CONFIG.jwtSecret);
+Deno.env.set("JWT_ACCESS_SECRET", Deno.env.get("JWT_ACCESS_SECRET") || TEST_CONFIG.jwtSecret);
+Deno.env.set("JWT_REFRESH_SECRET", Deno.env.get("JWT_REFRESH_SECRET") || TEST_CONFIG.jwtSecret);
 
 // Test database connection
 import mongoose from "mongoose";
@@ -59,7 +65,7 @@ export function createTestUser(overrides = {}) {
     email: `test.${Date.now()}@example.com`,
     password: "password123",
     phone: "0812-3456-7890",
-    role: "PARENT",
+    role: UserRole.PARENT,
     ...overrides,
   };
 }
@@ -94,31 +100,78 @@ export function createTestActivity(overrides = {}) {
 }
 
 // Mock context for resolvers
-export function createMockContext(user: any = null) {
-  return Object.assign(new AppContext(user ?? undefined), {
-    user,
+type MockContextUser = Partial<AuthDoc> & {
+  id?: string;
+  token?: string;
+};
+
+export type MockAppContext = AppContext & {
+  req: {
+    headers: {
+      authorization: string;
+    };
+  };
+};
+
+export function createMockContext(user: MockContextUser | null = null): MockAppContext {
+  return Object.assign(new AppContext((user ?? undefined) as AuthDoc | undefined), {
+    user: (user ?? undefined) as AuthDoc | undefined,
     req: {
       headers: {
         authorization: user ? `Bearer ${user.token}` : "",
       },
     },
+  }) as MockAppContext;
+}
+
+export function createContextFromUser(user: MockContextUser): MockAppContext {
+  return createMockContext({
+    ...user,
+    id: user.id || user._id?.toString?.() || "",
   });
 }
 
+export function createRoleContext(
+  role: UserRole,
+  overrides: Partial<MockContextUser> = {},
+): MockAppContext {
+  return createMockContext({
+    id: overrides.id || "mock-user-id",
+    name: overrides.name || "Mock User",
+    email: overrides.email || "mock.user@example.com",
+    phone: overrides.phone,
+    role,
+    token: overrides.token,
+    ...overrides,
+  });
+}
+
+export function createSuperAdminContext(overrides: Partial<MockContextUser> = {}) {
+  return createRoleContext(UserRole.SUPER_ADMIN, overrides);
+}
+
+export function createDaycareOwnerContext(overrides: Partial<MockContextUser> = {}) {
+  return createRoleContext(UserRole.DAYCARE_OWNER, overrides);
+}
+
 // Assert helpers
-export function assertExists(value: any, message?: string) {
+export function assertExists(value: unknown, message?: string) {
   if (value === null || value === undefined) {
     throw new Error(message || `Expected value to exist, got ${value}`);
   }
 }
 
-export function assertId(value: any, message?: string) {
+export function assertId(value: unknown, message?: string) {
   if (typeof value !== "string" || value.length !== 24) {
     throw new Error(message || `Expected ObjectId, got ${value}`);
   }
 }
 
-export function assertDate(value: any, message?: string) {
+export function assertDate(value: unknown, message?: string) {
+  if (!(value instanceof Date) && typeof value !== "string" && typeof value !== "number") {
+    throw new Error(message || `Expected date-like value, got ${String(value)}`);
+  }
+
   const date = new Date(value);
   if (isNaN(date.getTime())) {
     throw new Error(message || `Expected date, got ${value}`);
@@ -132,7 +185,7 @@ export const generateTestData = {
     email: `test${index}@example.com`,
     password: "password123",
     phone: `0812-3456-789${index}`,
-    role: "PARENT",
+    role: UserRole.PARENT,
   }),
   
   child: (index: number) => ({
