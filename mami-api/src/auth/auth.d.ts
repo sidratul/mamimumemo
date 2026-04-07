@@ -7,12 +7,16 @@ export interface Auth {
   name: string;
   email: string;
   password: string;
+  phone?: string;
   role?: RoleType; // Add role property
   createdAt: Date;
   updatedAt: Date;
 }
 
 export type AuthDoc = HydratedDocument<Auth>;
+
+export type AuthSubDoc = Pick<Auth, "_id" | "name" | "email" | "phone">;
+export type UserSubDoc = AuthSubDoc;
 
 export interface AuthFilter {
   search?: string;

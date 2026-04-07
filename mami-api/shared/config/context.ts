@@ -1,3 +1,4 @@
+import mongoose, { ClientSession } from "mongoose";
 import { AuthDoc } from "@/auth/auth.d.ts";
 
 /**
@@ -8,8 +9,39 @@ import { AuthDoc } from "@/auth/auth.d.ts";
  */
 export class AppContext {
   user?: AuthDoc;
+  private session?: ClientSession;
 
   constructor(user?: AuthDoc) {
     this.user = user;
+  }
+
+  public async getDbSession(): Promise<ClientSession> {
+    if (!this.session) {
+      this.session = await mongoose.startSession();
+    }
+    return this.session;
+  }
+
+  public async startTransaction(): Promise<void> {
+    const session = await this.getDbSession();
+    session.startTransaction();
+  }
+
+  public async commitTransaction(): Promise<void> {
+    if (this.session?.inTransaction()) {
+      await this.session.commitTransaction();
+    }
+  }
+
+  public async abortTransaction(): Promise<void> {
+    if (this.session?.inTransaction()) {
+      await this.session.abortTransaction();
+    }
+  }
+
+  public async endSession(): Promise<void> {
+    if (this.session && !this.session.hasEnded) {
+      await this.session.endSession();
+    }
   }
 }

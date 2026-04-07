@@ -9,13 +9,6 @@ export const typeDefs = `
     SUSPENDED
   }
 
-  type DaycareOwnerRef {
-    userId: ObjectId!
-    name: String!
-    email: String!
-    phone: String
-  }
-
   type DaycareLegalDocument {
     type: String!
     url: String!
@@ -43,28 +36,20 @@ export const typeDefs = `
   }
 
   type Daycare {
+    _id: ObjectId!
     id: ObjectId!
     name: String!
     description: String
     address: String!
     city: String!
-    owner: DaycareOwnerRef!
+    owner: User!
     legalDocuments: [DaycareLegalDocument!]!
     submittedAt: Date
     approvedAt: Date
     isActive: Boolean!
     approval: DaycareApproval!
-    approvalStatus: DaycareApprovalStatus!
-    approvalNote: String
-    ownerName: String!
-    ownerEmail: String!
     createdAt: Date!
     updatedAt: Date!
-  }
-
-  type SystemDaycareListResponse {
-    items: [Daycare!]!
-    total: Int!
   }
 
   input DaycareLegalDocumentInput {
@@ -73,7 +58,14 @@ export const typeDefs = `
     verified: Boolean
   }
 
-  input CreateDaycareDraftInput {
+  input RegisterDaycareOwnerInput {
+    name: String!
+    email: String!
+    password: String!
+    phone: String
+  }
+
+  input RegisterDaycareDataInput {
     name: String!
     description: String
     address: String!
@@ -81,25 +73,44 @@ export const typeDefs = `
     legalDocuments: [DaycareLegalDocumentInput!]
   }
 
+  input RegisterDaycareInput {
+    owner: RegisterDaycareOwnerInput!
+    daycare: RegisterDaycareDataInput!
+  }
+
+  input UpdateDaycareDocumentsInput {
+    legalDocuments: [DaycareLegalDocumentInput!]!
+  }
+
   input UpdateDaycareApprovalInput {
     status: DaycareApprovalStatus!
     note: String
   }
 
+  input PurgeDaycareInput {
+    deleteOwner: Boolean
+  }
+
+  input DaycareFilterInput {
+    statuses: [DaycareApprovalStatus!]
+    ownerIds: [ObjectId!]
+    cities: [String!]
+    isActive: Boolean
+    search: String
+  }
+
   extend type Query {
-    systemDaycares(
-      status: DaycareApprovalStatus
-      search: String
-      limit: Int
-      offset: Int
-    ): SystemDaycareListResponse!
-    systemDaycare(id: ObjectId!): Daycare
+    daycares(filter: DaycareFilterInput, sort: SortInput, pagination: PaginationInput): [Daycare!]!
+    daycareCount(filter: DaycareFilterInput): Int!
+    daycare(id: ObjectId!): Daycare
     myDaycareRegistration: Daycare
   }
 
   extend type Mutation {
-    createDaycareDraft(input: CreateDaycareDraftInput!): Daycare!
-    submitDaycareRegistration(id: ObjectId!): Daycare!
-    updateDaycareApprovalStatus(id: ObjectId!, input: UpdateDaycareApprovalInput!): Daycare!
+    registerDaycare(input: RegisterDaycareInput!): ActionResponse!
+    updateDaycareDocuments(id: ObjectId!, input: UpdateDaycareDocumentsInput!): ActionResponse!
+    updateDaycareApprovalStatus(id: ObjectId!, input: UpdateDaycareApprovalInput!): ActionResponse!
+    deleteDaycare(id: ObjectId!): ActionResponse!
+    purgeDaycare(id: ObjectId!, input: PurgeDaycareInput): ActionResponse!
   }
 `;

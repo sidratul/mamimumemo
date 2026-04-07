@@ -1,5 +1,4 @@
 import { AppContext } from "#shared/config/context.ts";
-import { AuthDoc } from "@/auth/auth.d.ts";
 
 /**
  * A sample guard function to check for an authenticated user.
@@ -18,8 +17,7 @@ export const AuthGuard = (context: AppContext) => {
  */
 export const AdminGuard = (context: AppContext) => {
   AuthGuard(context); // First, ensure the user is authenticated.
-  // Assuming AuthDoc has a 'role' property. If not, you'll need to add it to the Auth interface.
-  if (context.user?.role !== "ADMIN") {
+  if (context.user?.role !== "SUPER_ADMIN") {
     throw new Error("Authorization failed. Admin role required.");
   }
 };

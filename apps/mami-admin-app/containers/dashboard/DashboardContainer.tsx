@@ -5,7 +5,7 @@ import { Pressable, ScrollView } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import type { ComponentProps } from 'react';
 
-import { listSystemDaycares, type AdminDaycare } from '../../services/daycare-admin';
+import { listDaycares, type AdminDaycare } from '../../services/daycare-admin';
 import { Box, Text } from '../../theme/theme';
 
 type MaterialIconName = ComponentProps<typeof MaterialIcons>['name'];
@@ -122,7 +122,7 @@ export function DashboardContainer() {
   const loadDashboard = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await listSystemDaycares();
+      const data = await listDaycares();
       setItems(data);
     } finally {
       setLoading(false);

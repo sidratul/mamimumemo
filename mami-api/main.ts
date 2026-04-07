@@ -34,8 +34,8 @@ import { resolvers as GalleryResolvers } from "@/gallery/gallery.resolver.ts";
 import { typeDefs as GalleryTypeDefs } from "@/gallery/gallery.typedef.ts";
 import { resolvers as NotificationsResolvers } from "@/notifications/notifications.resolver.ts";
 import { typeDefs as NotificationsTypeDefs } from "@/notifications/notifications.typedef.ts";
-import { resolvers as DaycareAdminResolvers } from "@/daycare_admin/daycare_admin.resolver.ts";
-import { typeDefs as DaycareAdminTypeDefs } from "@/daycare_admin/daycare_admin.typedef.ts";
+import { resolvers as DaycareResolvers } from "@/daycare/daycare.resolver.ts";
+import { typeDefs as DaycareTypeDefs } from "@/daycare/daycare.typedef.ts";
 // SCAFFOLD_IMPORT
 import { scalarResolvers } from "#shared/scalar/scalar.resolver.ts";
 import { sharedTypeDefs, baseTypeDefs } from "#shared/types/shared.type.ts";
@@ -66,7 +66,7 @@ const schema = makeExecutableSchema({
     MenusResolvers,
     GalleryResolvers,
     NotificationsResolvers,
-    DaycareAdminResolvers,
+    DaycareResolvers,
     // SCAFFOLD_RESOLVER
   ],
   typeDefs: [
@@ -89,7 +89,7 @@ const schema = makeExecutableSchema({
     MenusTypeDefs,
     GalleryTypeDefs,
     NotificationsTypeDefs,
-    DaycareAdminTypeDefs,
+    DaycareTypeDefs,
     // SCAFFOLD_TYPEDEF
   ],
 });

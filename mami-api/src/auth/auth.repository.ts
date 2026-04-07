@@ -1,4 +1,4 @@
-import { FilterQuery, UpdateQuery } from "mongoose";
+import { ClientSession, FilterQuery, UpdateQuery } from "mongoose";
 import { Auth, AuthDoc, AuthQueryOptions } from "./auth.d.ts";
 import AuthModel from "./auth.schema.ts";
 import { ObjectId } from "#shared/index.ts";
@@ -23,6 +23,32 @@ class AuthRepository {
   public async delete(id: ObjectId): Promise<boolean> {
     const result = await AuthModel.findByIdAndDelete(id);
     return !!result;
+  }
+
+  public async deleteByIdOrEmail(
+    input: { id?: ObjectId | string; email?: string },
+    options?: { session?: ClientSession },
+  ): Promise<number> {
+    const filters: FilterQuery<Auth>[] = [];
+
+    if (input.id) {
+      filters.push({ _id: input.id as ObjectId });
+    }
+
+    if (input.email) {
+      filters.push({ email: input.email });
+    }
+
+    if (filters.length === 0) {
+      return 0;
+    }
+
+    const result = await AuthModel.deleteMany(
+      filters.length === 1 ? filters[0] : { $or: filters },
+      options,
+    );
+
+    return result.deletedCount ?? 0;
   }
 
   public async findAll(options: AuthQueryOptions = {}): Promise<AuthDoc[]> {

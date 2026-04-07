@@ -17,7 +17,7 @@ export function isAuthenticated(context: AppContext): boolean {
  */
 export function hasRole(context: AppContext, roles: RoleType[]): boolean {
   isAuthenticated(context);
-  if (!context.user || !roles.includes(context.user.role || "USER")) {
+  if (!context.user?.role || !roles.includes(context.user.role)) {
     throw new AuthorizationError();
   }
   return true;

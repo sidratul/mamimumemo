@@ -11,8 +11,8 @@ import { FormFieldProps } from '../../components/form/form.types';
 import { ApprovalStatusSelect, TextAreaField } from '../../components/input';
 import {
   getAvailableApprovalStatusOptions,
-  getSystemDaycareById,
-  updateSystemDaycareApprovalStatus,
+  getDaycareById,
+  updateDaycareApprovalStatus,
   type AdminDaycare,
   type ApprovalStatus,
 } from '../../services/daycare-admin';
@@ -54,7 +54,7 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
       try {
         setLoading(true);
         setError('');
-        const data = await getSystemDaycareById(id);
+        const data = await getDaycareById(id);
         setDaycare(data);
       } catch (nextError) {
         setDaycare(null);
@@ -193,7 +193,7 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
               try {
                 setSubmitLoading(true);
                 setSubmitError('');
-                const updated = await updateSystemDaycareApprovalStatus(id, data.status as ApprovalStatus, data.note);
+                const updated = await updateDaycareApprovalStatus(id, data.status as ApprovalStatus, data.note);
                 setDaycare({ ...updated });
               } catch (nextError) {
                 setSubmitError(nextError instanceof Error ? nextError.message : 'Gagal memperbarui status daycare.');

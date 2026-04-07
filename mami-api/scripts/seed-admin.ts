@@ -7,9 +7,8 @@
  *   deno run -A scripts/seed-admin.ts
  */
 
-import mongoose from "npm:mongoose";
-import bcrypt from "npm:bcryptjs";
-import "https://deno.land/std@0.208.0/dotenv/load.ts";
+import mongoose from "mongoose";
+import bcrypt from "bcrypt";
 
 const MONGO_URI = Deno.env.get("MONGO_URI") || "mongodb://localhost:27017/mami-db";
 

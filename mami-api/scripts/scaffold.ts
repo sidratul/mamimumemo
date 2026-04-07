@@ -1,5 +1,5 @@
-import { ensureDir } from "https://deno.land/std@0.224.0/fs/ensure_dir.ts";
-import { resolve } from "https://deno.land/std@0.224.0/path/mod.ts";
+import { ensureDir } from "@std/fs/ensure-dir";
+import { resolve } from "@std/path";
 
 const TEMPLATE_DIR = "./scripts/templates";
 const TARGET_DIR = "./src";

@@ -3,7 +3,7 @@ import { ActivityIndicator } from 'react-native-paper';
 
 import { ApprovalHistoryItem } from '../../components/daycare-admin';
 import { ScreenContainer } from '../../components/common/ScreenContainer';
-import { getSystemDaycareById, type DaycareApprovalHistory } from '../../services/daycare-admin';
+import { getDaycareById, type DaycareApprovalHistory } from '../../services/daycare-admin';
 import { Box, Text } from '../../theme/theme';
 
 type DaycareApprovalHistoryContainerProps = {
@@ -21,7 +21,7 @@ export function DaycareApprovalHistoryContainer({ id }: DaycareApprovalHistoryCo
       try {
         setLoading(true);
         setError('');
-        const data = await getSystemDaycareById(id);
+        const data = await getDaycareById(id);
         if (!data) {
           setDaycareName('Unknown Daycare');
           setHistory([]);

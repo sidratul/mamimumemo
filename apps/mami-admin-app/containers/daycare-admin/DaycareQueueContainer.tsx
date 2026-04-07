@@ -6,7 +6,7 @@ import { ActivityIndicator, TextInput } from 'react-native-paper';
 
 import { DaycareListItem } from '../../components/daycare-admin';
 import { ScreenContainer } from '../../components/common/ScreenContainer';
-import { listSystemDaycares, type AdminDaycare, type ApprovalStatus } from '../../services/daycare-admin';
+import { listDaycares, type AdminDaycare, type ApprovalStatus } from '../../services/daycare-admin';
 import { Box, Text } from '../../theme/theme';
 
 export function DaycareQueueContainer() {
@@ -38,7 +38,7 @@ export function DaycareQueueContainer() {
     try {
       setLoading(true);
       setError('');
-      const nextItems = await listSystemDaycares({ status, search });
+      const nextItems = await listDaycares({ status, search });
       setItems(nextItems);
     } catch (nextError) {
       setItems([]);

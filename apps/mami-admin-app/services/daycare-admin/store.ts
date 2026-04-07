@@ -44,34 +44,40 @@ type ListDaycaresInput = {
   search?: string;
 };
 
-type SystemDaycaresResponse = {
-  systemDaycares: {
-    items: DaycareApiNode[];
-    total: number;
-  };
+type DaycaresResponse = {
+  daycares: DaycareApiNode[];
 };
 
-type SystemDaycareResponse = {
-  systemDaycare: DaycareApiNode | null;
+type DaycareCountResponse = {
+  daycareCount: number;
+};
+
+type DaycareDetailResponse = {
+  daycare: DaycareApiNode | null;
 };
 
 type UpdateDaycareApprovalStatusResponse = {
-  updateDaycareApprovalStatus: DaycareApiNode;
+  updateDaycareApprovalStatus: {
+    id: string;
+    message: string;
+  };
 };
 
 type DaycareApiNode = {
   id: string;
   name: string;
-  ownerName: string;
-  ownerEmail: string;
+  owner: {
+    _id: string;
+    name: string;
+    email: string;
+    phone?: string | null;
+  };
   city: string;
   address?: string | null;
   description?: string | null;
   submittedAt?: string | null;
   approvedAt?: string | null;
-  approvalStatus: ApprovalStatus;
   isActive: boolean;
-  approvalNote?: string | null;
   legalDocuments?: Array<{
     type: string;
     url: string;
@@ -89,26 +95,30 @@ type DaycareApiNode = {
   } | null;
 };
 
-const SYSTEM_DAYCARE_FIELDS = gql`
-  fragment SystemDaycareFields on Daycare {
+const DAYCARE_FIELDS = gql`
+  fragment DaycareFields on Daycare {
     id
     name
-    ownerName
-    ownerEmail
+    owner {
+      _id
+      name
+      email
+      phone
+    }
     city
     address
     description
     submittedAt
     approvedAt
-    approvalStatus
     isActive
-    approvalNote
     legalDocuments {
       type
       url
       verified
     }
     approval {
+      status
+      note
       history {
         status
         note
@@ -121,34 +131,37 @@ const SYSTEM_DAYCARE_FIELDS = gql`
   }
 `;
 
-const LIST_SYSTEM_DAYCARES_QUERY = gql`
-  query ListSystemDaycares($status: DaycareApprovalStatus, $search: String, $limit: Int, $offset: Int) {
-    systemDaycares(status: $status, search: $search, limit: $limit, offset: $offset) {
-      total
-      items {
-        ...SystemDaycareFields
-      }
+const LIST_DAYCARES_QUERY = gql`
+  query ListDaycares($filter: DaycareFilterInput, $sort: SortInput, $pagination: PaginationInput) {
+    daycares(filter: $filter, sort: $sort, pagination: $pagination) {
+      ...DaycareFields
     }
   }
-  ${SYSTEM_DAYCARE_FIELDS}
+  ${DAYCARE_FIELDS}
 `;
 
-const GET_SYSTEM_DAYCARE_QUERY = gql`
-  query GetSystemDaycare($id: ObjectId!) {
-    systemDaycare(id: $id) {
-      ...SystemDaycareFields
+const DAYCARE_COUNT_QUERY = gql`
+  query DaycareCount($filter: DaycareFilterInput) {
+    daycareCount(filter: $filter)
+  }
+`;
+
+const GET_DAYCARE_QUERY = gql`
+  query GetDaycare($id: ObjectId!) {
+    daycare(id: $id) {
+      ...DaycareFields
     }
   }
-  ${SYSTEM_DAYCARE_FIELDS}
+  ${DAYCARE_FIELDS}
 `;
 
 const UPDATE_DAYCARE_APPROVAL_STATUS_MUTATION = gql`
   mutation UpdateDaycareApprovalStatus($id: ObjectId!, $input: UpdateDaycareApprovalInput!) {
     updateDaycareApprovalStatus(id: $id, input: $input) {
-      ...SystemDaycareFields
+      id
+      message
     }
   }
-  ${SYSTEM_DAYCARE_FIELDS}
 `;
 
 const statusLabelMap: Record<ApprovalStatus, string> = {
@@ -175,16 +188,16 @@ function mapDaycare(node: DaycareApiNode): AdminDaycare {
   return {
     id: node.id,
     name: node.name,
-    ownerName: node.ownerName,
-    ownerEmail: node.ownerEmail,
+    ownerName: node.owner.name,
+    ownerEmail: node.owner.email,
     city: node.city,
     address: node.address ?? '',
     description: node.description ?? '',
     submittedAt: node.submittedAt ?? '',
     approvedAt: node.approvedAt ?? '',
-    approvalStatus: node.approvalStatus,
+    approvalStatus: node.approval?.status ?? 'DRAFT',
     isActive: node.isActive,
-    approvalNote: node.approvalNote ?? '',
+    approvalNote: node.approval?.note ?? '',
     legalDocuments: node.legalDocuments ?? [],
     history: (node.approval?.history ?? []).map((item) => ({
       status: item.status,
@@ -206,33 +219,56 @@ export function getAvailableApprovalStatusOptions(status: ApprovalStatus) {
   }));
 }
 
-export async function listSystemDaycares({ status = 'ALL', search = '' }: ListDaycaresInput = {}) {
-  const response = await apolloClient.query<SystemDaycaresResponse>({
-    query: LIST_SYSTEM_DAYCARES_QUERY,
+export async function listDaycares({ status = 'ALL', search = '' }: ListDaycaresInput = {}) {
+  const response = await apolloClient.query<DaycaresResponse>({
+    query: LIST_DAYCARES_QUERY,
     variables: {
-      status: status === 'ALL' ? undefined : status,
-      search: search.trim() || undefined,
-      limit: 50,
-      offset: 0,
+      filter: {
+        statuses: status === 'ALL' ? undefined : [status],
+        search: search.trim() || undefined,
+      },
+      sort: {
+        sortBy: 'createdAt',
+        sortType: 'DESC',
+      },
+      pagination: {
+        page: 1,
+        limit: 50,
+      },
     },
     fetchPolicy: 'network-only',
   });
 
-  return response.data.systemDaycares.items.map(mapDaycare);
+  return response.data.daycares.map(mapDaycare);
 }
 
-export async function getSystemDaycareById(id: string) {
-  const response = await apolloClient.query<SystemDaycareResponse>({
-    query: GET_SYSTEM_DAYCARE_QUERY,
+export async function getDaycareCount({ status = 'ALL', search = '' }: ListDaycaresInput = {}) {
+  const response = await apolloClient.query<DaycareCountResponse>({
+    query: DAYCARE_COUNT_QUERY,
+    variables: {
+      filter: {
+        statuses: status === 'ALL' ? undefined : [status],
+        search: search.trim() || undefined,
+      },
+    },
+    fetchPolicy: 'network-only',
+  });
+
+  return response.data.daycareCount;
+}
+
+export async function getDaycareById(id: string) {
+  const response = await apolloClient.query<DaycareDetailResponse>({
+    query: GET_DAYCARE_QUERY,
     variables: { id },
     fetchPolicy: 'network-only',
   });
 
-  const daycare = response.data.systemDaycare;
+  const daycare = response.data.daycare;
   return daycare ? mapDaycare(daycare) : null;
 }
 
-export async function updateSystemDaycareApprovalStatus(id: string, status: ApprovalStatus, note: string) {
+export async function updateDaycareApprovalStatus(id: string, status: ApprovalStatus, note: string) {
   const response = await apolloClient.mutate<UpdateDaycareApprovalStatusResponse>({
     mutation: UPDATE_DAYCARE_APPROVAL_STATUS_MUTATION,
     variables: {
@@ -249,5 +285,10 @@ export async function updateSystemDaycareApprovalStatus(id: string, status: Appr
     throw new Error('Failed to update daycare approval status');
   }
 
-  return mapDaycare(updated);
+  const refreshed = await getDaycareById(updated.id);
+  if (!refreshed) {
+    throw new Error(updated.message || 'Failed to reload daycare after status update');
+  }
+
+  return refreshed;
 }

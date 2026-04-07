@@ -1,12 +1,10 @@
-import { config } from "https://deno.land/std@0.224.0/dotenv/mod.ts";
-
-// Load environment variables
-const env = await config({ export: true });
+import { AppContext } from "../shared/config/context.ts";
 
 export const TEST_CONFIG = {
-  mongoUri: env.TEST_MONGO_URI || "mongodb://localhost:27017/mami-test",
-  jwtSecret: env.TEST_JWT_SECRET || "test-secret-key",
-  port: parseInt(env.TEST_PORT || "8001"),
+  mongoUri: Deno.env.get("TEST_MONGO_URI") ||
+    "mongodb://mami-admin:mami-password-2026@localhost:27017/mami-test?authSource=admin",
+  jwtSecret: Deno.env.get("TEST_JWT_SECRET") || "test-secret-key",
+  port: parseInt(Deno.env.get("TEST_PORT") || "8001"),
 };
 
 // Test database connection
@@ -97,14 +95,14 @@ export function createTestActivity(overrides = {}) {
 
 // Mock context for resolvers
 export function createMockContext(user: any = null) {
-  return {
+  return Object.assign(new AppContext(user ?? undefined), {
     user,
     req: {
       headers: {
         authorization: user ? `Bearer ${user.token}` : "",
       },
     },
-  };
+  });
 }
 
 // Assert helpers

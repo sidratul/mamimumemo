@@ -12,7 +12,6 @@ export * from "./types/pagination.type.ts";
 export * from "./types/sort.type.ts";
 
 // Custom Errors
-export * from "./utils/error.ts";
 export * from "./errors/custom-errors.ts";
 
 // Config

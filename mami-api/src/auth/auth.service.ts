@@ -2,31 +2,50 @@ import AuthModel from "./auth.schema.ts";
 import { registerInput, loginInput, refreshTokenInput } from "./auth.validation.ts";
 import { GraphQLError } from "graphql";
 import bcrypt from "bcrypt";
+import { ClientSession } from "mongoose";
 import { createAccessToken, createRefreshToken, verifyRefreshToken } from "#shared/utils/jwt.ts";
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { UserRole } from "#shared/enums/enum.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
+import { AuthDoc } from "./auth.d.ts";
+import authRepository from "./auth.repository.ts";
 
 export class AuthService {
-  async register(input: typeof registerInput._type) {
+  async createUser(
+    input: typeof registerInput._type,
+    options?: { session?: ClientSession },
+  ): Promise<AuthDoc> {
     const existingUserOrNull = await AuthModel.findOne({ email: input.email }).exec();
     if (existingUserOrNull) {
       throw new GraphQLError(MESSAGES.AUTH.EMAIL_EXISTS);
     }
 
-    const hashedPassword = await bcrypt.hash(input.password, 10); // 10 is the salt rounds
+    const hashedPassword = await bcrypt.hash(input.password, 10);
     const user = new AuthModel({
       ...input,
+      phone: input.phone || "",
       password: hashedPassword,
-      role: input.role || UserRole.PARENT, // Default role is PARENT
+      role: input.role || UserRole.PARENT,
     });
-    await user.save();
+    await user.save(options);
+    return user;
+  }
+
+  async register(input: typeof registerInput._type) {
+    const user = await this.createUser(input);
 
     return {
       id: user.id,
       message: MESSAGES.AUTH.REGISTER_SUCCESS,
     };
+  }
+
+  async deleteUserByIdOrEmail(
+    input: { id?: string; email?: string },
+    options?: { session?: ClientSession },
+  ) {
+    return await authRepository.deleteByIdOrEmail(input, options);
   }
 
   async login(input: typeof loginInput._type) {
@@ -113,6 +132,7 @@ export class AuthService {
     return {
       _id: (_id ? _id.toString() : context.user._id?.toString?.() || context.user.id || id),
       ...profile,
+      role: profile.role,
     };
   }
 }
