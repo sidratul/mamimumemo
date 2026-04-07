@@ -1,6 +1,6 @@
 # Auth Module
 
-Modul auth dipakai untuk register, login, refresh token, dan ambil profile user aktif.
+Modul auth dipakai untuk login, refresh token, dan ambil profile user aktif.
 
 Source utama:
 
@@ -44,10 +44,6 @@ Hak akses:
 
 - harus login
 
-Catatan:
-
-- backend menormalkan role legacy `ADMIN` menjadi `SUPER_ADMIN`
-
 Contoh response:
 
 ```json
@@ -67,61 +63,6 @@ Contoh response:
 ```
 
 ## Mutations
-
-### `register`
-
-Mendaftarkan user baru.
-
-```graphql
-mutation Register($input: RegisterInput!) {
-  register(input: $input) {
-    id
-    message
-  }
-}
-```
-
-Contoh variables:
-
-```json
-{
-  "input": {
-    "name": "Ibu Budi",
-    "email": "ibu@example.com",
-    "password": "password123",
-    "phone": "081234567890",
-    "role": "PARENT"
-  }
-}
-```
-
-Validasi backend:
-
-- `name` wajib
-- `email` harus valid
-- `password` minimal 6 karakter
-- `role` optional
-
-Default role:
-
-- jika `role` tidak diisi, backend memakai `PARENT`
-
-Kemungkinan error:
-
-- `Pengguna dengan email ini sudah terdaftar`
-
-Contoh response:
-
-```json
-{
-  "data": {
-    "register": {
-      "id": "67f31f912d62a66531f0a0a9",
-      "message": "Registrasi berhasil"
-    }
-  }
-}
-```
 
 ### `login`
 
@@ -218,3 +159,9 @@ Untuk query/mutation yang butuh login:
   "Authorization": "Bearer <ACCESS_TOKEN>"
 }
 ```
+
+## Catatan
+
+- registrasi user tidak lagi berada di modul `auth`
+- manajemen user sekarang ada di `modules/users.md`
+- registrasi owner + daycare sekarang ada di `modules/daycare.md`

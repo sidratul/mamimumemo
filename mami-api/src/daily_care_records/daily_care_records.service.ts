@@ -141,9 +141,15 @@ export class DailyCareRecordsService {
       });
     }
 
+    const recordChildren = record.children as Array<{
+      childId: { toString(): string };
+    }> & {
+      push(value: unknown): number;
+    };
+
     // Check if child already exists in record
-    const childExists = record.children.some(
-      (c: any) => c.childId.toString() === input.childId
+    const childExists = recordChildren.some(
+      (c) => c.childId.toString() === input.childId
     );
 
     if (!childExists) {
@@ -153,7 +159,7 @@ export class DailyCareRecordsService {
       }
 
       // Add child to record
-      record.children.push({
+      recordChildren.push({
         childId: input.childId,
         childName: child.profile.name,
         childPhoto: child.profile.photo || child.customData?.customPhoto || "",

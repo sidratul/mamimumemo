@@ -86,7 +86,7 @@ export class WeeklySchedulesRepository {
       throw new GraphQLError("Child assignment not found");
     }
 
-    schedule.days[dayIndex].childAssignments[childAssignmentIndex].assignedSitters = sitters;
+    schedule.days[dayIndex].childAssignments[childAssignmentIndex].set("assignedSitters", sitters);
     
     return await schedule.save();
   }

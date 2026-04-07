@@ -1,6 +1,7 @@
 import { loginInput, refreshTokenInput } from "./auth.validation.ts";
 import { GraphQLError } from "graphql";
 import bcrypt from "bcrypt";
+import { Types } from "mongoose";
 import { createAccessToken, createRefreshToken, verifyRefreshToken } from "#shared/utils/jwt.ts";
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
@@ -54,7 +55,11 @@ export class AuthService {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const userOrNull = await usersService.findUserById(payload._id);
+    if (!Types.ObjectId.isValid(payload._id)) {
+      throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
+    }
+
+    const userOrNull = await usersService.findUserById(new Types.ObjectId(payload._id));
     if (!userOrNull) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }

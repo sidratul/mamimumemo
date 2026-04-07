@@ -4,15 +4,17 @@ Dokumen di folder ini mendeskripsikan query dan mutation berdasarkan schema back
 
 ## Modul
 
-- [`modules/daycare.md`](./modules/daycare.md) - Registrasi daycare, list daycare, count daycare, detail, dan approval update
-- [`modules/auth.md`](./modules/auth.md) - Register, login, refresh token, profile
+- [`modules/auth.md`](./modules/auth.md) - Login, refresh token, dan profile
+- [`modules/users.md`](./modules/users.md) - Manajemen user oleh super admin
+- [`modules/daycare.md`](./modules/daycare.md) - Registrasi daycare, list daycare, count daycare, detail, myDaycare, dan approval update
 
 ## Prioritas Baca
 
 Untuk flow registrasi daycare dan review admin, mulai dari:
 
 1. `modules/auth.md`
-2. `modules/daycare.md`
+2. `modules/users.md`
+3. `modules/daycare.md`
 
 ## Catatan
 

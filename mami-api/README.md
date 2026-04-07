@@ -24,6 +24,8 @@ Server saat ini me-load modul berikut dari `main.ts`:
 
 - `health`
 - `auth`
+- `users`
+- `daycare`
 - `children`
 - `medical_records`
 - `activities`
@@ -77,6 +79,7 @@ Endpoint GraphQL default: `http://localhost:8000/graphql`
 
 ## Dokumen Terkait
 
+- `docs/graphql/README.md` - Index dokumentasi query dan mutation per modul
 - `README_MODULES.md` - Ringkasan status modul dan test
 - `../SPECIFICATION.md` - Spesifikasi sistem
 - `../TDD_TECHNICAL_DESIGN.md` - Desain query/mutation gabungan

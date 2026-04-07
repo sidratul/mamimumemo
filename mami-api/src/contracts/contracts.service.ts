@@ -15,13 +15,14 @@ export class ContractsService {
     context: AppContext
   ) {
     isAuthenticated(context);
-    if (!context.user) {
+    const user = context.user;
+    if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
     // Only daycare staff can view all contracts
     const allowedRoles = [UserRole.DAYCARE_ADMIN, UserRole.DAYCARE_OWNER, UserRole.SUPER_ADMIN];
-    if (!allowedRoles.includes(context.user.role as UserRole)) {
+    if (!allowedRoles.includes(user.role as UserRole)) {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }
 
@@ -34,7 +35,8 @@ export class ContractsService {
     context: AppContext
   ) {
     isAuthenticated(context);
-    if (!context.user) {
+    const user = context.user;
+    if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
@@ -43,9 +45,9 @@ export class ContractsService {
     
     // Allow if user is the parent or daycare staff
     const allowedRoles = [UserRole.DAYCARE_ADMIN, UserRole.DAYCARE_OWNER, UserRole.SUPER_ADMIN];
-    const isParent = parent.some((p: any) => p.user.userId.toString() === context.user.id);
+    const isParent = user.role === UserRole.PARENT && user.id === parentId;
     
-    if (!allowedRoles.includes(context.user.role as UserRole) && !isParent) {
+    if (!allowedRoles.includes(user.role as UserRole) && !isParent) {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }
 

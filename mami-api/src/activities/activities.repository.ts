@@ -88,6 +88,6 @@ export class ActivitiesRepository {
   async isActivityOwner(activityId: string, userId: string): Promise<boolean> {
     const activity = await this.findById(activityId);
     if (!activity) return false;
-    return activity.loggedBy.userId.toString() === userId;
+    return activity.loggedBy?.userId?.toString() === userId;
   }
 }

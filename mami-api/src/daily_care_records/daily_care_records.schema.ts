@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { simpleUserRefSchema, assignedUserRefSchema } from "#shared/schemas/user-refs.schema.ts";
 
 // Attendance subdocument schema
-const attendanceSchema = new mongoose.Schema({
+const attendanceSchema = new mongoose.Schema<Record<string, unknown>>({
   checkIn: {
     time: { type: String, required: true }, // Format: "HH:mm"
     photo: { type: String, required: true }, // URL foto
@@ -21,7 +21,7 @@ const attendanceSchema = new mongoose.Schema({
 }, { _id: false });
 
 // Activity subdocument schema (sama seperti global activities tapi lebih simple)
-const dailyActivitySchema = new mongoose.Schema({
+const dailyActivitySchema = new mongoose.Schema<Record<string, unknown>>({
   _id: false,
   masterActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "MasterActivity" },
   activityName: { type: String, required: true },
@@ -57,7 +57,7 @@ const dailyActivitySchema = new mongoose.Schema({
 });
 
 // Assigned Sitter subdocument
-const assignedSitterSchema = new mongoose.Schema({
+const assignedSitterSchema = new mongoose.Schema<Record<string, unknown>>({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   name: { type: String, required: true },
   shift: { 
@@ -68,7 +68,7 @@ const assignedSitterSchema = new mongoose.Schema({
 }, { _id: false });
 
 // Child daily record subdocument
-const childDailyRecordSchema = new mongoose.Schema({
+const childDailyRecordSchema = new mongoose.Schema<Record<string, unknown>>({
   childId: { type: mongoose.Schema.Types.ObjectId, ref: "ChildrenDaycare", required: true },
   childName: { type: String, required: true },
   childPhoto: String,
@@ -79,7 +79,7 @@ const childDailyRecordSchema = new mongoose.Schema({
 }, { _id: false });
 
 // Main Daily Care Record schema
-const dailyCareRecordSchema = new mongoose.Schema({
+const dailyCareRecordSchema = new mongoose.Schema<Record<string, unknown>>({
   daycareId: { type: mongoose.Schema.Types.ObjectId, ref: "Daycare", required: true },
   date: { type: Date, required: true },
   children: [childDailyRecordSchema],
@@ -95,7 +95,7 @@ dailyCareRecordSchema.index({ "children.childId": 1, date: -1 });
 
 // Virtual untuk calculate total children
 dailyCareRecordSchema.virtual("totalChildren").get(function() {
-  return this.children.length;
+  return ((this as { children?: unknown[] }).children ?? []).length;
 });
 
 export default mongoose.model("DailyCareRecord", dailyCareRecordSchema);

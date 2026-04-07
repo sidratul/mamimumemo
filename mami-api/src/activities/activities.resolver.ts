@@ -29,7 +29,7 @@ export const resolvers = {
         input.childId,
         input.startDate,
         input.endDate,
-        input.includeDaycare,
+        input.includeDaycare ?? true,
         context
       );
     },

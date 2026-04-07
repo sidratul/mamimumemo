@@ -2,7 +2,6 @@ import { verifyAccessToken } from "#shared/utils/jwt.ts";
 import { YogaInitialContext } from "graphql-yoga";
 import { Types } from "mongoose";
 import { UserRole } from "#shared/enums/enum.ts";
-import { AuthDoc } from "@/auth/auth.d.ts";
 import { AuthenticatedUser } from "#shared/config/context.ts";
 import { DaycareRepository } from "@/daycare/daycare.repository.ts";
 import UsersService from "@/users/users.service.ts";
@@ -43,5 +42,5 @@ export async function createAuthContext({ request }: YogaInitialContext) {
   }
 
   // Kembalikan user dengan tipe yang sesuai
-  return { user: user as AuthDoc | undefined };
+  return { user };
 }

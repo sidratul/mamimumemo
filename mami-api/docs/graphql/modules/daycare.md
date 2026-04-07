@@ -4,7 +4,7 @@ Modul ini menangani:
 
 - registrasi owner + daycare dalam satu request
 - list, count, dan detail daycare untuk `SUPER_ADMIN`
-- cek status registrasi daycare milik owner
+- cek daycare milik owner yang sedang login
 - update dokumen pendukung selama proses review
 - update status approval daycare oleh `SUPER_ADMIN`
 
@@ -195,11 +195,11 @@ Catatan:
 
 - hanya `SUPER_ADMIN`
 
-### `myDaycareRegistration`
+### `myDaycare`
 
 ```graphql
-query MyDaycareRegistration {
-  myDaycareRegistration {
+query MyDaycare {
+  myDaycare {
     _id
     id
     name
@@ -314,7 +314,8 @@ Contoh variables:
 
 Catatan:
 
-- owner daycare terkait atau `SUPER_ADMIN`
+- `DAYCARE_OWNER` hanya bisa update daycare yang `id`-nya sama dengan `context.user.daycareId`
+- `SUPER_ADMIN` bisa update daycare mana pun
 
 Contoh response:
 

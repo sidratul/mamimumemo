@@ -4,6 +4,7 @@ import { GraphQLError } from "graphql";
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
+import { UserRole } from "#shared/enums/enum.ts";
 import { ChildrenRepository } from "@/children/children.repository.ts";
 
 const activitiesRepository = new ActivitiesRepository();
@@ -17,11 +18,12 @@ export class ActivitiesService {
     context: AppContext
   ) {
     isAuthenticated(context);
-    if (!context.user) {
+    const user = context.user;
+    if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const hasAccess = await activitiesRepository.userHasAccess(childId, context.user.id);
+    const hasAccess = await activitiesRepository.userHasAccess(childId, user.id);
     if (!hasAccess) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -35,7 +37,8 @@ export class ActivitiesService {
 
   async getActivity(id: string, context: AppContext) {
     isAuthenticated(context);
-    if (!context.user) {
+    const user = context.user;
+    if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
@@ -46,7 +49,7 @@ export class ActivitiesService {
 
     const hasAccess = await activitiesRepository.userHasAccess(
       activity.childId.toString(),
-      context.user.id
+      user.id,
     );
     if (!hasAccess) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
@@ -63,11 +66,12 @@ export class ActivitiesService {
     context: AppContext
   ) {
     isAuthenticated(context);
-    if (!context.user) {
+    const user = context.user;
+    if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const hasAccess = await activitiesRepository.userHasAccess(childId, context.user.id);
+    const hasAccess = await activitiesRepository.userHasAccess(childId, user.id);
     if (!hasAccess) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -80,7 +84,7 @@ export class ActivitiesService {
     );
 
     // Group activities by date
-    const timelineByDate: any = {};
+    const timelineByDate: Record<string, { date: string; activities: unknown[]; daycareActivities: unknown[] }> = {};
     
     for (const activity of activities) {
       const dateKey = activity.date.toISOString().split("T")[0];
@@ -97,18 +101,19 @@ export class ActivitiesService {
     }
 
     // Convert to array and sort by date
-    return Object.values(timelineByDate).sort((a: any, b: any) => 
+    return Object.values(timelineByDate).sort((a, b) =>
       new Date(a.date).getTime() - new Date(b.date).getTime()
     );
   }
 
   async getMyActivities(date: Date | undefined, context: AppContext) {
     isAuthenticated(context);
-    if (!context.user) {
+    const user = context.user;
+    if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    return await activitiesRepository.findByUserId(context.user.id, date);
+    return await activitiesRepository.findByUserId(user.id, date);
   }
 
   async createActivity(
@@ -116,11 +121,12 @@ export class ActivitiesService {
     context: AppContext
   ) {
     isAuthenticated(context);
-    if (!context.user) {
+    const user = context.user;
+    if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const hasAccess = await activitiesRepository.userHasAccess(input.childId, context.user.id);
+    const hasAccess = await activitiesRepository.userHasAccess(input.childId, user.id);
     if (!hasAccess) {
       throw new GraphQLError("You don't have permission to add activities for this child");
     }
@@ -132,22 +138,32 @@ export class ActivitiesService {
     }
 
     // Find user's guardian record
-    const guardian = child.guardians.find(
-      (g: any) => g.user.userId.toString() === context.user.id
-    );
+    const guardian = child.guardians.find((g) => g.user.userId.toString() === user.id);
 
-    const activityData = {
-      ...input,
-      source: context.user.role === "sitter" || context.user.role === "admin" ? "daycare" : "parent",
+    const activityData: typeof createActivityInput._type & {
+      source: "daycare" | "parent";
       loggedBy: {
-        userId: context.user.id,
-        name: context.user.name,
+        userId: string;
+        name: string;
+        relation: string;
+        role: UserRole | undefined;
+      };
+      visibleTo: string[];
+      duration?: number;
+    } = {
+      ...input,
+      source: user.role === UserRole.DAYCARE_SITTER || user.role === UserRole.DAYCARE_ADMIN
+        ? "daycare"
+        : "parent",
+      loggedBy: {
+        userId: user.id,
+        name: user.name,
         relation: guardian?.relation || "parent",
-        role: context.user.role,
+        role: user.role,
       },
       visibleTo: input.visibleTo || child.guardians
-        .filter((g: any) => g.active)
-        .map((g: any) => g.user.userId),
+        .filter((g) => g.active)
+        .map((g) => g.user.userId.toString()),
     };
 
     // Auto-calculate duration if startTime and endTime provided
@@ -166,32 +182,35 @@ export class ActivitiesService {
     context: AppContext
   ) {
     isAuthenticated(context);
-    if (!context.user) {
+    const user = context.user;
+    if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const isOwner = await activitiesRepository.isActivityOwner(id, context.user.id);
+    const isOwner = await activitiesRepository.isActivityOwner(id, user.id);
     if (!isOwner) {
       throw new GraphQLError("You can only update your own activities");
     }
 
     // Auto-calculate duration if startTime and endTime provided
-    if (input.startTime && input.endTime) {
-      const start = new Date(`2000-01-01 ${input.startTime}`);
-      const end = new Date(`2000-01-01 ${input.endTime}`);
-      input.duration = Math.round((end.getTime() - start.getTime()) / 60000);
+    const updateData: typeof updateActivityInput._type & { duration?: number } = { ...input };
+    if (updateData.startTime && updateData.endTime) {
+      const start = new Date(`2000-01-01 ${updateData.startTime}`);
+      const end = new Date(`2000-01-01 ${updateData.endTime}`);
+      updateData.duration = Math.round((end.getTime() - start.getTime()) / 60000);
     }
 
-    return await activitiesRepository.update(id, input);
+    return await activitiesRepository.update(id, updateData);
   }
 
   async deleteActivity(id: string, context: AppContext) {
     isAuthenticated(context);
-    if (!context.user) {
+    const user = context.user;
+    if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const isOwner = await activitiesRepository.isActivityOwner(id, context.user.id);
+    const isOwner = await activitiesRepository.isActivityOwner(id, user.id);
     if (!isOwner) {
       throw new GraphQLError("You can only delete your own activities");
     }

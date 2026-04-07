@@ -4,6 +4,7 @@ import { GraphQLError } from "graphql";
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
+import { UserRole } from "#shared/enums/enum.ts";
 import UserModel from "@/auth/auth.schema.ts";
 
 const childrenRepository = new ChildrenRepository();
@@ -98,11 +99,12 @@ export class ChildrenService {
     context: AppContext
   ) {
     isAuthenticated(context);
-    if (!context.user) {
+    const user = context.user;
+    if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const hasAccess = await childrenRepository.userHasAccess(id, context.user.id);
+    const hasAccess = await childrenRepository.userHasAccess(id, user.id);
     if (!hasAccess) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -113,10 +115,8 @@ export class ChildrenService {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
 
-    const isOwner = child.ownerId.toString() === context.user.id;
-    const guardian = child.guardians.find(
-      (g: any) => g.user.userId.toString() === context.user.id
-    );
+    const isOwner = child.ownerId.toString() === user.id;
+    const guardian = child.guardians.find((g) => g.user.userId.toString() === user.id);
 
     if (!isOwner && !guardian?.permissions?.includes("edit_profile")) {
       throw new GraphQLError("You don't have permission to edit this child's profile");
@@ -166,7 +166,7 @@ export class ChildrenService {
         name: guardianUser.name,
         email: guardianUser.email,
         phone: guardianUser.phone || "",
-        role: guardianUser.role === "parent" ? "parent" : "guardian",
+        role: guardianUser.role === UserRole.PARENT ? "parent" : "guardian",
       },
       relation: input.relation,
       permissions: input.permissions,
