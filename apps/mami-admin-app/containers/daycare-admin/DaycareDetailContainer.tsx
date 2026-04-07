@@ -11,6 +11,7 @@ import { FormFieldProps } from '../../components/form/form.types';
 import { ApprovalStatusSelect, TextAreaField } from '../../components/input';
 import {
   getAvailableApprovalStatusOptions,
+  getApprovalStatusHelperText,
   getDaycareById,
   updateDaycareApprovalStatus,
   type AdminDaycare,
@@ -124,9 +125,17 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
 
   return (
     <ScreenContainer>
-      <Box gap="xs">
-        <Text variant="title">{daycare.name}</Text>
-        <Text variant="subtitle">{daycare.city}</Text>
+      <Box gap="md">
+        <Pressable onPress={() => router.back()}>
+          <Box alignSelf="flex-start" paddingHorizontal="md" paddingVertical="sm" borderRadius="xl" borderWidth={1} borderColor="border" backgroundColor="surface">
+            <Text style={{ fontWeight: '700' }}>Kembali</Text>
+          </Box>
+        </Pressable>
+
+        <Box gap="xs">
+          <Text variant="title">{daycare.name}</Text>
+          <Text variant="subtitle">{daycare.city}</Text>
+        </Box>
       </Box>
 
       <Box backgroundColor="surface" borderColor="border" borderWidth={1} borderRadius="lg" padding="lg" gap="md">
@@ -134,7 +143,7 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
           <Text variant="cardValue">Status Saat Ini</Text>
           <ApprovalStatusBadge status={daycare.approvalStatus} />
         </Box>
-        <Text color="textSecondary">Owner: {daycare.ownerName} ({daycare.ownerEmail})</Text>
+        <Text color="textSecondary">Owner: {daycare.owner.name} ({daycare.owner.email})</Text>
         <Box flexDirection="row" justifyContent="space-between">
           <Box flex={1} gap="xs">
             <Text color="textSecondary">Submitted</Text>
@@ -151,6 +160,22 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
         <Text variant="cardValue">Profil Daycare</Text>
         <Text>{daycare.address || 'Alamat belum tersedia.'}</Text>
         <Text color="textSecondary">{daycare.description || 'Belum ada deskripsi daycare.'}</Text>
+      </Box>
+
+      <Box backgroundColor="surface" borderColor="border" borderWidth={1} borderRadius="lg" padding="lg" gap="sm">
+        <Text variant="cardValue">Owner Detail</Text>
+        <Box gap="xs">
+          <Text color="textSecondary">Nama</Text>
+          <Text>{daycare.owner.name}</Text>
+        </Box>
+        <Box gap="xs">
+          <Text color="textSecondary">Email</Text>
+          <Text selectable>{daycare.owner.email}</Text>
+        </Box>
+        <Box gap="xs">
+          <Text color="textSecondary">Nomor Telepon</Text>
+          <Text>{daycare.owner.phone || '-'}</Text>
+        </Box>
       </Box>
 
       <Box backgroundColor="surface" borderColor="border" borderWidth={1} borderRadius="lg" padding="lg" gap="sm">
@@ -174,6 +199,18 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
       {nextStatusOptions.length > 0 ? (
         <Box backgroundColor="surface" borderColor="border" borderWidth={1} borderRadius="lg" padding="lg" gap="md">
           <Text variant="cardValue">Review Action</Text>
+          <Box gap="xs">
+            <Text color="textSecondary">Opsi status berikutnya</Text>
+            {nextStatusOptions.map((option) => (
+              <Box key={option.value} borderColor="border" borderWidth={1} borderRadius="md" padding="md" gap="xs">
+                <Box flexDirection="row" justifyContent="space-between" alignItems="center" gap="sm">
+                  <Text style={{ fontWeight: '700', flex: 1 }}>{option.label}</Text>
+                  <ApprovalStatusBadge status={option.value as ApprovalStatus} />
+                </Box>
+                <Text color="textSecondary">{getApprovalStatusHelperText(option.value as ApprovalStatus)}</Text>
+              </Box>
+            ))}
+          </Box>
           {submitError ? <Text color="danger">{submitError}</Text> : null}
           <DynamicForm<ApprovalForm>
             fields={{

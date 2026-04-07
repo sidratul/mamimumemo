@@ -11,7 +11,7 @@ export function getTextField<T>({ label, message, props, show }: GetTextFieldPro
   return {
     label,
     props,
-    input: TextInput,
+    input: ({ onChange, ...inputProps }) => TextInput({ ...inputProps, onChangeText: onChange }),
     validation: string().required(message),
     show,
   };

@@ -29,10 +29,18 @@ export function DaycareListItem({ daycare, onPress }: DaycareListItemProps) {
           <ApprovalStatusBadge status={daycare.approvalStatus} />
         </Box>
 
+        <Box gap="xs">
+          <Text color="textSecondary">Owner</Text>
+          <Text numberOfLines={1}>{daycare.owner.name}</Text>
+          <Text color="textSecondary" numberOfLines={1}>
+            {daycare.owner.email}
+          </Text>
+        </Box>
+
         <Box flexDirection="row" justifyContent="space-between" alignItems="center">
           <Box gap="xs">
-            <Text color="textSecondary">Owner</Text>
-            <Text>{daycare.ownerName}</Text>
+            <Text color="textSecondary">Alamat</Text>
+            <Text numberOfLines={1}>{daycare.address || '-'}</Text>
           </Box>
           <Box alignItems="flex-end" gap="xs">
             <Text color="textSecondary">Submitted</Text>

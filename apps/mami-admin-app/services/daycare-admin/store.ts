@@ -21,8 +21,12 @@ export type DaycareApprovalHistory = {
 export type AdminDaycare = {
   id: string;
   name: string;
-  ownerName: string;
-  ownerEmail: string;
+  owner: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
   city: string;
   address?: string;
   description?: string;
@@ -64,7 +68,7 @@ type UpdateDaycareApprovalStatusResponse = {
 };
 
 type DaycareApiNode = {
-  id: string;
+  _id: string;
   name: string;
   owner: {
     _id: string;
@@ -84,6 +88,8 @@ type DaycareApiNode = {
     verified: boolean;
   }> | null;
   approval?: {
+    status?: ApprovalStatus;
+    note?: string | null;
     history?: Array<{
       status: ApprovalStatus;
       note?: string | null;
@@ -97,7 +103,7 @@ type DaycareApiNode = {
 
 const DAYCARE_FIELDS = gql`
   fragment DaycareFields on Daycare {
-    id
+    _id
     name
     owner {
       _id
@@ -186,10 +192,14 @@ const allowedNextStatuses: Record<ApprovalStatus, ApprovalStatus[]> = {
 
 function mapDaycare(node: DaycareApiNode): AdminDaycare {
   return {
-    id: node.id,
+    id: node._id,
     name: node.name,
-    ownerName: node.owner.name,
-    ownerEmail: node.owner.email,
+    owner: {
+      id: node.owner._id,
+      name: node.owner.name,
+      email: node.owner.email,
+      phone: node.owner.phone ?? '',
+    },
     city: node.city,
     address: node.address ?? '',
     description: node.description ?? '',
@@ -217,6 +227,23 @@ export function getAvailableApprovalStatusOptions(status: ApprovalStatus) {
     label: statusLabelMap[value],
     value,
   }));
+}
+
+export function getApprovalStatusHelperText(status: ApprovalStatus) {
+  switch (status) {
+    case 'IN_REVIEW':
+      return 'Pindahkan daycare ke tahap review aktif oleh admin.';
+    case 'APPROVED':
+      return 'Aktifkan daycare dan izinkan operasional berjalan.';
+    case 'NEEDS_REVISION':
+      return 'Minta owner melengkapi atau memperbaiki data pendaftaran.';
+    case 'REJECTED':
+      return 'Tolak pendaftaran daycare secara final.';
+    case 'SUSPENDED':
+      return 'Nonaktifkan daycare yang sebelumnya sudah approved.';
+    default:
+      return '';
+  }
 }
 
 export async function listDaycares({ status = 'ALL', search = '' }: ListDaycaresInput = {}) {

@@ -22,6 +22,8 @@ export default function AppLayout() {
       <Stack.Screen name="daycares/index" />
       <Stack.Screen name="daycares/[id]/index" />
       <Stack.Screen name="daycares/[id]/history" />
+      <Stack.Screen name="users/create" />
+      <Stack.Screen name="users/[id]" />
       <Stack.Screen name="modules/index" />
       <Stack.Screen name="modules/role-access" />
       <Stack.Screen name="modules/audit-log" />

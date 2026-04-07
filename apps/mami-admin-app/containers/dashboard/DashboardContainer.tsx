@@ -4,11 +4,16 @@ import { useRouter } from 'expo-router';
 import { Pressable, ScrollView } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import type { ComponentProps } from 'react';
+import type { DimensionValue } from 'react-native';
 
 import { listDaycares, type AdminDaycare } from '../../services/daycare-admin';
 import { Box, Text } from '../../theme/theme';
 
 type MaterialIconName = ComponentProps<typeof MaterialIcons>['name'];
+
+function toPercentWidth(value: number): DimensionValue {
+  return `${value}%` as DimensionValue;
+}
 
 function SummaryCard({
   title,
@@ -41,7 +46,7 @@ function ChartRow({
 }: {
   label: string;
   value: string;
-  width: string;
+  width: DimensionValue;
   color: string;
 }) {
   return (
@@ -112,10 +117,10 @@ export function DashboardContainer() {
       inReview,
       approved,
       revision,
-      submittedWidth: `${Math.max((submitted / total) * 100, submitted ? 12 : 0)}%`,
-      inReviewWidth: `${Math.max((inReview / total) * 100, inReview ? 12 : 0)}%`,
-      approvedWidth: `${Math.max((approved / total) * 100, approved ? 12 : 0)}%`,
-      revisionWidth: `${Math.max((revision / total) * 100, revision ? 12 : 0)}%`,
+      submittedWidth: toPercentWidth(Math.max((submitted / total) * 100, submitted ? 12 : 0)),
+      inReviewWidth: toPercentWidth(Math.max((inReview / total) * 100, inReview ? 12 : 0)),
+      approvedWidth: toPercentWidth(Math.max((approved / total) * 100, approved ? 12 : 0)),
+      revisionWidth: toPercentWidth(Math.max((revision / total) * 100, revision ? 12 : 0)),
     };
   }, [items]);
 

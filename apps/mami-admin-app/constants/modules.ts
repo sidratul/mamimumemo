@@ -13,10 +13,10 @@ export const moduleDefinitions: ModuleDefinition[] = [
     route: '/(app)/daycares',
   },
   {
-    slug: 'role-access',
-    title: 'Role & Access',
-    description: 'Monitoring role user system-level dan access policy.',
-    route: '/(app)/modules/role-access',
+    slug: 'users',
+    title: 'Users',
+    description: 'List user global, filter role, dan monitoring akun system-level.',
+    route: '/(app)/(tabs)/users',
   },
   {
     slug: 'audit-log',
