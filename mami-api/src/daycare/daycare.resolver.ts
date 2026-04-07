@@ -1,7 +1,8 @@
 import { AppContext } from "#shared/config/context.ts";
 import { AdminGuard, AuthGuard } from "#shared/guards/auth.guard.ts";
-import { hasRole, requireOwnerOrRole } from "#shared/guards/authorization.guard.ts";
+import { hasRole } from "#shared/guards/authorization.guard.ts";
 import { UserRole } from "#shared/enums/enum.ts";
+import { AuthorizationError } from "#shared/errors/custom-errors.ts";
 import { ObjectId } from "#shared/types/objectid.type.ts";
 import {
   deleteDaycareInput,
@@ -51,10 +52,10 @@ export const resolvers = {
       await AdminGuard(context);
       return daycareService.getDaycare(id);
     },
-    myDaycareRegistration: async (_: unknown, __: unknown, context: AppContext) => {
+    myDaycare: async (_: unknown, __: unknown, context: AppContext) => {
       await AuthGuard(context);
       hasRole(context, [UserRole.DAYCARE_OWNER, UserRole.SUPER_ADMIN]);
-      return daycareService.getMyDaycareRegistration(context);
+      return daycareService.getMyDaycare(context);
     },
   },
   Mutation: {
@@ -73,8 +74,9 @@ export const resolvers = {
     ) => {
       await AuthGuard(context);
       updateDaycareDocumentsInput.parse(input);
-      const daycare = await daycareService.getDaycareForUpdate(id);
-      requireOwnerOrRole(context, daycare.owner._id, [UserRole.SUPER_ADMIN]);
+      if (context.user?.role !== UserRole.SUPER_ADMIN && context.user?.daycareId?.toString() !== id.toString()) {
+        throw new AuthorizationError();
+      }
       return daycareService.updateDaycareDocuments(id, input);
     },
     updateDaycareApprovalStatus: async (

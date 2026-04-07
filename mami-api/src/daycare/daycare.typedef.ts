@@ -103,7 +103,7 @@ export const typeDefs = `
     daycares(filter: DaycareFilterInput, sort: SortInput, pagination: PaginationInput): [Daycare!]!
     daycareCount(filter: DaycareFilterInput): Int!
     daycare(id: ObjectId!): Daycare
-    myDaycareRegistration: Daycare
+    myDaycare: Daycare
   }
 
   extend type Mutation {

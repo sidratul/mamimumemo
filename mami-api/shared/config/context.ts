@@ -1,5 +1,10 @@
 import mongoose, { ClientSession } from "mongoose";
 import { AuthDoc } from "@/auth/auth.d.ts";
+import { ObjectId } from "#shared/types/objectid.type.ts";
+
+export type AuthenticatedUser = AuthDoc & {
+  daycareId?: ObjectId;
+};
 
 /**
  * The context that will be available in all resolvers.
@@ -8,10 +13,10 @@ import { AuthDoc } from "@/auth/auth.d.ts";
  * in the context creation logic based on a JWT or session.
  */
 export class AppContext {
-  user?: AuthDoc;
+  user?: AuthenticatedUser;
   private session?: ClientSession;
 
-  constructor(user?: AuthDoc) {
+  constructor(user?: AuthenticatedUser) {
     this.user = user;
   }
 

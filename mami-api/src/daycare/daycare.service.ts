@@ -63,13 +63,18 @@ export class DaycareService {
     return daycare;
   }
 
-  async getMyDaycareRegistration(context: AppContext) {
+  async getMyDaycare(context: AppContext) {
     const user = context.user;
     if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const daycare = await repository.findViewByOwnerId(user._id);
+    const daycareId = user.daycareId;
+    if (!daycareId) {
+      return null;
+    }
+
+    const daycare = await repository.findViewById(daycareId);
     if (!daycare) {
       return null;
     }
@@ -142,14 +147,6 @@ export class DaycareService {
       id: daycare._id.toString(),
       message: "Dokumen daycare berhasil diperbarui.",
     };
-  }
-
-  async getDaycareForUpdate(id: ObjectId) {
-    const daycare = await repository.findByIdForUpdate(id);
-    if (!daycare) {
-      throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
-    }
-    return daycare;
   }
 
   async updateDaycareApprovalStatus(
