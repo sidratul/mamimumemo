@@ -1,4 +1,6 @@
 import { AppContext } from "#shared/config/context.ts";
+import { AuthorizationError, AuthenticationError } from "#shared/errors/custom-errors.ts";
+import { UserRole } from "#shared/enums/enum.ts";
 
 /**
  * A sample guard function to check for an authenticated user.
@@ -7,7 +9,7 @@ import { AppContext } from "#shared/config/context.ts";
  */
 export const AuthGuard = (context: AppContext) => {
   if (!context.user) {
-    throw new Error("Authentication required. You must be logged in.");
+    throw new AuthenticationError("Authentication required. You must be logged in.");
   }
 };
 
@@ -17,7 +19,7 @@ export const AuthGuard = (context: AppContext) => {
  */
 export const AdminGuard = (context: AppContext) => {
   AuthGuard(context); // First, ensure the user is authenticated.
-  if (context.user?.role !== "SUPER_ADMIN") {
-    throw new Error("Authorization failed. Admin role required.");
+  if (context.user?.role !== UserRole.SUPER_ADMIN) {
+    throw new AuthorizationError("Authorization failed. Admin role required.");
   }
 };

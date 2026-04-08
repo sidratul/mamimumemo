@@ -6,9 +6,11 @@ import { MESSAGES } from "#shared/enums/constant.ts";
 import { UserRole } from "#shared/enums/enum.ts";
 import { ObjectId } from "#shared/types/objectid.type.ts";
 import UsersService from "@/users/users.service.ts";
+import DaycareMembershipsService from "@/daycare_memberships/daycare_memberships.service.ts";
 import { DaycareApprovalStatus } from "./daycare.enum.ts";
-import { DaycareFilter, DaycareQueryOptions } from "./daycare.d.ts";
+import { DaycareDocShape, DaycareFilter, DaycareQueryOptions } from "./daycare.d.ts";
 import { DaycareRepository } from "./daycare.repository.ts";
+import { ProjectionType } from "mongoose";
 import {
   purgeDaycareInput,
   registerDaycareInput,
@@ -18,6 +20,7 @@ import {
 
 const repository = new DaycareRepository();
 const usersService = new UsersService();
+const daycareMembershipsService = new DaycareMembershipsService();
 
 const REVIEW_REQUIRED_STATUSES = [
   DaycareApprovalStatus.NEEDS_REVISION,
@@ -45,8 +48,9 @@ const ADMIN_TRANSITIONS: Partial<Record<DaycareApprovalStatus, DaycareApprovalSt
 export class DaycareService {
   async listDaycares(
     options: DaycareQueryOptions,
+    projection?: ProjectionType<DaycareDocShape>,
   ) {
-    return await repository.list(options);
+    return await repository.list(options, projection);
   }
 
   async countDaycares(
@@ -55,8 +59,8 @@ export class DaycareService {
     return await repository.count(filter);
   }
 
-  async getDaycare(id: ObjectId) {
-    const daycare = await repository.findViewById(id);
+  async getDaycare(id: ObjectId, projection?: ProjectionType<DaycareDocShape>) {
+    const daycare = await repository.findViewById(id, projection);
     if (!daycare) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -120,6 +124,19 @@ export class DaycareService {
               changedAt: new Date(),
             },
           ],
+        },
+      }, { session });
+
+      await daycareMembershipsService.createOwnerMembership({
+        user: {
+          _id: owner._id,
+          name: owner.name,
+          email: owner.email,
+          phone: owner.phone || "",
+        },
+        daycare: {
+          _id: daycare._id,
+          name: daycare.name,
         },
       }, { session });
 
@@ -242,9 +259,11 @@ export class DaycareService {
 
     const ownerId = daycare.owner._id;
     const ownerEmail = daycare.owner.email;
+    await daycareMembershipsService.deleteMembershipsByDaycareId(id);
     await repository.hardDeleteById(id);
 
     if (input?.deleteOwner) {
+      await daycareMembershipsService.deleteMembershipsByUserId(ownerId);
       await usersService.deleteUserByIdOrEmail({
         id: ownerId,
         email: ownerEmail,

@@ -6,11 +6,72 @@ import { createAccessToken, createRefreshToken, verifyRefreshToken } from "#shar
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
+import { UserRole } from "#shared/enums/enum.ts";
 import UsersService from "@/users/users.service.ts";
+import DaycareMembershipsService from "@/daycare_memberships/daycare_memberships.service.ts";
+import { DaycareMembershipPersona } from "@/daycare_memberships/daycare_memberships.enum.ts";
 
 const usersService = new UsersService();
+const daycareMembershipsService = new DaycareMembershipsService();
+
+function mapMembershipPersonaToUserRole(persona: DaycareMembershipPersona): UserRole {
+  switch (persona) {
+    case DaycareMembershipPersona.OWNER:
+      return UserRole.DAYCARE_OWNER;
+    case DaycareMembershipPersona.ADMIN:
+      return UserRole.DAYCARE_ADMIN;
+    case DaycareMembershipPersona.SITTER:
+      return UserRole.DAYCARE_SITTER;
+  }
+}
 
 export class AuthService {
+  private async buildAccessTokenPayload(user: {
+    _id: { toString(): string };
+    email: string;
+    role?: string;
+    name: string;
+  }) {
+    let daycareMembership:
+      | {
+        _id: string;
+        persona: string;
+        daycare: {
+          _id: string;
+          name: string;
+        };
+      }
+      | undefined;
+
+    const membershipOrNull = await daycareMembershipsService.getActiveMembershipByUserId(
+      new Types.ObjectId(user._id.toString()),
+    );
+    if (membershipOrNull) {
+      daycareMembership = {
+        _id: membershipOrNull._id.toString(),
+        persona: membershipOrNull.persona,
+        daycare: {
+          _id: membershipOrNull.daycare._id.toString(),
+          name: membershipOrNull.daycare.name,
+        },
+      };
+    }
+
+    const effectiveRole = user.role === UserRole.SUPER_ADMIN
+      ? user.role
+      : daycareMembership
+      ? mapMembershipPersonaToUserRole(daycareMembership.persona as DaycareMembershipPersona)
+      : user.role;
+
+    return {
+      _id: user._id.toString(),
+      email: user.email,
+      role: effectiveRole,
+      name: user.name,
+      daycareMembership,
+    };
+  }
+
   async login(input: typeof loginInput._type) {
     loginInput.parse(input);
     const userOrNull = await usersService.findUserByEmail(input.email);
@@ -23,12 +84,7 @@ export class AuthService {
       throw new GraphQLError(MESSAGES.AUTH.INVALID_CREDENTIALS);
     }
 
-    const tokenPayload = {
-      _id: userOrNull._id.toString(),
-      email: userOrNull.email,
-      role: userOrNull.role,
-      name: userOrNull.name,
-    };
+    const tokenPayload = await this.buildAccessTokenPayload(userOrNull);
     const accessToken = createAccessToken(tokenPayload);
     const refreshToken = createRefreshToken({
       _id: userOrNull._id.toString(),
@@ -65,12 +121,7 @@ export class AuthService {
     }
 
     return {
-      accessToken: createAccessToken({
-        _id: userOrNull._id.toString(),
-        email: userOrNull.email,
-        role: userOrNull.role,
-        name: userOrNull.name,
-      }),
+      accessToken: createAccessToken(await this.buildAccessTokenPayload(userOrNull)),
       refreshToken: createRefreshToken({
         _id: userOrNull._id.toString(),
         tokenType: "refresh",

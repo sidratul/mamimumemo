@@ -2,14 +2,14 @@ import { createBox, createText, createTheme, useTheme as useRestyleTheme } from 
 
 export const theme = createTheme({
   colors: {
-    background: '#FFF7FB',
+    background: '#FFF9F3',
     surface: '#FFFFFF',
-    primary: '#E23A8A',
-    textPrimary: '#3A1130',
-    textSecondary: '#8A4C73',
-    border: '#F5C2DD',
-    success: '#1F9D63',
-    danger: '#C6285A',
+    primary: '#F15A29',
+    textPrimary: '#4B2A18',
+    textSecondary: '#8A6A56',
+    border: '#F4D7C7',
+    success: '#74B72E',
+    danger: '#D64545',
   },
   spacing: {
     none: 0,

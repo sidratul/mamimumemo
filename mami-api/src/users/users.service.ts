@@ -1,12 +1,12 @@
 import bcrypt from "bcrypt";
-import { ClientSession } from "mongoose";
+import { ClientSession, ProjectionType } from "mongoose";
 import { GraphQLError } from "graphql";
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { RoleType, UserRole } from "#shared/enums/enum.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
 import { ObjectId } from "#shared/types/objectid.type.ts";
-import { UserQueryOptions } from "./users.d.ts";
+import { User, UserQueryOptions } from "./users.d.ts";
 import usersRepository from "./users.repository.ts";
 import { createUserInput, updateUserInput, updateUserPasswordInput } from "./users.validation.ts";
 
@@ -29,17 +29,17 @@ export class UsersService {
     }, options);
   }
 
-  async findUserByEmail(email: string) {
-    return await usersRepository.find({ email });
+  async findUserByEmail(email: string, projection?: ProjectionType<User>) {
+    return await usersRepository.find({ email }, projection);
   }
 
-  async findUserById(id: ObjectId) {
-    return await usersRepository.findById(id);
+  async findUserById(id: ObjectId, projection?: ProjectionType<User>) {
+    return await usersRepository.findById(id, projection);
   }
 
-  async listUsers(options: UserQueryOptions, context: AppContext) {
+  async listUsers(options: UserQueryOptions, context: AppContext, projection?: ProjectionType<User>) {
     this.requireSuperAdmin(context);
-    return await usersRepository.findAll(options);
+    return await usersRepository.findAll(options, projection);
   }
 
   async countUsers(filter: UserQueryOptions | undefined, context: AppContext) {
@@ -47,9 +47,9 @@ export class UsersService {
     return await usersRepository.count(filter);
   }
 
-  async getUser(id: ObjectId, context: AppContext) {
+  async getUser(id: ObjectId, context: AppContext, projection?: ProjectionType<User>) {
     this.requireSuperAdmin(context);
-    const user = await usersRepository.findById(id);
+    const user = await usersRepository.findById(id, projection);
     if (!user) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }

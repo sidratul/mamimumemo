@@ -13,12 +13,12 @@ const labelMap: Record<ApprovalStatus, string> = {
 };
 
 const colorMap: Record<ApprovalStatus, string> = {
-  DRAFT: '#8A4C73',
-  SUBMITTED: '#6D28D9',
-  IN_REVIEW: '#2563EB',
-  NEEDS_REVISION: '#D97706',
-  APPROVED: '#1F9D63',
-  REJECTED: '#C6285A',
+  DRAFT: '#8A6A56',
+  SUBMITTED: '#F15A29',
+  IN_REVIEW: '#4DA7DB',
+  NEEDS_REVISION: '#F7B500',
+  APPROVED: '#74B72E',
+  REJECTED: '#D64545',
   SUSPENDED: '#6B7280',
 };
 

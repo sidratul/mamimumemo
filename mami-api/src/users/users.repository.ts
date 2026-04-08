@@ -1,4 +1,4 @@
-import { ClientSession, FilterQuery, UpdateQuery } from "mongoose";
+import { ClientSession, FilterQuery, ProjectionType, UpdateQuery } from "mongoose";
 import { ObjectId } from "#shared/index.ts";
 import UserModel from "./users.schema.ts";
 import { RoleType } from "#shared/enums/enum.ts";
@@ -10,12 +10,20 @@ class UsersRepository {
     return createdUser;
   }
 
-  public async find(filter: FilterQuery<User>): Promise<UserDoc | null> {
-    return await UserModel.findOne(filter);
+  public async find(filter: FilterQuery<User>, projection?: ProjectionType<User>): Promise<UserDoc | null> {
+    let query = UserModel.findOne(filter);
+    if (projection && Object.keys(projection).length > 0) {
+      query = query.select(projection);
+    }
+    return await query;
   }
 
-  public async findById(id: ObjectId): Promise<UserDoc | null> {
-    return await UserModel.findById(id);
+  public async findById(id: ObjectId, projection?: ProjectionType<User>): Promise<UserDoc | null> {
+    let query = UserModel.findById(id);
+    if (projection && Object.keys(projection).length > 0) {
+      query = query.select(projection);
+    }
+    return await query;
   }
 
   public async update(id: ObjectId, updateData: UpdateQuery<User>): Promise<UserDoc | null> {
@@ -53,7 +61,7 @@ class UsersRepository {
     return result.deletedCount ?? 0;
   }
 
-  public async findAll(options: UserQueryOptions = {}): Promise<UserDoc[]> {
+  public async findAll(options: UserQueryOptions = {}, projection?: ProjectionType<User>): Promise<UserDoc[]> {
     const { search, sort, page, limit, roles } = options as UserQueryOptions & { roles?: RoleType[] };
     const filter: FilterQuery<User> = {};
 
@@ -76,6 +84,10 @@ class UsersRepository {
       query = query.sort({ [sort.sortBy]: sort.sortType === "ASC" ? 1 : -1 });
     } else {
       query = query.sort({ name: 1 });
+    }
+
+    if (projection && Object.keys(projection).length > 0) {
+      query = query.select(projection);
     }
 
     return await query.exec();

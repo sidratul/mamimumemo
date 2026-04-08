@@ -7,6 +7,7 @@ Dokumen di folder ini mendeskripsikan query dan mutation berdasarkan schema back
 - [`modules/auth.md`](./modules/auth.md) - Login, refresh token, dan profile
 - [`modules/users.md`](./modules/users.md) - Manajemen user oleh super admin
 - [`modules/daycare.md`](./modules/daycare.md) - Registrasi daycare, list daycare, count daycare, detail, myDaycare, dan approval update
+- [`modules/daycare_memberships.md`](./modules/daycare_memberships.md) - Relasi owner/admin/sitter ke daycare
 
 ## Prioritas Baca
 
@@ -15,6 +16,7 @@ Untuk flow registrasi daycare dan review admin, mulai dari:
 1. `modules/auth.md`
 2. `modules/users.md`
 3. `modules/daycare.md`
+4. `modules/daycare_memberships.md`
 
 ## Catatan
 

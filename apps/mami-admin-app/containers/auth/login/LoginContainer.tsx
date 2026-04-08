@@ -20,8 +20,8 @@ export function LoginContainer() {
     <Box flex={1} backgroundColor="background" justifyContent="center" padding="xl" gap="lg" paddingTop="xxl">
       <Box gap="md">
         <Image
-          source={require('../../../assets/images/legacy-logo.png')}
-          style={{ width: 128, height: 128, resizeMode: 'contain', alignSelf: 'center' }}
+          source={require('../../../assets/images/logo-admin.png')}
+          style={{ width: 210, height: 160, resizeMode: 'contain', alignSelf: 'center' }}
         />
         <Box gap="xs">
           <Text variant="title">Mami Admin</Text>

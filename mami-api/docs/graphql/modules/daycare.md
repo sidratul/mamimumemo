@@ -3,6 +3,7 @@
 Modul ini menangani:
 
 - registrasi owner + daycare dalam satu request
+- pembuatan membership `OWNER` saat registrasi berhasil
 - list, count, dan detail daycare untuk `SUPER_ADMIN`
 - cek daycare milik owner yang sedang login
 - update dokumen pendukung selama proses review
@@ -222,8 +223,8 @@ query MyDaycare {
 
 Catatan:
 
-- `DAYCARE_OWNER` dan `SUPER_ADMIN`
-- jika owner belum punya daycare, backend mengembalikan `null`
+- semua user yang punya membership daycare aktif dapat mengakses query ini
+- jika user tidak punya daycare aktif, backend mengembalikan `null`
 
 ## Mutations
 
@@ -259,6 +260,11 @@ Contoh variables:
   }
 }
 ```
+
+Catatan:
+
+- registrasi membuat 3 data sekaligus: `users`, `daycares`, dan `daycare_memberships`
+- membership yang dibuat saat registrasi memakai persona `OWNER`
 
 Contoh response:
 

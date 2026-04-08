@@ -1,5 +1,5 @@
 import DaycareModel from "./daycare.schema.ts";
-import { ClientSession, FilterQuery } from "mongoose";
+import { ClientSession, FilterQuery, ProjectionType } from "mongoose";
 import { ObjectId } from "#shared/types/objectid.type.ts";
 import { DaycareCreateData, DaycareDocShape, DaycareFilter, DaycareQueryOptions, DaycareRecord } from "./daycare.d.ts";
 
@@ -40,7 +40,7 @@ export class DaycareRepository {
     return filter;
   }
 
-  async list(options: DaycareQueryOptions = {}): Promise<DaycareRecord[]> {
+  async list(options: DaycareQueryOptions = {}, projection?: ProjectionType<DaycareDocShape>): Promise<DaycareRecord[]> {
     const { sort, page, limit, ...filterInput } = options;
     const filter = this.buildFilter(filterInput);
 
@@ -56,6 +56,10 @@ export class DaycareRepository {
       query = query.sort([[sort.sortBy, sortOrder]]);
     } else {
       query = query.sort({ createdAt: -1 });
+    }
+
+    if (projection && Object.keys(projection).length > 0) {
+      query = query.select(projection);
     }
 
     return await query.lean<DaycareRecord[]>().exec();
@@ -77,11 +81,17 @@ export class DaycareRepository {
     return await DaycareModel.findByIdAndDelete(id).exec();
   }
 
-  async findViewById(id: ObjectId): Promise<DaycareRecord | null> {
-    return await DaycareModel.findOne({
+  async findViewById(id: ObjectId, projection?: ProjectionType<DaycareDocShape>): Promise<DaycareRecord | null> {
+    let query = DaycareModel.findOne({
       _id: id,
       deletedAt: { $exists: false },
-    }).lean<DaycareRecord | null>().exec();
+    });
+
+    if (projection && Object.keys(projection).length > 0) {
+      query = query.select(projection);
+    }
+
+    return await query.lean<DaycareRecord | null>().exec();
   }
 
   async findViewByOwnerId(ownerId: ObjectId): Promise<DaycareRecord | null> {

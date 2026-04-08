@@ -7,7 +7,7 @@ import type { ComponentProps } from 'react';
 import type { DimensionValue } from 'react-native';
 
 import { listDaycares, type AdminDaycare } from '../../services/daycare-admin';
-import { Box, Text } from '../../theme/theme';
+import { Box, Text, useAppTheme } from '../../theme/theme';
 
 type MaterialIconName = ComponentProps<typeof MaterialIcons>['name'];
 
@@ -20,17 +20,19 @@ function SummaryCard({
   value,
   note,
   icon,
+  iconColor,
 }: {
   title: string;
   value: string;
   note: string;
   icon: MaterialIconName;
+  iconColor: string;
 }) {
   return (
     <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="xs">
       <Box flexDirection="row" alignItems="center" justifyContent="space-between">
         <Text variant="cardTitle">{title}</Text>
-        <MaterialIcons name={icon} size={18} color="#E23A8A" />
+        <MaterialIcons name={icon} size={18} color={iconColor} />
       </Box>
       <Text variant="cardValue">{value}</Text>
       <Text color="textSecondary">{note}</Text>
@@ -43,11 +45,13 @@ function ChartRow({
   value,
   width,
   color,
+  trackColor,
 }: {
   label: string;
   value: string;
   width: DimensionValue;
   color: string;
+  trackColor: string;
 }) {
   return (
     <Box gap="xs">
@@ -55,7 +59,7 @@ function ChartRow({
         <Text>{label}</Text>
         <Text style={{ fontWeight: '700', color }}>{value}</Text>
       </Box>
-      <Box height={10} borderRadius="md" style={{ backgroundColor: '#FCE7F3', overflow: 'hidden' }}>
+      <Box height={10} borderRadius="md" style={{ backgroundColor: trackColor, overflow: 'hidden' }}>
         <Box height={10} borderRadius="md" style={{ width, backgroundColor: color }} />
       </Box>
     </Box>
@@ -67,11 +71,15 @@ function QuickAction({
   label,
   value,
   onPress,
+  iconColor,
+  iconBackground,
 }: {
   icon: MaterialIconName;
   label: string;
   value: string;
   onPress: () => void;
+  iconColor: string;
+  iconBackground: string;
 }) {
   return (
     <Pressable onPress={onPress}>
@@ -90,8 +98,8 @@ function QuickAction({
           borderRadius="md"
           alignItems="center"
           justifyContent="center"
-          style={{ backgroundColor: '#FCE7F3' }}>
-          <MaterialIcons name={icon} size={18} color="#E23A8A" />
+          style={{ backgroundColor: iconBackground }}>
+          <MaterialIcons name={icon} size={18} color={iconColor} />
         </Box>
         <Text style={{ fontWeight: '700' }}>{label}</Text>
         <Text color="textSecondary">{value}</Text>
@@ -102,6 +110,7 @@ function QuickAction({
 
 export function DashboardContainer() {
   const router = useRouter();
+  const theme = useAppTheme();
   const [items, setItems] = useState<AdminDaycare[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -144,9 +153,9 @@ export function DashboardContainer() {
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <Box flex={1} backgroundColor="background" padding="xl" gap="lg" paddingTop="xxl">
         <Box backgroundColor="primary" borderRadius="lg" padding="lg" gap="sm">
-          <Text style={{ color: '#FBCFE8', fontSize: 13 }}>Admin System</Text>
+          <Text style={{ color: '#FFE2D6', fontSize: 13 }}>Admin System</Text>
           <Text style={{ color: '#FFFFFF', fontSize: 28, fontWeight: '700' }}>Dashboard</Text>
-          <Text style={{ color: '#FCE7F3', fontSize: 15 }}>Pantau antrean approval daycare dan progres review hari ini.</Text>
+          <Text style={{ color: '#FFF4EF', fontSize: 15 }}>Pantau antrean approval daycare dan progres review hari ini.</Text>
         </Box>
 
         <Box gap="md">
@@ -155,30 +164,57 @@ export function DashboardContainer() {
             value={loading ? '...' : String(metrics.submitted)}
             note="Menunggu mulai direview"
             icon="mark-email-unread"
+            iconColor={theme.colors.primary}
           />
           <SummaryCard
             title="In Review"
             value={loading ? '...' : String(metrics.inReview)}
             note="Sedang diproses admin"
             icon="fact-check"
+            iconColor="#4DA7DB"
           />
           <SummaryCard
             title="Approved"
             value={loading ? '...' : String(metrics.approved)}
             note="Sudah aktif"
             icon="verified-user"
+            iconColor={theme.colors.success}
           />
         </Box>
 
         <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="md">
           <Box flexDirection="row" alignItems="center" justifyContent="space-between">
             <Text variant="cardValue">Approval Chart</Text>
-            <MaterialIcons name="bar-chart" size={20} color="#E23A8A" />
+            <MaterialIcons name="bar-chart" size={20} color={theme.colors.primary} />
           </Box>
-          <ChartRow label="Submitted" value={loading ? '...' : String(metrics.submitted)} width={metrics.submittedWidth} color="#E23A8A" />
-          <ChartRow label="In Review" value={loading ? '...' : String(metrics.inReview)} width={metrics.inReviewWidth} color="#F59E0B" />
-          <ChartRow label="Approved" value={loading ? '...' : String(metrics.approved)} width={metrics.approvedWidth} color="#1F9D63" />
-          <ChartRow label="Needs Revision" value={loading ? '...' : String(metrics.revision)} width={metrics.revisionWidth} color="#C6285A" />
+          <ChartRow
+            label="Submitted"
+            value={loading ? '...' : String(metrics.submitted)}
+            width={metrics.submittedWidth}
+            color={theme.colors.primary}
+            trackColor="#FFE7DE"
+          />
+          <ChartRow
+            label="In Review"
+            value={loading ? '...' : String(metrics.inReview)}
+            width={metrics.inReviewWidth}
+            color="#4DA7DB"
+            trackColor="#E5F4FD"
+          />
+          <ChartRow
+            label="Approved"
+            value={loading ? '...' : String(metrics.approved)}
+            width={metrics.approvedWidth}
+            color={theme.colors.success}
+            trackColor="#EAF7DD"
+          />
+          <ChartRow
+            label="Needs Revision"
+            value={loading ? '...' : String(metrics.revision)}
+            width={metrics.revisionWidth}
+            color="#F7B500"
+            trackColor="#FFF3CC"
+          />
         </Box>
 
         <Box gap="sm">
@@ -189,12 +225,16 @@ export function DashboardContainer() {
               label="Perlu Review"
               value={loading ? 'Memuat...' : `${metrics.submitted} daycare`}
               onPress={() => router.push({ pathname: '/(app)/(tabs)/daycares', params: { status: 'SUBMITTED' } })}
+              iconColor={theme.colors.primary}
+              iconBackground="#FFE7DE"
             />
             <QuickAction
               icon="fact-check"
               label="Sedang Direview"
               value={loading ? 'Memuat...' : `${metrics.inReview} daycare`}
               onPress={() => router.push({ pathname: '/(app)/(tabs)/daycares', params: { status: 'IN_REVIEW' } })}
+              iconColor="#4DA7DB"
+              iconBackground="#E5F4FD"
             />
           </Box>
         </Box>

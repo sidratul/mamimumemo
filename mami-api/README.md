@@ -26,6 +26,7 @@ Server saat ini me-load modul berikut dari `main.ts`:
 - `auth`
 - `users`
 - `daycare`
+- `daycare_memberships`
 - `children`
 - `medical_records`
 - `activities`
@@ -45,6 +46,7 @@ Server saat ini me-load modul berikut dari `main.ts`:
 ## Status Implementasi
 
 - Struktur modul sudah tersedia luas dan seluruh modul di atas sudah di-wire ke schema GraphQL utama.
+- Modul `daycare_memberships` menyiapkan relasi owner/admin/sitter terhadap daycare sebagai fondasi multi-persona.
 - Kedalaman implementasi tiap modul bisa berbeda, jadi cek service/repository/test modul terkait sebelum menganggap fiturnya production-ready.
 - File ringkasan lama di folder ini sebelumnya tidak konsisten; README ini sekarang menjadi gambaran status tingkat tinggi.
 

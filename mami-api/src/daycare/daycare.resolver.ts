@@ -1,9 +1,10 @@
 import { AppContext } from "#shared/config/context.ts";
 import { AdminGuard, AuthGuard } from "#shared/guards/auth.guard.ts";
-import { hasRole } from "#shared/guards/authorization.guard.ts";
 import { UserRole } from "#shared/enums/enum.ts";
 import { AuthorizationError } from "#shared/errors/custom-errors.ts";
 import { ObjectId } from "#shared/types/objectid.type.ts";
+import { getMongoProjection } from "#shared/graphql/projection.ts";
+import { GraphQLResolveInfo } from "graphql";
 import {
   deleteDaycareInput,
   purgeDaycareInput,
@@ -29,6 +30,7 @@ export const resolvers = {
         pagination?: PaginationOptions;
       },
       context: AppContext,
+      info: GraphQLResolveInfo,
     ) => {
       await AdminGuard(context);
       listDaycaresInput.parse(args);
@@ -37,7 +39,7 @@ export const resolvers = {
         ...(args.sort ? { sort: args.sort } : {}),
         ...(args.pagination ?? {}),
       };
-      return daycareService.listDaycares(options);
+      return daycareService.listDaycares(options, getMongoProjection(info));
     },
     daycareCount: async (
       _: unknown,
@@ -48,13 +50,12 @@ export const resolvers = {
       daycareCountInput.parse(args);
       return daycareService.countDaycares(args.filter);
     },
-    daycare: async (_: unknown, { id }: { id: ObjectId }, context: AppContext) => {
+    daycare: async (_: unknown, { id }: { id: ObjectId }, context: AppContext, info: GraphQLResolveInfo) => {
       await AdminGuard(context);
-      return daycareService.getDaycare(id);
+      return daycareService.getDaycare(id, getMongoProjection(info));
     },
     myDaycare: async (_: unknown, __: unknown, context: AppContext) => {
       await AuthGuard(context);
-      hasRole(context, [UserRole.DAYCARE_OWNER, UserRole.SUPER_ADMIN]);
       return daycareService.getMyDaycare(context);
     },
   },

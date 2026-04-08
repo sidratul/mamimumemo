@@ -1,6 +1,8 @@
 import { AppContext } from "#shared/config/context.ts";
 import { PaginationOptions, SortInput } from "#shared/index.ts";
 import { ObjectId } from "#shared/types/objectid.type.ts";
+import { getMongoProjection } from "#shared/graphql/projection.ts";
+import { GraphQLResolveInfo } from "graphql";
 import { UserQueryOptions } from "./users.d.ts";
 import { UsersService } from "./users.service.ts";
 import {
@@ -19,6 +21,7 @@ export const resolvers = {
       _: unknown,
       args: { filter?: UserQueryOptions; sort?: SortInput; pagination?: PaginationOptions },
       context: AppContext,
+      info: GraphQLResolveInfo,
     ) => {
       listUsersInput.parse(args);
       const options = {
@@ -26,7 +29,7 @@ export const resolvers = {
         ...(args.sort ? { sort: args.sort } : {}),
         ...(args.pagination ?? {}),
       };
-      return usersService.listUsers(options, context);
+      return usersService.listUsers(options, context, getMongoProjection(info));
     },
     userCount: (
       _: unknown,
@@ -36,8 +39,8 @@ export const resolvers = {
       userCountInput.parse(args);
       return usersService.countUsers(args.filter, context);
     },
-    user: (_: unknown, { id }: { id: ObjectId }, context: AppContext) => {
-      return usersService.getUser(id, context);
+    user: (_: unknown, { id }: { id: ObjectId }, context: AppContext, info: GraphQLResolveInfo) => {
+      return usersService.getUser(id, context, getMongoProjection(info));
     },
   },
   Mutation: {

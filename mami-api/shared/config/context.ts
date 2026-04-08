@@ -4,6 +4,12 @@ import { ObjectId } from "#shared/types/objectid.type.ts";
 
 export type AuthenticatedUser = AuthDoc & {
   daycareId?: ObjectId;
+  daycare?: {
+    _id: ObjectId;
+    name: string;
+  };
+  daycareMembershipId?: ObjectId;
+  daycarePersona?: string;
 };
 
 /**
