@@ -1,8 +1,8 @@
 import { KeyboardTypeOptions } from 'react-native';
 import { TextInput as SharedTextInput } from '@mami/ui';
 
-import { useAppTheme } from '../../theme/theme';
 import { InputComponentProps } from '../form/form.types';
+import { useSharedInputProps } from './shared';
 
 type TextFieldProps = InputComponentProps<string> & {
   keyboardType?: KeyboardTypeOptions;
@@ -18,7 +18,7 @@ export function TextField({
   autoCapitalize = 'none',
   disabled,
 }: TextFieldProps) {
-  const theme = useAppTheme();
+  const inputProps = useSharedInputProps();
 
   return (
     <SharedTextInput
@@ -28,9 +28,9 @@ export function TextField({
       keyboardType={keyboardType}
       autoCapitalize={autoCapitalize}
       onChangeText={onChange}
-      textColor={theme.colors.textPrimary}
-      backgroundColor={theme.colors.surface}
-      borderRadius={10}
+      textColor={inputProps.textColor}
+      backgroundColor={inputProps.backgroundColor}
+      borderRadius={inputProps.borderRadius}
     />
   );
 }

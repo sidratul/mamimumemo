@@ -7,12 +7,21 @@ export const typeDefs = `
     PARENT
   }
 
+  enum UserPersona {
+    SUPER_ADMIN
+    PARENT
+    OWNER
+    DAYCARE_ADMIN
+    DAYCARE_SITTER
+  }
+
   type User {
     _id: ObjectId!
     name: String!
     email: String!
     phone: String
     role: UserRole
+    personas: [UserPersona!]!
     createdAt: Date
     updatedAt: Date
   }
@@ -39,7 +48,7 @@ export const typeDefs = `
 
   input UserFilterInput {
     search: String
-    roles: [UserRole!]
+    personas: [UserPersona!]
   }
 
   extend type Query {

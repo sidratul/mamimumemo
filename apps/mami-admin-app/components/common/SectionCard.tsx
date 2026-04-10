@@ -1,4 +1,5 @@
 import { ReactNode } from 'react';
+import { Card } from 'react-native-paper';
 
 import { Box, Text } from '../../theme/theme';
 
@@ -9,9 +10,13 @@ type SectionCardProps = {
 
 export function SectionCard({ title, children }: SectionCardProps) {
   return (
-    <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="sm">
-      <Text variant="cardValue">{title}</Text>
-      {children}
-    </Box>
+    <Card mode="outlined">
+      <Card.Content>
+        <Box gap="sm">
+          <Text variant="cardValue">{title}</Text>
+          {children}
+        </Box>
+      </Card.Content>
+    </Card>
   );
 }

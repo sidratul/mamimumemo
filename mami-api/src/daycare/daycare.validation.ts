@@ -6,7 +6,7 @@ export const daycareApprovalStatusEnum = z.nativeEnum(DaycareApprovalStatus);
 
 export const legalDocumentInput = z.object({
   type: z.string().min(1, "Document type is required"),
-  url: z.string().url("Document URL must be valid"),
+  url: z.string().min(1, "Document file path is required"),
   verified: z.boolean().optional(),
 });
 
@@ -19,6 +19,7 @@ export const registerDaycareOwnerInput = z.object({
 
 export const registerDaycareDataInput = z.object({
   name: z.string().min(1, "Daycare name is required"),
+  logoUrl: z.string().url("Logo URL must be valid").optional().or(z.literal("")),
   description: z.string().optional(),
   address: z.string().min(1, "Address is required"),
   city: z.string().min(1, "City is required"),

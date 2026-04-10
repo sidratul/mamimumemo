@@ -26,6 +26,10 @@ export const daycareMembershipsByDaycareInput = z.object({
   daycareId: objectIdSchema,
 });
 
+export const daycareMembershipsByUserInput = z.object({
+  userId: objectIdSchema,
+});
+
 export const deactivateDaycareMembershipInput = z.object({
   id: objectIdSchema,
 });

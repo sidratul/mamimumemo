@@ -1,5 +1,7 @@
+import { DaycareStatusInput } from '@mami/ui';
+
 import { InputComponentProps } from '../form/form.types';
-import { Select, type SelectOption } from './Select';
+import { type SelectOption } from './Select';
 
 type ApprovalStatusSelectProps = InputComponentProps<string> & {
   disabled?: boolean;
@@ -18,7 +20,7 @@ const APPROVAL_STATUS_OPTIONS = [
 
 export function ApprovalStatusSelect({ value, placeholder, onChange, disabled, options }: ApprovalStatusSelectProps) {
   return (
-    <Select
+    <DaycareStatusInput
       value={value}
       placeholder={placeholder ?? 'Pilih status approval'}
       onChange={onChange}

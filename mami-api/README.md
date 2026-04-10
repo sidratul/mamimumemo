@@ -79,6 +79,21 @@ Endpoint GraphQL default: `http://localhost:8000/graphql`
 - Test file tersedia untuk sebagian besar modul domain dan health check
 - Lihat `TEST_SUMMARY.md` untuk ringkasan cakupan file test yang ada
 
+## Storage Temp Cleanup
+
+Dokumen private saat dipilih di app akan diupload dulu ke prefix temporary `documents/tmp`, lalu dipindahkan ke path final saat submit berhasil.
+
+Untuk membersihkan file temporary yang tidak jadi dipakai:
+
+```bash
+deno task cleanup:tmp-uploads
+```
+
+Env terkait:
+
+- `TMP_UPLOAD_PREFIX`
+- `TMP_UPLOAD_MAX_AGE_HOURS`
+
 ## Dokumen Terkait
 
 - `docs/graphql/README.md` - Index dokumentasi query dan mutation per modul

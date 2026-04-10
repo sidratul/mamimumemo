@@ -5,6 +5,7 @@ import { Pressable, ScrollView } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import type { ComponentProps } from 'react';
 import type { DimensionValue } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { listDaycares, type AdminDaycare } from '../../services/daycare-admin';
 import { Box, Text, useAppTheme } from '../../theme/theme';
@@ -29,7 +30,7 @@ function SummaryCard({
   iconColor: string;
 }) {
   return (
-    <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="xs">
+    <Box backgroundColor="surface" borderRadius="md" borderWidth={1} borderColor="border" padding="lg" gap="xs">
       <Box flexDirection="row" alignItems="center" justifyContent="space-between">
         <Text variant="cardTitle">{title}</Text>
         <MaterialIcons name={icon} size={18} color={iconColor} />
@@ -150,95 +151,96 @@ export function DashboardContainer() {
   );
 
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <Box flex={1} backgroundColor="background" padding="xl" gap="lg" paddingTop="xxl">
-        <Box backgroundColor="primary" borderRadius="lg" padding="lg" gap="sm">
-          <Text style={{ color: '#FFE2D6', fontSize: 13 }}>Admin System</Text>
-          <Text style={{ color: '#FFFFFF', fontSize: 28, fontWeight: '700' }}>Dashboard</Text>
-          <Text style={{ color: '#FFF4EF', fontSize: 15 }}>Pantau antrean approval daycare dan progres review hari ini.</Text>
-        </Box>
-
-        <Box gap="md">
-          <SummaryCard
-            title="Submitted"
-            value={loading ? '...' : String(metrics.submitted)}
-            note="Menunggu mulai direview"
-            icon="mark-email-unread"
-            iconColor={theme.colors.primary}
-          />
-          <SummaryCard
-            title="In Review"
-            value={loading ? '...' : String(metrics.inReview)}
-            note="Sedang diproses admin"
-            icon="fact-check"
-            iconColor="#4DA7DB"
-          />
-          <SummaryCard
-            title="Approved"
-            value={loading ? '...' : String(metrics.approved)}
-            note="Sudah aktif"
-            icon="verified-user"
-            iconColor={theme.colors.success}
-          />
-        </Box>
-
-        <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="md">
-          <Box flexDirection="row" alignItems="center" justifyContent="space-between">
-            <Text variant="cardValue">Approval Chart</Text>
-            <MaterialIcons name="bar-chart" size={20} color={theme.colors.primary} />
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.colors.background }} edges={['top', 'left', 'right']}>
+      <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        <Box flex={1} backgroundColor="background" padding="lg" gap="lg" paddingTop="md">
+          <Box gap="xs">
+            <Text style={{ color: '#24324B', fontSize: 20, fontWeight: '700' }}>Dashboard</Text>
+            <Text color="textSecondary">Pantau antrean approval daycare dan progres review hari ini.</Text>
           </Box>
-          <ChartRow
-            label="Submitted"
-            value={loading ? '...' : String(metrics.submitted)}
-            width={metrics.submittedWidth}
-            color={theme.colors.primary}
-            trackColor="#FFE7DE"
-          />
-          <ChartRow
-            label="In Review"
-            value={loading ? '...' : String(metrics.inReview)}
-            width={metrics.inReviewWidth}
-            color="#4DA7DB"
-            trackColor="#E5F4FD"
-          />
-          <ChartRow
-            label="Approved"
-            value={loading ? '...' : String(metrics.approved)}
-            width={metrics.approvedWidth}
-            color={theme.colors.success}
-            trackColor="#EAF7DD"
-          />
-          <ChartRow
-            label="Needs Revision"
-            value={loading ? '...' : String(metrics.revision)}
-            width={metrics.revisionWidth}
-            color="#F7B500"
-            trackColor="#FFF3CC"
-          />
-        </Box>
 
-        <Box gap="sm">
-          <Text variant="cardValue">Quick Action</Text>
-          <Box flexDirection="row" gap="sm" flexWrap="wrap">
-            <QuickAction
-              icon="schedule"
-              label="Perlu Review"
-              value={loading ? 'Memuat...' : `${metrics.submitted} daycare`}
-              onPress={() => router.push({ pathname: '/(app)/(tabs)/daycares', params: { status: 'SUBMITTED' } })}
+          <Box gap="md">
+            <SummaryCard
+              title="Submitted"
+              value={loading ? '...' : String(metrics.submitted)}
+              note="Menunggu mulai direview"
+              icon="mark-email-unread"
               iconColor={theme.colors.primary}
-              iconBackground="#FFE7DE"
             />
-            <QuickAction
+            <SummaryCard
+              title="In Review"
+              value={loading ? '...' : String(metrics.inReview)}
+              note="Sedang diproses admin"
               icon="fact-check"
-              label="Sedang Direview"
-              value={loading ? 'Memuat...' : `${metrics.inReview} daycare`}
-              onPress={() => router.push({ pathname: '/(app)/(tabs)/daycares', params: { status: 'IN_REVIEW' } })}
-              iconColor="#4DA7DB"
-              iconBackground="#E5F4FD"
+              iconColor="#F5A623"
+            />
+            <SummaryCard
+              title="Approved"
+              value={loading ? '...' : String(metrics.approved)}
+              note="Sudah aktif"
+              icon="verified-user"
+              iconColor={theme.colors.success}
             />
           </Box>
+
+          <Box backgroundColor="surface" borderRadius="md" borderWidth={1} borderColor="border" padding="lg" gap="md">
+            <Box flexDirection="row" alignItems="center" justifyContent="space-between">
+              <Text variant="cardValue">Approval Chart</Text>
+              <MaterialIcons name="bar-chart" size={20} color={theme.colors.primary} />
+            </Box>
+            <ChartRow
+              label="Submitted"
+              value={loading ? '...' : String(metrics.submitted)}
+              width={metrics.submittedWidth}
+              color="#4D96FF"
+              trackColor="#E7F0FF"
+            />
+            <ChartRow
+              label="In Review"
+              value={loading ? '...' : String(metrics.inReview)}
+              width={metrics.inReviewWidth}
+              color="#F5A623"
+              trackColor="#FFF1DB"
+            />
+            <ChartRow
+              label="Approved"
+              value={loading ? '...' : String(metrics.approved)}
+              width={metrics.approvedWidth}
+              color={theme.colors.success}
+              trackColor="#E8F8EA"
+            />
+            <ChartRow
+              label="Needs Revision"
+              value={loading ? '...' : String(metrics.revision)}
+              width={metrics.revisionWidth}
+              color="#8B6DFF"
+              trackColor="#F0EAFF"
+            />
+          </Box>
+
+          <Box gap="sm">
+            <Text variant="cardValue">Quick Action</Text>
+            <Box flexDirection="row" gap="sm" flexWrap="wrap">
+              <QuickAction
+                icon="schedule"
+                label="Perlu Review"
+                value={loading ? 'Memuat...' : `${metrics.submitted} daycare`}
+                onPress={() => router.push({ pathname: '/(app)/(tabs)/daycares', params: { status: 'SUBMITTED' } })}
+                iconColor="#4D96FF"
+                iconBackground="#E7F0FF"
+              />
+              <QuickAction
+                icon="fact-check"
+                label="Sedang Direview"
+                value={loading ? 'Memuat...' : `${metrics.inReview} daycare`}
+                onPress={() => router.push({ pathname: '/(app)/(tabs)/daycares', params: { status: 'IN_REVIEW' } })}
+                iconColor="#F5A623"
+                iconBackground="#FFF1DB"
+              />
+            </Box>
+          </Box>
         </Box>
-      </Box>
-    </ScrollView>
+      </ScrollView>
+    </SafeAreaView>
   );
 }

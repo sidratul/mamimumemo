@@ -24,11 +24,20 @@ query Users(
     email
     phone
     role
+    personas
     createdAt
     updatedAt
   }
 }
 ```
+
+`personas` adalah gabungan identitas akun dan membership aktif user, misalnya:
+
+- `SUPER_ADMIN`
+- `PARENT`
+- `OWNER`
+- `DAYCARE_ADMIN`
+- `DAYCARE_SITTER`
 
 Catatan:
 
@@ -52,6 +61,7 @@ query User($id: ObjectId!) {
     email
     phone
     role
+    personas
     createdAt
     updatedAt
   }
@@ -84,10 +94,15 @@ Contoh variables:
     "email": "owner.baru@example.com",
     "password": "password123",
     "phone": "081200000001",
-    "role": "DAYCARE_OWNER"
+    "role": "SUPER_ADMIN"
   }
 }
 ```
+
+Catatan:
+
+- field `role` sekarang sebaiknya dipakai untuk identitas akun global
+- persona daycare seperti `OWNER`, `DAYCARE_ADMIN`, dan `DAYCARE_SITTER` berasal dari `daycare_memberships`
 
 ### `updateUser`
 

@@ -1,14 +1,17 @@
 import { ScrollView } from 'react-native';
+import { ScreenHeader, ScreenSection } from '@mami/ui';
 
-import { Box, Text } from '../../../theme/theme';
+import { Box } from '../../../theme/theme';
 import { RegisterForm } from './RegisterForm';
 
 export function RegisterContainer() {
   return (
-    <ScrollView style={{ flex: 1, backgroundColor: '#FFF8F4' }} contentContainerStyle={{ padding: 16, gap: 12 }}>
+    <ScrollView style={{ flex: 1, backgroundColor: '#FFF8F4' }} contentContainerStyle={{ paddingBottom: 48, gap: 12 }}>
       <Box gap="md">
-        <Text style={{ fontSize: 28, fontWeight: '700' }}>Daftar</Text>
+        <ScreenHeader title="Daftar" subtitle="Buat akun owner dan daycare dalam satu alur." />
+        <ScreenSection>
         <RegisterForm />
+        </ScreenSection>
       </Box>
     </ScrollView>
   );

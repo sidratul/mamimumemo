@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { getUserRoleLabel as getSharedUserRoleLabel } from '@mami/core';
 
 import { apolloClient } from '../apollo';
 
@@ -9,19 +10,42 @@ export type UserRole =
   | 'DAYCARE_SITTER'
   | 'PARENT';
 
+export type UserPersona =
+  | 'SUPER_ADMIN'
+  | 'PARENT'
+  | 'OWNER'
+  | 'DAYCARE_ADMIN'
+  | 'DAYCARE_SITTER';
+
 export type AdminUser = {
   id: string;
   name: string;
   email: string;
   phone: string;
   role: UserRole;
+  personas: UserPersona[];
   createdAt?: string;
   updatedAt?: string;
 };
 
+export type UserDaycareMembership = {
+  id: string;
+  persona: 'OWNER' | 'ADMIN' | 'SITTER';
+  status: 'ACTIVE' | 'INACTIVE';
+  joinedAt?: string;
+  endedAt?: string;
+  notes?: string;
+  daycare: {
+    id: string;
+    name: string;
+  };
+};
+
 type ListUsersInput = {
-  role?: UserRole | 'ALL';
+  persona?: UserPersona | 'ALL';
   search?: string;
+  page?: number;
+  limit?: number;
 };
 
 type UsersResponse = {
@@ -57,15 +81,41 @@ type DeleteUserResponse = {
   deleteUser: ActionResponse;
 };
 
+type UserDaycareMembershipsResponse = {
+  userDaycareMemberships: Array<{
+    _id: string;
+    persona: 'OWNER' | 'ADMIN' | 'SITTER';
+    status: 'ACTIVE' | 'INACTIVE';
+    joinedAt?: string | null;
+    endedAt?: string | null;
+    notes?: string | null;
+    daycare: {
+      _id: string;
+      name: string;
+    };
+  }>;
+};
+
 type UserApiNode = {
   _id: string;
   name: string;
   email: string;
   phone?: string | null;
   role?: UserRole | null;
+  personas?: UserPersona[] | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
+
+let userDataVersion = 0;
+
+export function getUserDataVersion() {
+  return userDataVersion;
+}
+
+export function invalidateUserData() {
+  userDataVersion += 1;
+}
 
 const USER_FIELDS = gql`
   fragment UserFields on User {
@@ -74,6 +124,7 @@ const USER_FIELDS = gql`
     email
     phone
     role
+    personas
     createdAt
     updatedAt
   }
@@ -139,6 +190,23 @@ const DELETE_USER_MUTATION = gql`
   }
 `;
 
+const USER_DAYCARE_MEMBERSHIPS_QUERY = gql`
+  query UserDaycareMemberships($userId: ObjectId!) {
+    userDaycareMemberships(userId: $userId) {
+      _id
+      persona
+      status
+      joinedAt
+      endedAt
+      notes
+      daycare {
+        _id
+        name
+      }
+    }
+  }
+`;
+
 function mapUser(node: UserApiNode): AdminUser {
   return {
     id: node._id,
@@ -146,17 +214,18 @@ function mapUser(node: UserApiNode): AdminUser {
     email: node.email,
     phone: node.phone ?? '',
     role: node.role ?? 'PARENT',
+    personas: node.personas ?? [],
     createdAt: node.createdAt ?? '',
     updatedAt: node.updatedAt ?? '',
   };
 }
 
-export async function listUsers({ role = 'ALL', search = '' }: ListUsersInput = {}) {
+export async function listUsers({ persona = 'ALL', search = '', page = 1, limit = 20 }: ListUsersInput = {}) {
   const response = await apolloClient.query<UsersResponse>({
     query: LIST_USERS_QUERY,
     variables: {
       filter: {
-        roles: role === 'ALL' ? undefined : [role],
+        personas: persona === 'ALL' ? undefined : [persona],
         search: search.trim() || undefined,
       },
       sort: {
@@ -164,8 +233,8 @@ export async function listUsers({ role = 'ALL', search = '' }: ListUsersInput = 
         sortType: 'DESC',
       },
       pagination: {
-        page: 1,
-        limit: 50,
+        page,
+        limit,
       },
     },
     fetchPolicy: 'network-only',
@@ -174,12 +243,12 @@ export async function listUsers({ role = 'ALL', search = '' }: ListUsersInput = 
   return response.data.users.map(mapUser);
 }
 
-export async function getUserCount({ role = 'ALL', search = '' }: ListUsersInput = {}) {
+export async function getUserCount({ persona = 'ALL', search = '' }: ListUsersInput = {}) {
   const response = await apolloClient.query<UserCountResponse>({
     query: USER_COUNT_QUERY,
     variables: {
       filter: {
-        roles: role === 'ALL' ? undefined : [role],
+        personas: persona === 'ALL' ? undefined : [persona],
         search: search.trim() || undefined,
       },
     },
@@ -219,6 +288,7 @@ export async function createUser(input: {
     throw new Error('Gagal membuat user.');
   }
 
+  invalidateUserData();
   return response.data.createUser;
 }
 
@@ -240,6 +310,7 @@ export async function updateUser(
     throw new Error('Gagal memperbarui user.');
   }
 
+  invalidateUserData();
   return response.data.updateUser;
 }
 
@@ -259,6 +330,7 @@ export async function updateUserPassword(
     throw new Error('Gagal memperbarui password.');
   }
 
+  invalidateUserData();
   return response.data.updateUserPassword;
 }
 
@@ -272,22 +344,31 @@ export async function deleteUser(id: string) {
     throw new Error('Gagal menghapus user.');
   }
 
+  invalidateUserData();
   return response.data.deleteUser;
 }
 
+export async function getUserDaycareMemberships(userId: string): Promise<UserDaycareMembership[]> {
+  const response = await apolloClient.query<UserDaycareMembershipsResponse>({
+    query: USER_DAYCARE_MEMBERSHIPS_QUERY,
+    variables: { userId },
+    fetchPolicy: 'network-only',
+  });
+
+  return response.data.userDaycareMemberships.map((membership) => ({
+    id: membership._id,
+    persona: membership.persona,
+    status: membership.status,
+    joinedAt: membership.joinedAt ?? '',
+    endedAt: membership.endedAt ?? '',
+    notes: membership.notes ?? '',
+    daycare: {
+      id: membership.daycare._id,
+      name: membership.daycare.name,
+    },
+  }));
+}
+
 export function getUserRoleLabel(role: UserRole) {
-  switch (role) {
-    case 'SUPER_ADMIN':
-      return 'Super Admin';
-    case 'DAYCARE_OWNER':
-      return 'Daycare Owner';
-    case 'DAYCARE_ADMIN':
-      return 'Daycare Admin';
-    case 'DAYCARE_SITTER':
-      return 'Daycare Sitter';
-    case 'PARENT':
-      return 'Parent';
-    default:
-      return role;
-  }
+  return getSharedUserRoleLabel(role);
 }

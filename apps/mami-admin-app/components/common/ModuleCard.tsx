@@ -1,4 +1,4 @@
-import { Pressable } from 'react-native';
+import { Card } from 'react-native-paper';
 
 import { Box, Text } from '../../theme/theme';
 
@@ -10,11 +10,13 @@ type ModuleCardProps = {
 
 export function ModuleCard({ title, description, onPress }: ModuleCardProps) {
   return (
-    <Pressable onPress={onPress}>
-      <Box backgroundColor="surface" borderWidth={1} borderColor="border" borderRadius="lg" padding="lg" gap="xs">
-        <Text variant="cardValue">{title}</Text>
-        <Text color="textSecondary">{description}</Text>
-      </Box>
-    </Pressable>
+    <Card mode="outlined" onPress={onPress} style={{ borderRadius: 14 }}>
+      <Card.Content>
+        <Box gap="xs">
+          <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>{title}</Text>
+          <Text color="textSecondary">{description}</Text>
+        </Box>
+      </Card.Content>
+    </Card>
   );
 }

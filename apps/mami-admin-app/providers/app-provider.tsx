@@ -1,6 +1,8 @@
 import { ThemeProvider } from '@shopify/restyle';
 import { ApolloProvider } from '@apollo/client/react';
 import { PaperProvider } from 'react-native-paper';
+import { BottomSheetModalProvider } from '@mami/ui';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { SessionProvider } from './session-provider';
 import { apolloClient } from '../services/apollo';
@@ -13,12 +15,16 @@ type AppProviderProps = {
 
 export function AppProvider({ children }: AppProviderProps) {
   return (
-    <SessionProvider>
-      <ApolloProvider client={apolloClient}>
-        <ThemeProvider theme={theme}>
-          <PaperProvider theme={paperTheme}>{children}</PaperProvider>
-        </ThemeProvider>
-      </ApolloProvider>
-    </SessionProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SessionProvider>
+        <ApolloProvider client={apolloClient}>
+          <ThemeProvider theme={theme}>
+            <PaperProvider theme={paperTheme}>
+              <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+            </PaperProvider>
+          </ThemeProvider>
+        </ApolloProvider>
+      </SessionProvider>
+    </GestureHandlerRootView>
   );
 }

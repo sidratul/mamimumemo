@@ -7,10 +7,12 @@ import { UserRole } from "#shared/enums/enum.ts";
 import { ObjectId } from "#shared/types/objectid.type.ts";
 import UsersService from "@/users/users.service.ts";
 import DaycareMembershipsService from "@/daycare_memberships/daycare_memberships.service.ts";
+import UploadsService from "@/uploads/uploads.service.ts";
 import { DaycareApprovalStatus } from "./daycare.enum.ts";
 import { DaycareDocShape, DaycareFilter, DaycareQueryOptions } from "./daycare.d.ts";
 import { DaycareRepository } from "./daycare.repository.ts";
 import { ProjectionType } from "mongoose";
+import type { ClientSession } from "mongoose";
 import {
   purgeDaycareInput,
   registerDaycareInput,
@@ -21,6 +23,7 @@ import {
 const repository = new DaycareRepository();
 const usersService = new UsersService();
 const daycareMembershipsService = new DaycareMembershipsService();
+const uploadsService = new UploadsService();
 
 const REVIEW_REQUIRED_STATUSES = [
   DaycareApprovalStatus.NEEDS_REVISION,
@@ -37,11 +40,14 @@ const INACTIVE_STATUSES = [
 const ADMIN_TRANSITIONS: Partial<Record<DaycareApprovalStatus, DaycareApprovalStatus[]>> = {
   [DaycareApprovalStatus.SUBMITTED]: [DaycareApprovalStatus.IN_REVIEW],
   [DaycareApprovalStatus.IN_REVIEW]: [
+    DaycareApprovalStatus.SUBMITTED,
     DaycareApprovalStatus.APPROVED,
     DaycareApprovalStatus.NEEDS_REVISION,
     DaycareApprovalStatus.REJECTED,
   ],
-  [DaycareApprovalStatus.APPROVED]: [DaycareApprovalStatus.SUSPENDED],
+  [DaycareApprovalStatus.NEEDS_REVISION]: [DaycareApprovalStatus.IN_REVIEW],
+  [DaycareApprovalStatus.APPROVED]: [DaycareApprovalStatus.IN_REVIEW, DaycareApprovalStatus.SUSPENDED],
+  [DaycareApprovalStatus.REJECTED]: [DaycareApprovalStatus.IN_REVIEW],
   [DaycareApprovalStatus.SUSPENDED]: [DaycareApprovalStatus.APPROVED],
 };
 
@@ -50,7 +56,8 @@ export class DaycareService {
     options: DaycareQueryOptions,
     projection?: ProjectionType<DaycareDocShape>,
   ) {
-    return await repository.list(options, projection);
+    const daycares = await repository.list(options, projection);
+    return await Promise.all(daycares.map((daycare) => this.resolveDaycareDocumentUrls(daycare)));
   }
 
   async countDaycares(
@@ -64,7 +71,7 @@ export class DaycareService {
     if (!daycare) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
-    return daycare;
+    return await this.resolveDaycareDocumentUrls(daycare);
   }
 
   async getMyDaycare(context: AppContext) {
@@ -83,11 +90,11 @@ export class DaycareService {
       return null;
     }
 
-    return daycare;
+    return await this.resolveDaycareDocumentUrls(daycare);
   }
 
   async registerDaycare(input: typeof registerDaycareInput._type, context: AppContext) {
-    return await runInTransaction(context, async (session) => {
+    return await runInTransaction(context, async (session?: ClientSession) => {
       const owner = await usersService.createUser({
         name: input.owner.name,
         email: input.owner.email,
@@ -98,6 +105,7 @@ export class DaycareService {
 
       const daycare = await repository.create({
         name: input.daycare.name,
+        logoUrl: input.daycare.logoUrl?.trim() || "",
         description: input.daycare.description,
         address: input.daycare.address,
         city: input.daycare.city,
@@ -156,7 +164,7 @@ export class DaycareService {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
 
-    daycare.set("legalDocuments", this.mapLegalDocuments(input.legalDocuments));
+    daycare.set("legalDocuments", await this.mapPrivateLegalDocuments(input.legalDocuments));
 
     await daycare.save();
 
@@ -296,8 +304,48 @@ export class DaycareService {
   ) {
     return (documents ?? []).map((document) => ({
       type: document.type,
-      url: document.url,
+      url: uploadsService.normalizeStoragePath(document.url, "private"),
       verified: document.verified ?? false,
     }));
+  }
+
+  private async mapPrivateLegalDocuments(
+    documents?: typeof updateDaycareDocumentsInput._type["legalDocuments"],
+  ) {
+    return await Promise.all(
+      (documents ?? []).map(async (document) => ({
+        type: document.type,
+        url: await uploadsService.finalizePrivatePath(document.url, "documents"),
+        verified: document.verified ?? false,
+      })),
+    );
+  }
+
+  private async resolveDaycareDocumentUrls(daycare: DaycareDocShape & { _id?: ObjectId }) {
+    if (!daycare.legalDocuments?.length) {
+      return daycare;
+    }
+
+    const legalDocuments = await Promise.all(
+      daycare.legalDocuments.map(async (document) => {
+        const normalizedPath = uploadsService.normalizeStoragePath(document.url, "private");
+        if (!normalizedPath || normalizedPath.startsWith("http")) {
+          return document;
+        }
+
+        return {
+          ...document,
+          url: await uploadsService.createSignedUrl(
+            Deno.env.get("SUPABASE_PRIVATE_BUCKET") || "daycare_private",
+            normalizedPath,
+          ),
+        };
+      }),
+    );
+
+    return {
+      ...daycare,
+      legalDocuments,
+    };
   }
 }

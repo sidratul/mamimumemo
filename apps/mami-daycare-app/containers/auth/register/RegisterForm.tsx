@@ -3,8 +3,8 @@ import { Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { DynamicForm, NumberField, PasswordField, TextAreaField, TextField, type FormFieldProps } from '@mami/ui';
+import { daycareRegistrationDaycareStepSchema, daycareRegistrationOwnerStepSchema } from '@mami/core';
 import { HelperText } from 'react-native-paper';
-import * as yup from 'yup';
 
 import { useSession } from '../../../providers/session-provider';
 import { submitDaycareRegistration } from '../../../services/registration';
@@ -74,7 +74,6 @@ const daycareFields: FormFieldProps<DaycareStepData> = {
   daycareName: {
     label: 'Nama Daycare',
     input: TextField,
-    validation: yup.string().required('Nama daycare wajib diisi'),
     props: {
       placeholder: 'Contoh: Mami Daycare Kemang',
       borderRadius: 14,
@@ -84,7 +83,6 @@ const daycareFields: FormFieldProps<DaycareStepData> = {
   city: {
     label: 'Kota',
     input: TextField,
-    validation: yup.string().required('Kota wajib diisi'),
     props: {
       placeholder: 'Contoh: Jakarta Selatan',
       borderRadius: 14,
@@ -94,7 +92,6 @@ const daycareFields: FormFieldProps<DaycareStepData> = {
   address: {
     label: 'Alamat Daycare',
     input: TextAreaField,
-    validation: yup.string().required('Alamat wajib diisi'),
     props: {
       placeholder: 'Alamat lengkap daycare',
       borderRadius: 14,
@@ -105,7 +102,6 @@ const daycareFields: FormFieldProps<DaycareStepData> = {
   description: {
     label: 'Deskripsi Singkat',
     input: TextAreaField,
-    validation: yup.string().required('Deskripsi wajib diisi').min(10, 'Deskripsi minimal 10 karakter'),
     props: {
       placeholder: 'Deskripsi operasional daycare, jam layanan, kapasitas, dll.',
       borderRadius: 14,
@@ -119,7 +115,6 @@ const ownerFields: FormFieldProps<OwnerStepData> = {
   ownerName: {
     label: 'Nama Owner',
     input: TextField,
-    validation: yup.string().required('Nama owner wajib diisi'),
     props: {
       placeholder: 'Contoh: Nadia Putri',
       borderRadius: 14,
@@ -129,7 +124,6 @@ const ownerFields: FormFieldProps<OwnerStepData> = {
   ownerEmail: {
     label: 'Email Owner',
     input: TextField,
-    validation: yup.string().required('Email wajib diisi').email('Format email tidak valid'),
     props: {
       placeholder: 'owner@daycare.id',
       keyboardType: 'email-address',
@@ -141,7 +135,6 @@ const ownerFields: FormFieldProps<OwnerStepData> = {
   ownerPhone: {
     label: 'Nomor Telepon Owner',
     input: NumberField,
-    validation: yup.string().required('Nomor telepon wajib diisi'),
     props: {
       placeholder: '08xxxxxxxxxx',
       borderRadius: 14,
@@ -151,7 +144,6 @@ const ownerFields: FormFieldProps<OwnerStepData> = {
   password: {
     label: 'Password Akun',
     input: PasswordField,
-    validation: yup.string().required('Password wajib diisi').min(6, 'Password minimal 6 karakter'),
     props: {
       placeholder: 'Minimal 6 karakter',
       borderRadius: 14,
@@ -233,6 +225,7 @@ export function RegisterForm() {
               address: values.address,
               description: values.description,
             }}
+            schema={daycareRegistrationDaycareStepSchema}
             submitLabel="Lanjut"
             onSubmit={handleNextStep}
           />
@@ -255,6 +248,7 @@ export function RegisterForm() {
               ownerPhone: values.ownerPhone,
               password: values.password,
             }}
+            schema={daycareRegistrationOwnerStepSchema}
             submitLabel={isSubmitting ? 'Mengirim...' : 'Kirim'}
             loading={isSubmitting}
             onSubmit={onSubmit}

@@ -1,5 +1,6 @@
 import { KeyboardTypeOptions } from 'react-native';
 import { TextInput as PaperTextInput } from 'react-native-paper';
+import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 
 export type SharedTextInputProps = {
   value?: string;
@@ -47,6 +48,7 @@ export function TextInput({
       onChangeText={onChangeText}
       textColor={textColor}
       style={{ backgroundColor }}
+      render={(inputProps) => <BottomSheetTextInput {...inputProps} />}
       right={right as any}
     />
   );

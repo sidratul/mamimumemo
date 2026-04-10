@@ -1,18 +1,25 @@
 import { ReactNode } from 'react';
-import { ScrollView } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { Box } from '../../theme/theme';
 
 type ScreenContainerProps = {
   children: ReactNode;
+  floatingAction?: ReactNode;
 };
 
-export function ScreenContainer({ children }: ScreenContainerProps) {
+export function ScreenContainer({ children, floatingAction }: ScreenContainerProps) {
   return (
-    <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
-      <Box flex={1} backgroundColor="background" padding="xl" paddingTop="xxl" gap="lg">
-        {children}
-      </Box>
-    </ScrollView>
+    <View style={{ flex: 1, backgroundColor: '#F7F9FC' }}>
+      <ScrollView
+        style={{ flex: 1 }}
+        contentContainerStyle={{ flexGrow: 1, paddingBottom: 120 }}
+        showsVerticalScrollIndicator={false}>
+        <Box flex={1} backgroundColor="background" gap="lg">
+          {children}
+        </Box>
+      </ScrollView>
+      {floatingAction ? <View style={{ position: 'absolute', right: 24, bottom: 32 }}>{floatingAction}</View> : null}
+    </View>
   );
 }

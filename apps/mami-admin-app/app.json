@@ -15,7 +15,7 @@
     "android": {
       "package": "com.mami.adminapp",
       "adaptiveIcon": {
-        "backgroundColor": "#E6F4FE",
+          "backgroundColor": "#F7F9FC",
           "foregroundImage": "./assets/images/logo-admin-icon.png",
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
@@ -36,9 +36,9 @@
           "image": "./assets/images/logo-admin.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff",
+          "backgroundColor": "#F7F9FC",
           "dark": {
-            "backgroundColor": "#000000"
+            "backgroundColor": "#24324B"
           }
         }
       ]

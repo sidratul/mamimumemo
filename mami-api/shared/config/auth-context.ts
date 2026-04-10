@@ -21,11 +21,7 @@ function mapMembershipPersonaToUserRole(persona: DaycareMembershipPersona): User
   }
 }
 
-/**
- * Creates the application context for each GraphQL request with authentication.
- * This function handles JWT verification and user retrieval.
- */
-export async function createAuthContext({ request }: YogaInitialContext) {
+export async function getAuthenticatedUserFromRequest(request: Request) {
   const token = request.headers.get("authorization")?.replace("Bearer ", "");
   let user: AuthenticatedUser | undefined;
 
@@ -108,6 +104,14 @@ export async function createAuthContext({ request }: YogaInitialContext) {
     }
   }
 
-  // Kembalikan user dengan tipe yang sesuai
+  return user;
+}
+
+/**
+ * Creates the application context for each GraphQL request with authentication.
+ * This function handles JWT verification and user retrieval.
+ */
+export async function createAuthContext({ request }: YogaInitialContext) {
+  const user = await getAuthenticatedUserFromRequest(request);
   return { user };
 }

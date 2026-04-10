@@ -39,6 +39,7 @@ export const typeDefs = `
     _id: ObjectId!
     id: ObjectId!
     name: String!
+    logoUrl: String
     description: String
     address: String!
     city: String!
@@ -67,6 +68,7 @@ export const typeDefs = `
 
   input RegisterDaycareDataInput {
     name: String!
+    logoUrl: String
     description: String
     address: String!
     city: String!

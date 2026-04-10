@@ -19,12 +19,18 @@ Source utama:
 
 `Daycare` utama yang dipakai query sekarang berisi:
 
-- `_id`, `id`, `name`, `description`, `address`, `city`
+- `_id`, `id`, `name`, `logoUrl`, `description`, `address`, `city`
 - `owner: User!`
 - `legalDocuments`
 - `submittedAt`, `approvedAt`, `isActive`
 - `approval { status, note, reviewedBy, reviewedAt, history }`
 - `createdAt`, `updatedAt`
+
+Catatan penyimpanan file:
+
+- `logoUrl` disimpan sebagai URL public
+- `legalDocuments[].url` disimpan sebagai path private di storage
+- saat query dibaca, backend mengubah path private dokumen menjadi signed URL sementara
 
 ## Queries
 
@@ -42,6 +48,7 @@ query Daycares(
     _id
     id
     name
+    logoUrl
     owner {
       _id
       name
@@ -94,6 +101,7 @@ Contoh response:
         "id": "67f31d8b2d62a66531f0a001",
         "_id": "67f31d8b2d62a66531f0a001",
         "name": "Mami Daycare Kemang",
+        "logoUrl": "https://example.com/daycare-logo.png",
         "city": "Jakarta Selatan",
         "address": "Jl. Kemang No. 1",
         "submittedAt": "2026-04-07T02:10:00.000Z",
@@ -151,6 +159,7 @@ query Daycare($id: ObjectId!) {
     _id
     id
     name
+    logoUrl
     description
     address
     city
@@ -204,6 +213,7 @@ query MyDaycare {
     _id
     id
     name
+    logoUrl
     city
     submittedAt
     approvedAt
@@ -252,6 +262,7 @@ Contoh variables:
     },
     "daycare": {
       "name": "Mami Daycare Kemang",
+      "logoUrl": "https://example.com/daycare-logo.png",
       "description": "Daycare keluarga kecil",
       "address": "Jl. Kemang No. 1",
       "city": "Jakarta Selatan",
@@ -284,6 +295,7 @@ Catatan:
 - membuat owner baru dengan role `DAYCARE_OWNER`
 - membuat daycare baru dengan `approval.status = SUBMITTED`
 - `legalDocuments` optional
+- `logoUrl` optional
 
 ### `updateDaycareDocuments`
 

@@ -1,6 +1,6 @@
-import * as yup from 'yup';
 import { useState } from 'react';
 import { HelperText } from 'react-native-paper';
+import { z } from 'zod';
 
 import { Box } from '../../../theme/theme';
 import { DynamicForm } from '../../../components/form/Form';
@@ -14,11 +14,15 @@ type LoginData = {
   password: string;
 };
 
+const loginSchema = z.object({
+  email: z.string().min(1, 'Email wajib diisi').email('Format email tidak valid'),
+  password: z.string().min(6, 'Password minimal 6 karakter'),
+});
+
 const fields: FormFieldProps<LoginData> = {
   email: {
     label: 'Email',
     input: TextField,
-    validation: yup.string().required('Email wajib diisi').email('Format email tidak valid'),
     props: {
       placeholder: 'admin@daycare.id',
       keyboardType: 'email-address',
@@ -27,7 +31,6 @@ const fields: FormFieldProps<LoginData> = {
   password: {
     label: 'Password',
     input: PasswordField,
-    validation: yup.string().required('Password wajib diisi').min(6, 'Password minimal 6 karakter'),
     props: {
       placeholder: 'Minimal 6 karakter',
     },
@@ -58,6 +61,7 @@ export function LoginForm() {
       <DynamicForm<LoginData>
         fields={fields}
         defaultValue={{ email: '', password: '' }}
+        schema={loginSchema}
         submitLabel="Masuk"
         loading={submitting}
         onSubmit={onSubmit}

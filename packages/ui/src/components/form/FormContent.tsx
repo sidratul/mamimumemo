@@ -4,7 +4,7 @@ import { FormInput } from './FormInput';
 import { useFormContext } from './form.types';
 
 export function FormContent<T extends Record<string, unknown>>() {
-  const { fields, submitLabel, loading, formik, readOnly, inputsContainerStyle } = useFormContext<T>();
+  const { fields, submitLabel, loading, formik, readOnly, showSubmitButton = true, inputsContainerStyle } = useFormContext<T>();
   const values = formik.values;
 
   const visibleFieldKeys = Object.keys(fields).filter((key) => {
@@ -21,7 +21,7 @@ export function FormContent<T extends Record<string, unknown>>() {
         <FormInput<T> key={`form-field-${key}`} fieldKey={key} />
       ))}
 
-      {!readOnly ? (
+      {!readOnly && showSubmitButton ? (
         <Pressable disabled={loading} onPress={() => void formik.submitForm()}>
           <View style={[styles.button, loading ? styles.buttonDisabled : null]}>
             <Text style={styles.buttonText}>{loading ? 'Memproses...' : submitLabel ?? 'Simpan'}</Text>

@@ -1,5 +1,5 @@
-import { DaycareQueueContainer } from '../../../containers/daycare-admin';
+import { DaycareListContainer } from '../../../containers/daycare';
 
 export default function DaycareQueueScreen() {
-  return <DaycareQueueContainer />;
+  return <DaycareListContainer />;
 }

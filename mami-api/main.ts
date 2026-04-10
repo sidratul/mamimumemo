@@ -44,8 +44,9 @@ import { typeDefs as DaycareMembershipTypeDefs } from "@/daycare_memberships/day
 import { scalarResolvers } from "#shared/scalar/scalar.resolver.ts";
 import { sharedTypeDefs, baseTypeDefs } from "#shared/types/shared.type.ts";
 import { connectToDatabase } from "#shared/database/mongo.ts";
-import { createAuthContext } from "#shared/config/auth-context.ts";
+import { createAuthContext, getAuthenticatedUserFromRequest } from "#shared/config/auth-context.ts";
 import { AppContext } from "#shared/config/context.ts";
+import UploadsService from "@/uploads/uploads.service.ts";
 
 // Connect to the database
 await connectToDatabase();
@@ -111,9 +112,52 @@ const yoga = createYoga({
 });
 
 const port = Number(Deno.env.get("PORT") ?? 8000);
+const uploadsService = new UploadsService();
 
 Deno.serve({
-  handler: yoga,
+  handler: async (request) => {
+    const url = new URL(request.url);
+
+    if (url.pathname === "/uploads" && request.method === "POST") {
+      const user = await getAuthenticatedUserFromRequest(request);
+      if (!user) {
+        return new Response(JSON.stringify({ message: "Authentication required." }), {
+          status: 401,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      const formData = await request.formData();
+      const file = formData.get("file");
+      const folder = String(formData.get("folder") || "").trim();
+      const filename = String(formData.get("filename") || "").trim() || undefined;
+      const visibilityValue = String(formData.get("visibility") || "public").trim();
+      const visibility = visibilityValue === "private" ? "private" : "public";
+
+      if (!(file instanceof File) || !folder) {
+        return new Response(JSON.stringify({ message: "file dan folder wajib diisi." }), {
+          status: 400,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+
+      try {
+        const uploaded = await uploadsService.uploadFile({ file, folder, filename, visibility });
+        return new Response(JSON.stringify(uploaded), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : "Upload gagal.";
+        return new Response(JSON.stringify({ message }), {
+          status: 500,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
+    }
+
+    return yoga.fetch(request);
+  },
   port,
   onListen({ hostname, port }) {
     console.log(`Listening on http://${hostname}:${port}${yoga.graphqlEndpoint}`);

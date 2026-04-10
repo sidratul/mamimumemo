@@ -3,9 +3,13 @@ import { Select } from './Select';
 
 type RoleSelectProps = InputComponentProps<string> & {
   disabled?: boolean;
+  options?: Array<{
+    label: string;
+    value: string;
+  }>;
 };
 
-const ROLE_OPTIONS = [
+export const ROLE_OPTIONS = [
   { label: 'Super Admin', value: 'SUPER_ADMIN' },
   { label: 'Daycare Owner', value: 'DAYCARE_OWNER' },
   { label: 'Daycare Admin', value: 'DAYCARE_ADMIN' },
@@ -13,14 +17,19 @@ const ROLE_OPTIONS = [
   { label: 'Parent', value: 'PARENT' },
 ];
 
-export function RoleSelect({ value, placeholder, onChange, disabled }: RoleSelectProps) {
+export const ADMIN_MANAGED_ROLE_OPTIONS = [
+  { label: 'Super Admin', value: 'SUPER_ADMIN' },
+  { label: 'Daycare Admin', value: 'DAYCARE_ADMIN' },
+];
+
+export function RoleSelect({ value, placeholder, onChange, disabled, options }: RoleSelectProps) {
   return (
     <Select
       value={value}
       placeholder={placeholder ?? 'Pilih role'}
       onChange={onChange}
       disabled={disabled}
-      options={ROLE_OPTIONS}
+      options={options ?? ROLE_OPTIONS}
     />
   );
 }

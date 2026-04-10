@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
 import { DynamicForm, PasswordField, TextField, type FormFieldProps } from '@mami/ui';
+import { loginSchema } from '@mami/core';
 import { HelperText } from 'react-native-paper';
-import * as yup from 'yup';
 
 import { useSession } from '../../../providers/session-provider';
 import { signInDaycareOwner } from '../../../services/registration';
@@ -22,7 +22,6 @@ const fields: FormFieldProps<LoginData> = {
   email: {
     label: 'Email',
     input: TextField,
-    validation: yup.string().required('Email wajib diisi').email('Format email tidak valid'),
     props: {
       placeholder: 'owner@daycare.id',
       keyboardType: 'email-address',
@@ -34,7 +33,6 @@ const fields: FormFieldProps<LoginData> = {
   password: {
     label: 'Password',
     input: PasswordField,
-    validation: yup.string().required('Password wajib diisi'),
     props: {
       placeholder: 'Masukkan password',
       borderRadius: 14,
@@ -73,6 +71,7 @@ export function LoginForm() {
       <DynamicForm<LoginData>
         fields={fields}
         defaultValue={initialValues}
+        schema={loginSchema}
         submitLabel="Masuk"
         loading={isSubmitting}
         onSubmit={onSubmit}

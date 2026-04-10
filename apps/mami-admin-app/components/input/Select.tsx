@@ -1,13 +1,9 @@
-import { useMemo, useState } from 'react';
-import { Pressable } from 'react-native';
-import { Menu, TextInput } from 'react-native-paper';
+import { SelectInput as SharedSelectInput, type SelectOption as SharedSelectOption } from '@mami/ui';
 
 import { InputComponentProps } from '../form/form.types';
+import { useSharedInputProps } from './shared';
 
-export type SelectOption = {
-  label: string;
-  value: string;
-};
+export type SelectOption = SharedSelectOption;
 
 type SelectProps = InputComponentProps<string> & {
   options?: SelectOption[];
@@ -15,40 +11,18 @@ type SelectProps = InputComponentProps<string> & {
 };
 
 export function Select({ value, placeholder, onChange, options = [], disabled }: SelectProps) {
-  const [visible, setVisible] = useState(false);
-
-  const selectedLabel = useMemo(() => {
-    const selectedOption = options.find((option) => option.value === value);
-    return selectedOption?.label ?? '';
-  }, [options, value]);
+  const inputProps = useSharedInputProps();
 
   return (
-    <Menu
-      visible={visible}
-      onDismiss={() => setVisible(false)}
-      anchor={
-        <Pressable disabled={disabled} onPress={() => setVisible(true)}>
-          <TextInput
-            mode="outlined"
-            value={selectedLabel}
-            placeholder={placeholder}
-            editable={false}
-            pointerEvents="none"
-            disabled={disabled}
-            right={<TextInput.Icon icon="chevron-down" />}
-          />
-        </Pressable>
-      }>
-      {options.map((option) => (
-        <Menu.Item
-          key={option.value}
-          title={option.label}
-          onPress={() => {
-            onChange(option.value);
-            setVisible(false);
-          }}
-        />
-      ))}
-    </Menu>
+    <SharedSelectInput
+      value={value}
+      placeholder={placeholder}
+      onChange={onChange}
+      disabled={disabled}
+      options={options}
+      textColor={inputProps.textColor}
+      backgroundColor={inputProps.backgroundColor}
+      borderRadius={inputProps.borderRadius}
+    />
   );
 }

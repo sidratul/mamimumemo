@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable } from 'react-native';
 import { Redirect, router } from 'expo-router';
+import { Button } from 'react-native-paper';
+import { ScreenHeader, ScreenSection } from '@mami/ui';
+import { formatDateTimeId } from '@mami/core';
 
 import { useSession } from '../../../providers/session-provider';
 import { getMyDaycareRegistration, type DaycareRegistrationStatus } from '../../../services/registration';
@@ -58,13 +60,7 @@ export function RegistrationStatusContainer() {
       return 'Belum ada tanggal submit';
     }
 
-    return new Date(status.submittedAt).toLocaleString('id-ID', {
-      day: '2-digit',
-      month: 'short',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+    return formatDateTimeId(status.submittedAt);
   }, [status?.submittedAt]);
 
   if (isLoading) {
@@ -79,26 +75,24 @@ export function RegistrationStatusContainer() {
 
   return (
     <Box flex={1} backgroundColor="background" padding="lg" paddingTop="xl" gap="md">
-      <Box gap="xs">
-        <Text style={{ fontSize: 28, fontWeight: '700' }}>Status</Text>
-      </Box>
+      <ScreenHeader title="Status" subtitle="Pantau proses review daycare kamu." />
 
       {loading ? (
-        <Box backgroundColor="surface" borderRadius="xl" borderWidth={1} borderColor="border" padding="lg" gap="xs">
+        <ScreenSection gap={8}>
           <Text style={{ fontWeight: '700' }}>Memuat...</Text>
-        </Box>
+        </ScreenSection>
       ) : null}
 
       {!loading && error ? (
-        <Box backgroundColor="surface" borderRadius="xl" borderWidth={1} borderColor="border" padding="lg" gap="xs">
+        <ScreenSection gap={8}>
           <Text color="danger" style={{ fontWeight: '700' }}>Status belum bisa dimuat</Text>
           <Text color="textSecondary">{error}</Text>
-        </Box>
+        </ScreenSection>
       ) : null}
 
       {!loading && !error && status ? (
         <>
-          <Box backgroundColor="surface" borderRadius="xl" borderWidth={1} borderColor="border" padding="lg" gap="md">
+          <ScreenSection>
             <Box gap="xs">
               <Text variant="title">{status.name}</Text>
               <Text variant="subtitle">{status.city}</Text>
@@ -121,30 +115,30 @@ export function RegistrationStatusContainer() {
               <Text color="textSecondary">Catatan</Text>
               <Text>{status.approvalNote || 'Belum ada catatan.'}</Text>
             </Box>
-          </Box>
+          </ScreenSection>
 
           {status.approvalStatus === 'APPROVED' ? (
-            <Pressable onPress={() => void router.push('/(daycare)/operations')}>
-              <Box backgroundColor="primary" borderRadius="lg" padding="lg" alignItems="center">
-                <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>Buka Operasional</Text>
-              </Box>
-            </Pressable>
+            <Box paddingHorizontal="xl">
+              <Button mode="contained" onPress={() => void router.push('/(daycare)/operations')}>
+                Buka Operasional
+              </Button>
+            </Box>
           ) : null}
         </>
       ) : null}
 
       {!loading && !error && !status ? (
-        <Box backgroundColor="surface" borderRadius="xl" borderWidth={1} borderColor="border" padding="lg" gap="xs">
+        <ScreenSection gap={8}>
           <Text style={{ fontSize: 20, fontWeight: '700' }}>Belum ada daycare</Text>
           <Text color="textSecondary">Data daycare belum ditemukan.</Text>
-        </Box>
+        </ScreenSection>
       ) : null}
 
-      <Pressable onPress={() => void signOut()}>
-        <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" alignItems="center">
-          <Text color="primary" style={{ fontWeight: '700' }}>Keluar</Text>
-        </Box>
-      </Pressable>
+      <Box paddingHorizontal="xl">
+        <Button mode="outlined" onPress={() => void signOut()}>
+          Keluar
+        </Button>
+      </Box>
     </Box>
   );
 }

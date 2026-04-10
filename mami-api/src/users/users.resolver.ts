@@ -43,6 +43,11 @@ export const resolvers = {
       return usersService.getUser(id, context, getMongoProjection(info));
     },
   },
+  User: {
+    personas: async (user: { _id: ObjectId; role?: string | null }) => {
+      return await usersService.getUserPersonas(user._id, user.role as never);
+    },
+  },
   Mutation: {
     createUser: (_: unknown, { input }: { input: typeof createUserInput._type }, context: AppContext) => {
       createUserInput.parse(input);

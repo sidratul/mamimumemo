@@ -45,6 +45,7 @@ export const typeDefs = `
 
   extend type Query {
     daycareMemberships(daycareId: ObjectId!): [DaycareMembership!]!
+    userDaycareMemberships(userId: ObjectId!): [DaycareMembership!]!
   }
 
   extend type Mutation {

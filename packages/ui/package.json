@@ -7,5 +7,9 @@
   "types": "src/index.ts",
   "scripts": {
     "build": "echo \"@mami/ui uses source exports (no build step yet).\""
+  },
+  "dependencies": {
+    "@gorhom/bottom-sheet": "^5.2.6",
+    "zod": "^4.3.6"
   }
 }

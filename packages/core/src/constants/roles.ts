@@ -8,6 +8,18 @@ export const userRoles = {
 
 export type UserRole = (typeof userRoles)[keyof typeof userRoles];
 
+export const userRoleLabelMap: Record<UserRole, string> = {
+  SUPER_ADMIN: 'Super Admin',
+  DAYCARE_OWNER: 'Daycare Owner',
+  DAYCARE_ADMIN: 'Daycare Admin',
+  DAYCARE_SITTER: 'Daycare Sitter',
+  PARENT: 'Parent',
+};
+
+export function getUserRoleLabel(role: UserRole) {
+  return userRoleLabelMap[role];
+}
+
 export const appRoleMap = {
   admin: [userRoles.SUPER_ADMIN],
   owner: [userRoles.DAYCARE_OWNER],

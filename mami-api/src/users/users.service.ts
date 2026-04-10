@@ -6,9 +6,14 @@ import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { RoleType, UserRole } from "#shared/enums/enum.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
 import { ObjectId } from "#shared/types/objectid.type.ts";
-import { User, UserQueryOptions } from "./users.d.ts";
+import { User, UserPersona, UserQueryOptions } from "./users.d.ts";
 import usersRepository from "./users.repository.ts";
+import { DaycareMembershipsRepository } from "@/daycare_memberships/daycare_memberships.repository.ts";
+import { DaycareMembershipPersona } from "@/daycare_memberships/daycare_memberships.enum.ts";
+import { mapMembershipPersonaToUserPersona } from "./users.persona.ts";
 import { createUserInput, updateUserInput, updateUserPasswordInput } from "./users.validation.ts";
+
+const daycareMembershipsRepository = new DaycareMembershipsRepository();
 
 export class UsersService {
   async createUser(
@@ -39,12 +44,13 @@ export class UsersService {
 
   async listUsers(options: UserQueryOptions, context: AppContext, projection?: ProjectionType<User>) {
     this.requireSuperAdmin(context);
-    return await usersRepository.findAll(options, projection);
+    const filter = await this.buildUserFilter(options);
+    return await usersRepository.findAll(filter, options, projection);
   }
 
   async countUsers(filter: UserQueryOptions | undefined, context: AppContext) {
     this.requireSuperAdmin(context);
-    return await usersRepository.count(filter);
+    return await usersRepository.count(await this.buildUserFilter(filter));
   }
 
   async getUser(id: ObjectId, context: AppContext, projection?: ProjectionType<User>) {
@@ -140,6 +146,99 @@ export class UsersService {
     options?: { session?: ClientSession },
   ) {
     return await usersRepository.deleteByIdOrEmail(input, options);
+  }
+
+  async getUserPersonas(userId: ObjectId, fallbackRole?: RoleType): Promise<UserPersona[]> {
+    const personas = new Set<UserPersona>();
+
+    if (fallbackRole === UserRole.SUPER_ADMIN) {
+      personas.add("SUPER_ADMIN");
+    }
+
+    if (fallbackRole === UserRole.PARENT) {
+      personas.add("PARENT");
+    }
+
+    const memberships = await daycareMembershipsRepository.listByUserId(userId);
+    for (const membership of memberships) {
+      if (membership.status !== "ACTIVE") {
+        continue;
+      }
+      personas.add(mapMembershipPersonaToUserPersona(membership.persona));
+    }
+
+    if (personas.size === 0 && fallbackRole) {
+      if (fallbackRole === UserRole.DAYCARE_OWNER) {
+        personas.add("OWNER");
+      } else if (fallbackRole === UserRole.DAYCARE_ADMIN) {
+        personas.add("DAYCARE_ADMIN");
+      } else if (fallbackRole === UserRole.DAYCARE_SITTER) {
+        personas.add("DAYCARE_SITTER");
+      }
+    }
+
+    return [...personas];
+  }
+
+  private async buildUserFilter(options?: UserQueryOptions) {
+    const filter: import("mongoose").FilterQuery<User> = {};
+    const search = options?.search?.trim();
+
+    if (search) {
+      filter.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { email: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const personas = options?.personas ?? [];
+    if (personas.length === 0) {
+      return filter;
+    }
+
+    const roleFilters: RoleType[] = [];
+    const membershipPersonaFilters: DaycareMembershipPersona[] = [];
+
+    for (const persona of personas) {
+      if (persona === "SUPER_ADMIN") {
+        roleFilters.push(UserRole.SUPER_ADMIN);
+      } else if (persona === "PARENT") {
+        roleFilters.push(UserRole.PARENT);
+      } else if (persona === "OWNER") {
+        membershipPersonaFilters.push(DaycareMembershipPersona.OWNER);
+      } else if (persona === "DAYCARE_ADMIN") {
+        membershipPersonaFilters.push(DaycareMembershipPersona.ADMIN);
+      } else if (persona === "DAYCARE_SITTER") {
+        membershipPersonaFilters.push(DaycareMembershipPersona.SITTER);
+      }
+    }
+
+    const orFilters: import("mongoose").FilterQuery<User>[] = [];
+
+    if (roleFilters.length > 0) {
+      orFilters.push({ role: { $in: roleFilters } });
+    }
+
+    if (membershipPersonaFilters.length > 0) {
+      const membershipUserIds = await daycareMembershipsRepository.findActiveUserIdsByPersonas(membershipPersonaFilters);
+      if (membershipUserIds.length > 0) {
+        orFilters.push({ _id: { $in: membershipUserIds } });
+      }
+    }
+
+    if (orFilters.length === 0) {
+      filter._id = { $in: [] };
+      return filter;
+    }
+
+    if (orFilters.length === 1) {
+      Object.assign(filter, orFilters[0]);
+      return filter;
+    }
+
+    filter.$and = filter.$and ?? [];
+    filter.$and.push({ $or: orFilters });
+    return filter;
   }
 
   private requireSuperAdmin(context: AppContext) {

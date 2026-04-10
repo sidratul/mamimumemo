@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { Pressable, ScrollView } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import { DynamicForm, NumberField, PasswordField, TextAreaField, TextField, type FormFieldProps } from '@mami/ui';
+import { daycareChildEditSchema, daycareEnrollmentSchema, daycareParentNotesSchema } from '@mami/core';
 import { HelperText } from 'react-native-paper';
-import * as yup from 'yup';
 
 import { useSession } from '../../../providers/session-provider';
 import {
@@ -97,25 +97,21 @@ const enrollmentFields: FormFieldProps<EnrollmentForm> = {
   parentName: {
     label: 'Nama Parent',
     input: TextField,
-    validation: yup.string().required('Nama parent wajib diisi'),
     props: { placeholder: 'Contoh: Ayu Maharani', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   parentEmail: {
     label: 'Email Parent',
     input: TextField,
-    validation: yup.string().required('Email parent wajib diisi').email('Format email parent tidak valid'),
     props: { placeholder: 'parent@example.com', keyboardType: 'email-address', autoCapitalize: 'none', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   parentPhone: {
     label: 'Nomor Telepon',
     input: NumberField,
-    validation: yup.string().required('Nomor telepon wajib diisi'),
     props: { placeholder: '08xxxxxxxxxx', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   parentPassword: {
     label: 'Password Sementara',
     input: PasswordField,
-    validation: yup.string().required('Password sementara wajib diisi').min(6, 'Password minimal 6 karakter'),
     props: { placeholder: 'Minimal 6 karakter', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   parentNotes: {
@@ -126,16 +122,11 @@ const enrollmentFields: FormFieldProps<EnrollmentForm> = {
   childName: {
     label: 'Nama Child',
     input: TextField,
-    validation: yup.string().required('Nama anak wajib diisi'),
     props: { placeholder: 'Contoh: Alma Putri', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   childBirthDate: {
     label: 'Tanggal Lahir',
     input: TextField,
-    validation: yup
-      .string()
-      .required('Tanggal lahir wajib diisi')
-      .test('date-format', 'Gunakan format YYYY-MM-DD', (value) => !!value && !Number.isNaN(new Date(value).getTime())),
     props: { placeholder: 'YYYY-MM-DD', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   childGender: {
@@ -162,16 +153,11 @@ const childEditFields: FormFieldProps<ChildEditForm> = {
   name: {
     label: 'Nama Child',
     input: TextField,
-    validation: yup.string().required('Nama child wajib diisi'),
     props: { placeholder: 'Nama child', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   birthDate: {
     label: 'Tanggal Lahir',
     input: TextField,
-    validation: yup
-      .string()
-      .required('Tanggal lahir wajib diisi')
-      .test('date-format', 'Gunakan format YYYY-MM-DD', (value) => !!value && !Number.isNaN(new Date(value).getTime())),
     props: { placeholder: 'YYYY-MM-DD', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   notes: {
@@ -294,6 +280,8 @@ export function DaycareOperationsContainer() {
     return <Redirect href="/(auth)/login" />;
   }
 
+  const activeSession = session;
+
   if (!loading && gate === 'pending') {
     return <Redirect href="/(daycare)/registration-status" />;
   }
@@ -314,8 +302,8 @@ export function DaycareOperationsContainer() {
       setErrorMessage('');
       setSuccessMessage('');
       setValues(nextValues);
-      await onboardFamily(session.token, {
-        daycareId: session.daycareId,
+      await onboardFamily(activeSession.token, {
+        daycareId: activeSession.daycareId,
         parentName: nextValues.parentName,
         parentEmail: nextValues.parentEmail,
         parentPhone: nextValues.parentPhone,
@@ -326,7 +314,7 @@ export function DaycareOperationsContainer() {
         childGender: nextValues.childGender,
         childNotes: nextValues.childNotes,
       });
-      await loadRoster(session);
+      await loadRoster(activeSession);
       setValues(initialForm);
       setShowEnrollmentForm(false);
       setSuccessMessage('Parent dan child berhasil ditambahkan ke roster daycare.');
@@ -345,8 +333,8 @@ export function DaycareOperationsContainer() {
     try {
       setActionBusyId(`parent-${editingParentId}`);
       setErrorMessage('');
-      await updateDaycareParentNotes(session.token, editingParentId, form.notes);
-      await loadRoster(session);
+      await updateDaycareParentNotes(activeSession.token, editingParentId, form.notes);
+      await loadRoster(activeSession);
       setEditingParentId('');
       setEditingParentNotes('');
       setSuccessMessage('Catatan parent berhasil diperbarui.');
@@ -361,8 +349,8 @@ export function DaycareOperationsContainer() {
     try {
       setActionBusyId(`parent-${parentId}`);
       setErrorMessage('');
-      await deactivateDaycareParent(session.token, parentId);
-      await loadRoster(session);
+      await deactivateDaycareParent(activeSession.token, parentId);
+      await loadRoster(activeSession);
       if (editingParentId === parentId) {
         setEditingParentId('');
         setEditingParentNotes('');
@@ -383,13 +371,13 @@ export function DaycareOperationsContainer() {
     try {
       setActionBusyId(`child-${editingChildId}`);
       setErrorMessage('');
-      await updateDaycareChild(session.token, editingChildId, {
+      await updateDaycareChild(activeSession.token, editingChildId, {
         name: form.name,
         birthDate: form.birthDate,
         gender: editingChildGender,
         notes: form.notes,
       });
-      await loadRoster(session);
+      await loadRoster(activeSession);
       setEditingChildId('');
       setEditingChildName('');
       setEditingChildBirthDate('');
@@ -407,8 +395,8 @@ export function DaycareOperationsContainer() {
     try {
       setActionBusyId(`child-${childId}`);
       setErrorMessage('');
-      await deactivateDaycareChild(session.token, childId);
-      await loadRoster(session);
+      await deactivateDaycareChild(activeSession.token, childId);
+      await loadRoster(activeSession);
       if (editingChildId === childId) {
         setEditingChildId('');
         setEditingChildName('');
@@ -466,6 +454,7 @@ export function DaycareOperationsContainer() {
                   <DynamicForm<EnrollmentForm>
                     fields={enrollmentFields}
                     defaultValue={values}
+                    schema={daycareEnrollmentSchema}
                     submitLabel={isSubmitting ? 'Menyimpan...' : 'Simpan'}
                     loading={isSubmitting}
                     onSubmit={handleSubmit}
@@ -542,6 +531,7 @@ export function DaycareOperationsContainer() {
               <DynamicForm<ParentEditForm>
                 fields={parentEditFields}
                 defaultValue={{ notes: editingParentNotes }}
+                schema={daycareParentNotesSchema}
                 submitLabel={actionBusyId === `parent-${editingParentId}` ? 'Menyimpan...' : 'Simpan'}
                 loading={actionBusyId === `parent-${editingParentId}`}
                 onSubmit={handleParentSave}
@@ -610,6 +600,7 @@ export function DaycareOperationsContainer() {
                   birthDate: editingChildBirthDate,
                   notes: editingChildNotes,
                 }}
+                schema={daycareChildEditSchema}
                 submitLabel={actionBusyId === `child-${editingChildId}` ? 'Menyimpan...' : 'Simpan'}
                 loading={actionBusyId === `child-${editingChildId}`}
                 onSubmit={handleChildSave}

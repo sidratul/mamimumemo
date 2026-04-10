@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 
-import { UserDetailContainer } from '../../../containers/users';
+import { UserDetailContainer } from '../../../containers/user-detail/UserDetailContainer';
 
 export default function UserDetailScreen() {
   const params = useLocalSearchParams<{ id?: string }>();

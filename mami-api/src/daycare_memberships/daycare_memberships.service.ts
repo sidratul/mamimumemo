@@ -44,6 +44,15 @@ export class DaycareMembershipsService {
     return await repository.listByDaycareId(daycareId, projection);
   }
 
+  async listUserDaycareMemberships(
+    userId: ObjectId,
+    context: AppContext,
+    projection?: ProjectionType<DaycareMembershipDocShape>,
+  ) {
+    this.requireAdmin(context);
+    return await repository.listByUserId(userId, projection);
+  }
+
   async createOwnerMembership(
     input: {
       user: { _id: ObjectId; name: string; email: string; phone?: string };
@@ -206,6 +215,17 @@ export class DaycareMembershipsService {
     const hasSameDaycare = context.user.daycareId?.toString() === daycareId.toString();
     const allowedRoles = [UserRole.DAYCARE_OWNER, UserRole.DAYCARE_ADMIN];
     if (!hasSameDaycare || !context.user.role || !allowedRoles.includes(context.user.role)) {
+      throw new AuthorizationError();
+    }
+  }
+
+  private requireAdmin(context: AppContext) {
+    isAuthenticated(context);
+    if (!context.user) {
+      throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
+    }
+
+    if (context.user.role !== UserRole.SUPER_ADMIN) {
       throw new AuthorizationError();
     }
   }

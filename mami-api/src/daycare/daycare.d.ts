@@ -37,6 +37,7 @@ export type DaycareDeletedBy = {
 export type DaycareDocShape = {
   id?: string;
   name: string;
+  logoUrl?: string;
   description?: string;
   address: string;
   city: string;

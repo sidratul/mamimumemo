@@ -1,4 +1,5 @@
 import { gql } from '@apollo/client';
+import { getApprovalStatusLabel as getSharedApprovalStatusLabel } from '@mami/core';
 
 import { apolloClient } from '../apollo';
 
@@ -21,6 +22,7 @@ export type DaycareApprovalHistory = {
 export type AdminDaycare = {
   id: string;
   name: string;
+  logoUrl?: string;
   owner: {
     id: string;
     name: string;
@@ -31,6 +33,7 @@ export type AdminDaycare = {
   address?: string;
   description?: string;
   submittedAt: string;
+  statusChangedAt: string;
   approvedAt?: string;
   approvalStatus: ApprovalStatus;
   isActive: boolean;
@@ -46,6 +49,8 @@ export type AdminDaycare = {
 type ListDaycaresInput = {
   status?: ApprovalStatus | 'ALL';
   search?: string;
+  page?: number;
+  limit?: number;
 };
 
 type DaycaresResponse = {
@@ -67,9 +72,24 @@ type UpdateDaycareApprovalStatusResponse = {
   };
 };
 
+type UpdateDaycareDocumentsResponse = {
+  updateDaycareDocuments: {
+    id: string;
+    message: string;
+  };
+};
+
+type RegisterDaycareResponse = {
+  registerDaycare: {
+    id: string;
+    message: string;
+  };
+};
+
 type DaycareApiNode = {
   _id: string;
   name: string;
+  logoUrl?: string | null;
   owner: {
     _id: string;
     name: string;
@@ -105,6 +125,7 @@ const DAYCARE_FIELDS = gql`
   fragment DaycareFields on Daycare {
     _id
     name
+    logoUrl
     owner {
       _id
       name
@@ -170,30 +191,49 @@ const UPDATE_DAYCARE_APPROVAL_STATUS_MUTATION = gql`
   }
 `;
 
-const statusLabelMap: Record<ApprovalStatus, string> = {
-  DRAFT: 'Draft',
-  SUBMITTED: 'Submitted',
-  IN_REVIEW: 'In Review',
-  NEEDS_REVISION: 'Needs Revision',
-  APPROVED: 'Approved',
-  REJECTED: 'Rejected',
-  SUSPENDED: 'Suspended',
-};
+const UPDATE_DAYCARE_DOCUMENTS_MUTATION = gql`
+  mutation UpdateDaycareDocuments($id: ObjectId!, $input: UpdateDaycareDocumentsInput!) {
+    updateDaycareDocuments(id: $id, input: $input) {
+      id
+      message
+    }
+  }
+`;
+
+const REGISTER_DAYCARE_MUTATION = gql`
+  mutation RegisterDaycare($input: RegisterDaycareInput!) {
+    registerDaycare(input: $input) {
+      id
+      message
+    }
+  }
+`;
 
 const allowedNextStatuses: Record<ApprovalStatus, ApprovalStatus[]> = {
   DRAFT: [],
   SUBMITTED: ['IN_REVIEW'],
-  IN_REVIEW: ['APPROVED', 'NEEDS_REVISION', 'REJECTED'],
-  NEEDS_REVISION: [],
-  APPROVED: ['SUSPENDED'],
-  REJECTED: [],
+  IN_REVIEW: ['SUBMITTED', 'APPROVED', 'NEEDS_REVISION', 'REJECTED'],
+  NEEDS_REVISION: ['IN_REVIEW'],
+  APPROVED: ['IN_REVIEW', 'SUSPENDED'],
+  REJECTED: ['IN_REVIEW'],
   SUSPENDED: ['APPROVED'],
 };
+
+let daycareDataVersion = 0;
+
+export function getDaycareDataVersion() {
+  return daycareDataVersion;
+}
+
+export function invalidateDaycareData() {
+  daycareDataVersion += 1;
+}
 
 function mapDaycare(node: DaycareApiNode): AdminDaycare {
   return {
     id: node._id,
     name: node.name,
+    logoUrl: node.logoUrl ?? '',
     owner: {
       id: node.owner._id,
       name: node.owner.name,
@@ -204,6 +244,7 @@ function mapDaycare(node: DaycareApiNode): AdminDaycare {
     address: node.address ?? '',
     description: node.description ?? '',
     submittedAt: node.submittedAt ?? '',
+    statusChangedAt: node.approval?.history?.[0]?.changedAt ?? node.submittedAt ?? '',
     approvedAt: node.approvedAt ?? '',
     approvalStatus: node.approval?.status ?? 'DRAFT',
     isActive: node.isActive,
@@ -219,18 +260,20 @@ function mapDaycare(node: DaycareApiNode): AdminDaycare {
 }
 
 export function getApprovalStatusLabel(status: ApprovalStatus) {
-  return statusLabelMap[status];
+  return getSharedApprovalStatusLabel(status);
 }
 
 export function getAvailableApprovalStatusOptions(status: ApprovalStatus) {
   return allowedNextStatuses[status].map((value) => ({
-    label: statusLabelMap[value],
+    label: getSharedApprovalStatusLabel(value),
     value,
   }));
 }
 
 export function getApprovalStatusHelperText(status: ApprovalStatus) {
   switch (status) {
+    case 'SUBMITTED':
+      return 'Kembalikan daycare ke status pengajuan awal.';
     case 'IN_REVIEW':
       return 'Pindahkan daycare ke tahap review aktif oleh admin.';
     case 'APPROVED':
@@ -246,7 +289,7 @@ export function getApprovalStatusHelperText(status: ApprovalStatus) {
   }
 }
 
-export async function listDaycares({ status = 'ALL', search = '' }: ListDaycaresInput = {}) {
+export async function listDaycares({ status = 'ALL', search = '', page = 1, limit = 20 }: ListDaycaresInput = {}) {
   const response = await apolloClient.query<DaycaresResponse>({
     query: LIST_DAYCARES_QUERY,
     variables: {
@@ -259,8 +302,8 @@ export async function listDaycares({ status = 'ALL', search = '' }: ListDaycares
         sortType: 'DESC',
       },
       pagination: {
-        page: 1,
-        limit: 50,
+        page,
+        limit,
       },
     },
     fetchPolicy: 'network-only',
@@ -317,5 +360,66 @@ export async function updateDaycareApprovalStatus(id: string, status: ApprovalSt
     throw new Error(updated.message || 'Failed to reload daycare after status update');
   }
 
+  invalidateDaycareData();
   return refreshed;
+}
+
+export async function updateDaycareDocuments(
+  id: string,
+  legalDocuments: Array<{
+    type: string;
+    url: string;
+    verified?: boolean;
+  }>
+) {
+  const response = await apolloClient.mutate<UpdateDaycareDocumentsResponse>({
+    mutation: UPDATE_DAYCARE_DOCUMENTS_MUTATION,
+    variables: {
+      id,
+      input: {
+        legalDocuments,
+      },
+    },
+  });
+
+  const updated = response.data?.updateDaycareDocuments;
+  if (!updated) {
+    throw new Error('Failed to update daycare documents');
+  }
+
+  const refreshed = await getDaycareById(updated.id);
+  if (!refreshed) {
+    throw new Error(updated.message || 'Failed to reload daycare after document update');
+  }
+
+  invalidateDaycareData();
+  return refreshed;
+}
+
+export async function registerDaycare(input: {
+  owner: {
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+  };
+  daycare: {
+    name: string;
+    logoUrl?: string;
+    description?: string;
+    address: string;
+    city: string;
+  };
+}) {
+  const response = await apolloClient.mutate<RegisterDaycareResponse>({
+    mutation: REGISTER_DAYCARE_MUTATION,
+    variables: { input },
+  });
+
+  if (!response.data?.registerDaycare) {
+    throw new Error('Gagal mendaftarkan daycare.');
+  }
+
+  invalidateDaycareData();
+  return response.data.registerDaycare;
 }

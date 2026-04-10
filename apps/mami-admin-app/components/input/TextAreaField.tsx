@@ -1,7 +1,7 @@
 import { TextAreaInput as SharedTextAreaInput } from '@mami/ui';
 
-import { useAppTheme } from '../../theme/theme';
 import { InputComponentProps } from '../form/form.types';
+import { useSharedInputProps } from './shared';
 
 type TextAreaFieldProps = InputComponentProps<string> & {
   disabled?: boolean;
@@ -9,7 +9,7 @@ type TextAreaFieldProps = InputComponentProps<string> & {
 };
 
 export function TextAreaField({ value, placeholder, onChange, disabled, numberOfLines = 4 }: TextAreaFieldProps) {
-  const theme = useAppTheme();
+  const inputProps = useSharedInputProps();
 
   return (
     <SharedTextAreaInput
@@ -18,9 +18,9 @@ export function TextAreaField({ value, placeholder, onChange, disabled, numberOf
       disabled={disabled}
       placeholder={placeholder}
       onChangeText={onChange}
-      textColor={theme.colors.textPrimary}
-      backgroundColor={theme.colors.surface}
-      borderRadius={10}
+      textColor={inputProps.textColor}
+      backgroundColor={inputProps.backgroundColor}
+      borderRadius={inputProps.borderRadius}
     />
   );
 }

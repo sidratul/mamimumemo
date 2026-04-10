@@ -43,6 +43,7 @@ const deletedBySchema = new mongoose.Schema({
 
 const daycareSchema = new mongoose.Schema({
   name: { type: String, required: true },
+  logoUrl: { type: String, default: "" },
   description: { type: String, default: "" },
   address: { type: String, required: true },
   city: { type: String, required: true },

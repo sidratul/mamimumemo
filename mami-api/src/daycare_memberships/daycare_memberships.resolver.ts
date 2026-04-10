@@ -7,6 +7,7 @@ import DaycareMembershipsService from "./daycare_memberships.service.ts";
 import {
   addUserToDaycareInput,
   daycareMembershipsByDaycareInput,
+  daycareMembershipsByUserInput,
   deactivateDaycareMembershipInput,
 } from "./daycare_memberships.validation.ts";
 
@@ -23,6 +24,16 @@ export const resolvers = {
       await AuthGuard(context);
       daycareMembershipsByDaycareInput.parse({ daycareId });
       return daycareMembershipsService.listDaycareMemberships(daycareId, context, getMongoProjection(info));
+    },
+    userDaycareMemberships: async (
+      _: unknown,
+      { userId }: { userId: ObjectId },
+      context: AppContext,
+      info: GraphQLResolveInfo,
+    ) => {
+      await AuthGuard(context);
+      daycareMembershipsByUserInput.parse({ userId });
+      return daycareMembershipsService.listUserDaycareMemberships(userId, context, getMongoProjection(info));
     },
   },
   Mutation: {

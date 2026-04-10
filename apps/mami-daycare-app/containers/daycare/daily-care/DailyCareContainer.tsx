@@ -2,8 +2,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import { DynamicForm, TextAreaField, TextField, type FormFieldProps } from '@mami/ui';
+import { daycareActivityTextSchema } from '@mami/core';
 import { HelperText } from 'react-native-paper';
-import * as yup from 'yup';
 
 import { useSession } from '../../../providers/session-provider';
 import {
@@ -59,7 +59,6 @@ const activityFields: FormFieldProps<ActivityTextForm> = {
   activityName: {
     label: 'Nama Aktivitas',
     input: TextField,
-    validation: yup.string().required('Nama aktivitas wajib diisi'),
     props: {
       placeholder: 'Contoh: Free play di indoor corner',
       borderRadius: 14,
@@ -69,10 +68,6 @@ const activityFields: FormFieldProps<ActivityTextForm> = {
   startTime: {
     label: 'Jam Mulai',
     input: TextField,
-    validation: yup
-      .string()
-      .required('Jam mulai wajib diisi')
-      .matches(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, 'Gunakan format jam HH:mm'),
     props: {
       placeholder: 'HH:mm',
       borderRadius: 14,
@@ -246,6 +241,8 @@ export function DailyCareContainer() {
     return <Redirect href="/(auth)/login" />;
   }
 
+  const activeSession = session;
+
   if (!loading && gate === 'pending') {
     return <Redirect href="/(daycare)/registration-status" />;
   }
@@ -260,8 +257,8 @@ export function DailyCareContainer() {
     try {
       setBusyChildId(childId);
       setErrorMessage('');
-      const daycareId = session.daycareId || (await getMyDaycareRegistration(session.token))?.id || '';
-      const record = await checkInChildForToday(session.token, daycareId, childId, viewer);
+      const daycareId = activeSession.daycareId || (await getMyDaycareRegistration(activeSession.token))?.id || '';
+      const record = await checkInChildForToday(activeSession.token, daycareId, childId, viewer);
       setRecordChildren(record.children);
       setSuccessMessage('Check-in berhasil dicatat.');
     } catch (error) {
@@ -279,8 +276,8 @@ export function DailyCareContainer() {
     try {
       setBusyChildId(childId);
       setErrorMessage('');
-      const daycareId = session.daycareId || (await getMyDaycareRegistration(session.token))?.id || '';
-      const record = await checkOutChildForToday(session.token, daycareId, childId, viewer);
+      const daycareId = activeSession.daycareId || (await getMyDaycareRegistration(activeSession.token))?.id || '';
+      const record = await checkOutChildForToday(activeSession.token, daycareId, childId, viewer);
       setRecordChildren(record.children);
       setSuccessMessage('Check-out berhasil dicatat.');
     } catch (error) {
@@ -302,8 +299,8 @@ export function DailyCareContainer() {
       setIsSubmitting(true);
       setErrorMessage('');
       setForm((current) => ({ ...current, ...values }));
-      const daycareId = session.daycareId || (await getMyDaycareRegistration(session.token))?.id || '';
-      const record = await logQuickDailyActivity(session.token, {
+      const daycareId = activeSession.daycareId || (await getMyDaycareRegistration(activeSession.token))?.id || '';
+      const record = await logQuickDailyActivity(activeSession.token, {
         daycareId,
         childId: form.childId,
         category: form.category,
@@ -522,6 +519,7 @@ export function DailyCareContainer() {
                     description: form.description,
                     startTime: form.startTime,
                   }}
+                  schema={daycareActivityTextSchema}
                   submitLabel={isSubmitting ? 'Menyimpan Aktivitas...' : 'Simpan Aktivitas'}
                   loading={isSubmitting}
                   onSubmit={handleLogActivity}

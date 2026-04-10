@@ -61,18 +61,12 @@ class UsersRepository {
     return result.deletedCount ?? 0;
   }
 
-  public async findAll(options: UserQueryOptions = {}, projection?: ProjectionType<User>): Promise<UserDoc[]> {
-    const { search, sort, page, limit, roles } = options as UserQueryOptions & { roles?: RoleType[] };
-    const filter: FilterQuery<User> = {};
-
-    if (search) {
-      filter.name = { $regex: search, $options: "i" };
-    }
-
-    if (roles?.length) {
-      filter.role = { $in: roles };
-    }
-
+  public async findAll(
+    filter: FilterQuery<User> = {},
+    options: Omit<UserQueryOptions, "personas"> = {},
+    projection?: ProjectionType<User>,
+  ): Promise<UserDoc[]> {
+    const { sort, page, limit } = options;
     let query = UserModel.find(filter);
 
     if (page && limit) {
@@ -93,18 +87,7 @@ class UsersRepository {
     return await query.exec();
   }
 
-  public async count(options: UserQueryOptions = {}): Promise<number> {
-    const { search, roles } = options as UserQueryOptions & { roles?: RoleType[] };
-    const filter: FilterQuery<User> = {};
-
-    if (search) {
-      filter.name = { $regex: search, $options: "i" };
-    }
-
-    if (roles?.length) {
-      filter.role = { $in: roles };
-    }
-
+  public async count(filter: FilterQuery<User> = {}): Promise<number> {
     return await UserModel.countDocuments(filter);
   }
 }

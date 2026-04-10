@@ -62,10 +62,46 @@ export class DaycareMembershipsRepository {
     return await query.lean<DaycareMembershipRecord[]>().exec();
   }
 
-  async listByUserId(userId: ObjectId): Promise<DaycareMembershipRecord[]> {
-    return await DaycareMembershipModel.find({
+  async listByUserId(
+    userId: ObjectId,
+    projection?: ProjectionType<DaycareMembershipDocShape>,
+  ): Promise<DaycareMembershipRecord[]> {
+    let query = DaycareMembershipModel.find({
       "user._id": userId,
+    }).sort({ createdAt: -1 });
+
+    if (projection && Object.keys(projection).length > 0) {
+      query = query.select(projection);
+    }
+
+    return await query.lean<DaycareMembershipRecord[]>().exec();
+  }
+
+  async listActiveByUserIds(userIds: ObjectId[]): Promise<DaycareMembershipRecord[]> {
+    if (userIds.length === 0) {
+      return [];
+    }
+
+    return await DaycareMembershipModel.find({
+      "user._id": { $in: userIds },
+      status: DaycareMembershipStatus.ACTIVE,
     }).sort({ createdAt: -1 }).lean<DaycareMembershipRecord[]>().exec();
+  }
+
+  async findActiveUserIdsByPersonas(personas: DaycareMembershipPersona[]): Promise<ObjectId[]> {
+    if (personas.length === 0) {
+      return [];
+    }
+
+    const records = await DaycareMembershipModel.find(
+      {
+        persona: { $in: personas },
+        status: DaycareMembershipStatus.ACTIVE,
+      },
+      { "user._id": 1 },
+    ).lean<Array<{ user: { _id: ObjectId } }>>().exec();
+
+    return [...new Map(records.map((record) => [record.user._id.toString(), record.user._id])).values()];
   }
 
   async deactivate(id: ObjectId) {

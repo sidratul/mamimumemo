@@ -1,5 +1,5 @@
-import { UsersContainer } from '../../../containers/users';
+import { UserListContainer } from '../../../containers/user/UserListContainer';
 
 export default function UsersTabScreen() {
-  return <UsersContainer />;
+  return <UserListContainer />;
 }
