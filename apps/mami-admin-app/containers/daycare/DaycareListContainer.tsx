@@ -2,12 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { FlatList } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useFocusEffect } from '@react-navigation/native';
-import { ActivityIndicator, Button } from 'react-native-paper';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { ListFilterBar } from '@mami/ui';
 
-import { approvalStatusColorMap } from './shared/ApprovalStatusBadge';
+import { DaycareListFooter } from './DaycareListFooter';
+import { DaycareListHeader } from './DaycareListHeader';
 import { DaycareListItem } from './DaycareListItem';
+import { DaycareListState } from './DaycareListState';
 import { usePaginatedResource } from '../../hooks/use-paginated-resource';
 import {
   getDaycareCount,
@@ -16,7 +16,7 @@ import {
   type AdminDaycare,
   type ApprovalStatus,
 } from '../../services/daycare-admin';
-import { Box, Text } from '../../theme/theme';
+import { Box } from '../../theme/theme';
 
 const PAGE_SIZE = 20;
 
@@ -42,18 +42,8 @@ export function DaycareListContainer() {
     },
   });
 
-  const statusOptions = [
-    { label: 'Semua', value: 'ALL' },
-    { label: 'Submitted', value: 'SUBMITTED', color: approvalStatusColorMap.SUBMITTED },
-    { label: 'Review', value: 'IN_REVIEW', color: approvalStatusColorMap.IN_REVIEW },
-    { label: 'Revisi', value: 'NEEDS_REVISION', color: approvalStatusColorMap.NEEDS_REVISION },
-    { label: 'Approve', value: 'APPROVED', color: approvalStatusColorMap.APPROVED },
-    { label: 'Rejected', value: 'REJECTED', color: approvalStatusColorMap.REJECTED },
-    { label: 'Suspended', value: 'SUSPENDED', color: approvalStatusColorMap.SUSPENDED },
-  ];
-
   useEffect(() => {
-    if (params.status && statusOptions.some((option) => option.value === params.status)) {
+    if (params.status && ['ALL', 'SUBMITTED', 'IN_REVIEW', 'NEEDS_REVISION', 'APPROVED', 'REJECTED', 'SUSPENDED'].includes(params.status)) {
       setStatus(params.status);
     }
   }, [params.status]);
@@ -69,53 +59,17 @@ export function DaycareListContainer() {
   );
 
   const header = (
-    <Box gap="lg" paddingTop="md" paddingBottom="sm">
-      <Box paddingHorizontal="lg" gap="xs">
-        <Box flexDirection="row" alignItems="center" justifyContent="space-between" gap="md">
-          <Text style={{ fontSize: 20, fontWeight: '700', color: '#24324B' }}>Daycare</Text>
-          <Button
-            mode="contained"
-            compact
-            icon="plus"
-            onPress={() => router.push('/(app)/daycares/create' as never)}
-            contentStyle={{ height: 36, alignItems: 'center', justifyContent: 'center' }}
-            labelStyle={{ marginVertical: 0, lineHeight: 16 }}
-            style={{ borderRadius: 10 }}>
-            Tambah
-          </Button>
-        </Box>
-        <Text color="textSecondary">Kelola data daycare terdaftar</Text>
-      </Box>
-
-      <ListFilterBar
-        searchPlaceholder="Cari nama daycare atau owner..."
-        searchValue={search}
-        onSearchChange={setSearch}
-        options={statusOptions}
-        selectedValue={status}
-        onSelect={(value) => setStatus(value as ApprovalStatus | 'ALL')}
+    <Box>
+      <DaycareListHeader
+        status={status}
+        search={search}
+        onChangeStatus={setStatus}
+        onChangeSearch={setSearch}
+        onPressAdd={() => router.push('/(app)/daycares/create' as never)}
       />
-
-      {loading ? (
-        <Box paddingHorizontal="lg" paddingVertical="md" alignItems="center" gap="sm">
-          <ActivityIndicator color="#E23A8A" />
-          <Text color="textSecondary">Memuat daftar daycare...</Text>
-        </Box>
-      ) : null}
-
-      {!loading && error ? (
-        <Box paddingHorizontal="lg" gap="xs">
-          <Text color="danger" style={{ fontWeight: '700' }}>Gagal memuat data</Text>
-          <Text color="textSecondary">{error}</Text>
-        </Box>
-      ) : null}
-
-      {!loading && !error && items.length === 0 ? (
-        <Box paddingHorizontal="lg" paddingVertical="xl" gap="xs" alignItems="center">
-          <Text variant="cardValue">Belum ada data</Text>
-          <Text color="textSecondary">Tidak ada daycare yang cocok dengan filter saat ini.</Text>
-        </Box>
-      ) : null}
+      {loading ? <DaycareListState type="loading" /> : null}
+      {!loading && error ? <DaycareListState type="error" message={error} /> : null}
+      {!loading && !error && items.length === 0 ? <DaycareListState type="empty" /> : null}
     </Box>
   );
 
@@ -133,17 +87,7 @@ export function DaycareListContainer() {
           </Box>
         )}
         ListHeaderComponent={header}
-        ListFooterComponent={
-          <Box paddingVertical="lg" alignItems="center" gap="sm">
-            {loadingMore ? <ActivityIndicator color="#E23A8A" /> : null}
-            {!loading && !error && total > 0 ? (
-              <Text color="textSecondary">
-                Menampilkan 1 - {items.length} dari {total} data
-              </Text>
-            ) : null}
-            <Box height={48} />
-          </Box>
-        }
+        ListFooterComponent={<DaycareListFooter loading={loading} loadingMore={loadingMore} error={error} total={total} itemCount={items.length} />}
         ItemSeparatorComponent={() => <Box height={12} />}
         contentContainerStyle={{ paddingBottom: 24 }}
         showsVerticalScrollIndicator={false}

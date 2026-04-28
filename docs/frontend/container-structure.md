@@ -18,6 +18,9 @@ containers/
   daycare/
     DaycareListContainer.tsx
     DaycareListItem.tsx
+    DaycareListHeader.tsx
+    DaycareListState.tsx
+    DaycareListFooter.tsx
     shared/
       ApprovalStatusBadge.tsx
   daycare-detail/
@@ -40,14 +43,35 @@ containers/
   user/
     UserListContainer.tsx
     UserListItem.tsx
+    UserListHeader.tsx
+    UserListState.tsx
+    UserListFooter.tsx
   user-detail/
     UserDetailContainer.tsx
+    UserDetailHeader.tsx
+    UserDetailState.tsx
     UserSummarySection.tsx
+    UserMembershipForm.tsx
+    UserMembershipsSection.tsx
     UserProfileSection.tsx
     UserPasswordSection.tsx
     UserDangerSection.tsx
   user-create/
     UserCreateContainer.tsx
+    UserCreateSummarySection.tsx
+    UserCreateFormSection.tsx
+  dashboard/
+    DashboardContainer.tsx
+    DashboardHeaderSection.tsx
+    DashboardSummarySection.tsx
+    DashboardChartSection.tsx
+    DashboardQuickActionsSection.tsx
+  modules/
+    ModulesHomeContainer.tsx
+    ModulesListSection.tsx
+  setting/
+    SettingContainer.tsx
+    SettingsAccountSection.tsx
 ```
 
 ## Boundary
@@ -58,6 +82,8 @@ containers/
   mengurus input UI dan submit intent untuk satu concern spesifik
 - `Section`
   mengurus blok tampilan detail untuk satu concern spesifik dalam satu page
+- `List header/footer/state`
+  simpan di folder feature kalau hanya dipakai oleh satu screen list
 - `Shared feature component`
   hanya dipakai jika minimal dua file di feature yang sama membutuhkannya
 - `Global component`

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ActivityIndicator } from 'react-native-paper';
-import { BottomDrawer, ScreenHeader, type SelectOption } from '@mami/ui';
+import { BottomDrawer, type SelectOption } from '@mami/ui';
 
 import { ScreenContainer } from '../../components/common/ScreenContainer';
 import { listDaycares } from '../../services/daycare-admin';
@@ -18,6 +17,8 @@ import {
 } from '../../services/users';
 import { Box, Text } from '../../theme/theme';
 import { UserDangerSection } from './UserDangerSection';
+import { UserDetailHeader } from './UserDetailHeader';
+import { UserDetailState } from './UserDetailState';
 import { UserMembershipForm } from './UserMembershipForm';
 import { UserMembershipsSection } from './UserMembershipsSection';
 import { UserPasswordSection } from './UserPasswordSection';
@@ -177,30 +178,16 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
   }
 
   if (loading) {
-    return (
-      <ScreenContainer>
-        <Box backgroundColor="surface" borderColor="border" borderWidth={1} borderRadius="lg" padding="xl" gap="sm" alignItems="center" marginHorizontal="xl" marginTop="xxl">
-          <ActivityIndicator color="#4D96FF" />
-          <Text color="textSecondary">Memuat detail user...</Text>
-        </Box>
-      </ScreenContainer>
-    );
+    return <UserDetailState type="loading" />;
   }
 
   if (!user || error) {
-    return (
-      <ScreenContainer>
-        <Box backgroundColor="surface" borderColor="border" borderWidth={1} borderRadius="lg" padding="xl" gap="sm" marginHorizontal="xl" marginTop="xxl">
-          <Text color="danger" style={{ fontWeight: '700' }}>Detail user tidak tersedia</Text>
-          <Text color="textSecondary">{error || 'User tidak ditemukan.'}</Text>
-        </Box>
-      </ScreenContainer>
-    );
+    return <UserDetailState type="error" message={error || 'User tidak ditemukan.'} />;
   }
 
   return (
     <ScreenContainer>
-      <ScreenHeader title={user.name} subtitle="Detail akun dan persona user" onBack={() => router.back()} />
+      <UserDetailHeader title={user.name} onBack={() => router.back()} />
 
       <UserSummarySection user={user} />
       <UserMembershipsSection
