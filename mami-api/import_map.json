@@ -1,9 +1,6 @@
 {
   "imports": {
     "graphql": "npm:graphql@^16.8.1",
-    "@graphql-yoga/plugin-health-check": "npm:@graphql-yoga/plugin-health-check@^3",
-    "@graphql-yoga/logger": "npm:@graphql-yoga/logger@^2.0.1",
-    "@graphql-yoga/subscription": "npm:@graphql-yoga/subscription@^5.0.5",
     "graphql-yoga": "npm:graphql-yoga@^5",
     "mongoose": "npm:mongoose@8.4.0",
     "zod": "npm:zod@^3.22.4",
