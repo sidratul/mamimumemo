@@ -1,4 +1,4 @@
-import { ScreenHeader } from '@mami/ui';
+import { AppPageHeader } from '../../components/common/AppPageHeader';
 
 type UserDetailHeaderProps = {
   title: string;
@@ -6,5 +6,5 @@ type UserDetailHeaderProps = {
 };
 
 export function UserDetailHeader({ title, onBack }: UserDetailHeaderProps) {
-  return <ScreenHeader title={title} subtitle="Detail akun dan persona user" onBack={onBack} />;
+  return <AppPageHeader title={title} onBack={onBack} />;
 }

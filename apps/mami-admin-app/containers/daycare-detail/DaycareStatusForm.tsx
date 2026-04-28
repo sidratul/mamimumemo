@@ -91,6 +91,7 @@ export function DaycareStatusForm({
           }}
           disabled={loading}
           numberOfLines={4}
+          useBottomSheetInput
         />
         {fieldErrors.note ? <Text color="danger">{fieldErrors.note}</Text> : null}
       </Box>

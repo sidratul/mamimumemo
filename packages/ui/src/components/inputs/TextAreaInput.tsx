@@ -16,6 +16,7 @@ export function TextAreaInput({
   textColor = '#3D2218',
   backgroundColor = '#FFFFFF',
   borderRadius = 10,
+  useBottomSheetInput = false,
 }: SharedTextAreaInputProps) {
   const minHeight = Math.max(numberOfLines * 24 + 32, 112);
 
@@ -37,7 +38,7 @@ export function TextAreaInput({
       contentStyle={{
         textAlignVertical: 'top',
       }}
-      render={(inputProps) => <BottomSheetTextInput {...inputProps} />}
+      render={useBottomSheetInput ? (inputProps) => <BottomSheetTextInput {...inputProps} /> : undefined}
     />
   );
 }

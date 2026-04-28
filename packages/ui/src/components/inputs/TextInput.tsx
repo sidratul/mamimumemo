@@ -16,6 +16,7 @@ export type SharedTextInputProps = {
   backgroundColor?: string;
   borderRadius?: number;
   right?: React.ReactNode;
+  useBottomSheetInput?: boolean;
 };
 
 export function TextInput({
@@ -32,6 +33,7 @@ export function TextInput({
   backgroundColor = '#FFFFFF',
   borderRadius = 10,
   right,
+  useBottomSheetInput = false,
 }: SharedTextInputProps) {
   return (
     <PaperTextInput
@@ -48,7 +50,7 @@ export function TextInput({
       onChangeText={onChangeText}
       textColor={textColor}
       style={{ backgroundColor }}
-      render={(inputProps) => <BottomSheetTextInput {...inputProps} />}
+      render={useBottomSheetInput ? (inputProps) => <BottomSheetTextInput {...inputProps} /> : undefined}
       right={right as any}
     />
   );

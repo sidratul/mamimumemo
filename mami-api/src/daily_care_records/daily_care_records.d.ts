@@ -1,14 +1,32 @@
 import { Types } from "mongoose";
-import { ActivityCategory, MealType, EatenAmount, NapQuality, ToiletingType, Mood, Intensity } from "#shared/types/enums.ts";
+import { ActivityCategory, MealType, EatenAmount, NapQuality, ToiletingType, Mood, Intensity, SitterRole } from "#shared/types/enums.ts";
 
 export interface IDailyCareRecord {
   _id: Types.ObjectId;
   daycareId: Types.ObjectId;
   date: Date;
+  appliedTemplate?: IAppliedScheduleTemplate;
+  plannedActivities: IPlannedDailyActivity[];
   children: IChildDailyRecord[];
   totalChildren: number;
   createdAt: Date;
   updatedAt: Date;
+}
+
+export interface IAppliedScheduleTemplate {
+  templateId: Types.ObjectId;
+  templateName: string;
+  appliedAt: Date;
+}
+
+export interface IPlannedDailyActivity {
+  masterActivityId?: Types.ObjectId;
+  activityName: string;
+  category: ActivityCategory;
+  startTime: string;
+  endTime?: string;
+  duration?: number;
+  defaultSitterRole?: SitterRole;
 }
 
 export interface IChildDailyRecord {

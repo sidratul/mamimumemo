@@ -432,6 +432,25 @@ export function DaycareOperationsContainer() {
             </Box>
           </Pressable>
 
+          <Box backgroundColor="surface" borderRadius="xl" borderWidth={1} borderColor="border" padding="lg" gap="md">
+            <Box gap="xs">
+              <Text style={{ fontSize: 20, fontWeight: '700' }}>Perencanaan Hari</Text>
+              <Text color="textSecondary">Buat template activity lalu terapkan ke tanggal tertentu sebagai daily record.</Text>
+            </Box>
+            <Box flexDirection="row" gap="sm">
+              <Pressable onPress={() => router.push('/(daycare)/template')} style={{ flex: 1 }}>
+                <Box backgroundColor="background" borderRadius="lg" borderWidth={1} borderColor="border" padding="md" alignItems="center">
+                  <Text style={{ fontWeight: '700' }}>Buat Template</Text>
+                </Box>
+              </Pressable>
+              <Pressable onPress={() => router.push('/(daycare)/daily-record-create')} style={{ flex: 1 }}>
+                <Box backgroundColor="background" borderRadius="lg" borderWidth={1} borderColor="border" padding="md" alignItems="center">
+                  <Text style={{ fontWeight: '700' }}>Buat Daily Record</Text>
+                </Box>
+              </Pressable>
+            </Box>
+          </Box>
+
           <Box flexDirection="row" gap="md">
             <SummaryCard label="Parent Aktif" value={parents.length} />
             <SummaryCard label="Child Aktif" value={children.length} />

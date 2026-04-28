@@ -94,65 +94,97 @@ export class DaycareService {
   }
 
   async registerDaycare(input: typeof registerDaycareInput._type, context: AppContext) {
-    return await runInTransaction(context, async (session?: ClientSession) => {
-      const owner = await usersService.createUser({
-        name: input.owner.name,
-        email: input.owner.email,
-        password: input.owner.password,
-        phone: input.owner.phone,
-        role: UserRole.DAYCARE_OWNER,
-      }, { session });
+    try {
+      return await runInTransaction(context, async (session?: ClientSession) => {
+        const owner = await usersService.createUser({
+          name: input.owner.name,
+          email: input.owner.email,
+          password: input.owner.password,
+          phone: input.owner.phone,
+          role: UserRole.DAYCARE_OWNER,
+        }, { session });
 
-      const daycare = await repository.create({
-        name: input.daycare.name,
-        logoUrl: input.daycare.logoUrl?.trim() || "",
-        description: input.daycare.description,
-        address: input.daycare.address,
-        city: input.daycare.city,
-        legalDocuments: this.mapLegalDocuments(input.daycare.legalDocuments),
-        owner: {
-          _id: owner.id,
-          name: owner.name,
-          email: owner.email,
-          phone: owner.phone || "",
-        },
-        isActive: false,
-        submittedAt: new Date(),
-        approval: {
-          status: DaycareApprovalStatus.SUBMITTED,
-          note: "Registrasi daycare berhasil dikirim. Tim kami akan menghubungi owner.",
-          history: [
-            {
-              status: DaycareApprovalStatus.SUBMITTED,
-              note: "Registrasi daycare berhasil dikirim.",
-              changedBy: {
-                userId: owner.id,
-                name: owner.name,
+        const daycare = await repository.create({
+          name: input.daycare.name,
+          logoUrl: input.daycare.logoUrl?.trim() || "",
+          description: input.daycare.description,
+          address: input.daycare.address,
+          city: input.daycare.city,
+          legalDocuments: this.mapLegalDocuments(input.daycare.legalDocuments),
+          owner: {
+            _id: owner._id,
+            name: owner.name,
+            email: owner.email,
+            phone: owner.phone || "",
+          },
+          isActive: false,
+          submittedAt: new Date(),
+          approval: {
+            status: DaycareApprovalStatus.SUBMITTED,
+            note: "Registrasi daycare berhasil dikirim. Tim kami akan menghubungi owner.",
+            history: [
+              {
+                status: DaycareApprovalStatus.SUBMITTED,
+                note: "Registrasi daycare berhasil dikirim.",
+                changedBy: {
+                  userId: owner._id,
+                  name: owner.name,
+                },
+                changedAt: new Date(),
               },
-              changedAt: new Date(),
-            },
-          ],
-        },
-      }, { session });
+            ],
+          },
+        }, { session });
 
-      await daycareMembershipsService.createOwnerMembership({
-        user: {
-          _id: owner._id,
-          name: owner.name,
-          email: owner.email,
-          phone: owner.phone || "",
-        },
-        daycare: {
-          _id: daycare._id,
-          name: daycare.name,
-        },
-      }, { session });
+        await daycareMembershipsService.createOwnerMembership({
+          user: {
+            _id: owner._id,
+            name: owner.name,
+            email: owner.email,
+            phone: owner.phone || "",
+          },
+          daycare: {
+            _id: daycare._id,
+            name: daycare.name,
+          },
+        }, { session });
 
-      return {
-        id: daycare._id.toString(),
-        message: "Registrasi daycare berhasil dikirim.",
-      };
-    });
+        return {
+          id: daycare._id.toString(),
+          message: "Registrasi daycare berhasil dikirim.",
+        };
+      });
+    } catch (error) {
+      console.error("[DaycareService:registerDaycare] failed", {
+        ownerEmail: input.owner.email,
+        daycareName: input.daycare.name,
+        city: input.daycare.city,
+        error: error instanceof Error ? {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        } : error,
+      });
+
+      if (error instanceof GraphQLError) {
+        throw error;
+      }
+
+      if (
+        error &&
+        typeof error === "object" &&
+        "code" in error &&
+        error.code === 11000
+      ) {
+        throw new GraphQLError(MESSAGES.AUTH.EMAIL_EXISTS);
+      }
+
+      throw new GraphQLError(
+        error instanceof Error && error.message
+          ? error.message
+          : "Gagal mendaftarkan daycare.",
+      );
+    }
   }
 
   async updateDaycareDocuments(

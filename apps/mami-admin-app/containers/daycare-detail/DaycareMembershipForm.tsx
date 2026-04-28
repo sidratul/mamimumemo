@@ -87,6 +87,7 @@ export function DaycareMembershipForm({
           onChange={onChangeNotes}
           disabled={loading}
           numberOfLines={4}
+          useBottomSheetInput
         />
       </Box>
 

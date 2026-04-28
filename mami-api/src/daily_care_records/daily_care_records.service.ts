@@ -5,6 +5,7 @@ import {
   checkInChildInput,
   checkOutChildInput,
   logDailyActivityInput,
+  applyScheduleTemplateInput,
 } from "./daily_care_records.validation.ts";
 import { GraphQLError } from "graphql";
 import { AppContext } from "#shared/config/context.ts";
@@ -12,8 +13,10 @@ import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
 import { UserRole } from "#shared/enums/enum.ts";
 import ChildrenDaycareModel from "@/children_daycare/children_daycare.schema.ts";
+import { ScheduleTemplatesRepository } from "@/schedule_templates/schedule_templates.repository.ts";
 
 const dailyCareRecordsRepository = new DailyCareRecordsRepository();
+const scheduleTemplatesRepository = new ScheduleTemplatesRepository();
 
 export class DailyCareRecordsService {
   private readonly daycareAccessRoles = [
@@ -96,6 +99,8 @@ export class DailyCareRecordsService {
     return await dailyCareRecordsRepository.upsert(input.daycareId, date, {
       daycareId: input.daycareId,
       date,
+      plannedActivities: input.plannedActivities || [],
+      appliedTemplate: undefined,
       children: input.children,
     });
   }
@@ -113,6 +118,47 @@ export class DailyCareRecordsService {
     this.requireDaycareAccess(context);
 
     return await dailyCareRecordsRepository.update(id, input);
+  }
+
+  async applyScheduleTemplate(
+    input: typeof applyScheduleTemplateInput._type,
+    context: AppContext
+  ) {
+    isAuthenticated(context);
+    if (!context.user) {
+      throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
+    }
+
+    this.requireDaycareAccess(context);
+
+    const template = await scheduleTemplatesRepository.findById(input.templateId);
+    if (!template) {
+      throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
+    }
+
+    const date = new Date(input.date);
+    date.setHours(0, 0, 0, 0);
+
+    const plannedActivities = template.activities.map((activity) => ({
+      masterActivityId: activity.masterActivityId,
+      activityName: activity.activityName,
+      category: activity.category,
+      startTime: activity.startTime,
+      endTime: activity.endTime,
+      duration: activity.duration,
+      defaultSitterRole: activity.defaultSitterRole,
+    }));
+
+    return await dailyCareRecordsRepository.upsert(input.daycareId, date, {
+      daycareId: input.daycareId,
+      date,
+      appliedTemplate: {
+        templateId: template._id,
+        templateName: template.name,
+        appliedAt: new Date(),
+      },
+      plannedActivities,
+    });
   }
 
   async checkInChild(
@@ -251,6 +297,9 @@ export class DailyCareRecordsService {
       loggedAt: new Date(),
     };
 
+    const currentRecord = await dailyCareRecordsRepository.findByDaycareAndDate(input.daycareId, date);
+    this.requireChildAccess(context, currentRecord, input.childId);
+
     await dailyCareRecordsRepository.addChildActivity(
       input.daycareId,
       date,
@@ -268,6 +317,39 @@ export class DailyCareRecordsService {
 
   private requireDaycareAccess(context: AppContext) {
     if (!context.user || !this.daycareAccessRoles.includes(context.user.role as UserRole)) {
+      throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
+    }
+  }
+
+  private requireChildAccess(
+    context: AppContext,
+    record: Awaited<ReturnType<DailyCareRecordsRepository["findByDaycareAndDate"]>> | null,
+    childId: string,
+  ) {
+    if (!context.user || context.user.role !== UserRole.DAYCARE_SITTER) {
+      return;
+    }
+
+    const children = (record?.children ?? []) as Array<{
+      childId?: { toString(): string } | string;
+      assignedSitters?: Array<{ userId?: { toString(): string } | string }>;
+    }>;
+
+    const childRecord = children.find((child) => {
+      if (!child.childId) return false;
+      return typeof child.childId === "string"
+        ? child.childId === childId
+        : child.childId.toString() === childId;
+    });
+
+    const assigned = childRecord?.assignedSitters?.some((sitter) => {
+      if (!sitter.userId) return false;
+      return typeof sitter.userId === "string"
+        ? sitter.userId === context.user?.id
+        : sitter.userId.toString() === context.user?.id;
+    });
+
+    if (!assigned) {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }
   }

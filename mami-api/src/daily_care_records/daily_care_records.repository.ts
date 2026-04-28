@@ -87,6 +87,22 @@ export class DailyCareRecordsRepository {
     ).exec();
   }
 
+  async updateByDaycareAndDate(daycareId: string, date: Date, data: any) {
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    return await DailyCareRecordModel.findOneAndUpdate(
+      {
+        daycareId,
+        date: { $gte: startOfDay, $lte: endOfDay },
+      },
+      data,
+      { new: true, upsert: false }
+    ).exec();
+  }
+
   async updateChildAttendance(
     daycareId: string,
     date: Date,

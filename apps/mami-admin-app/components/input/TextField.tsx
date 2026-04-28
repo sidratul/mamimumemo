@@ -8,6 +8,7 @@ type TextFieldProps = InputComponentProps<string> & {
   keyboardType?: KeyboardTypeOptions;
   autoCapitalize?: 'none' | 'sentences' | 'words' | 'characters';
   disabled?: boolean;
+  useBottomSheetInput?: boolean;
 };
 
 export function TextField({
@@ -17,6 +18,7 @@ export function TextField({
   keyboardType,
   autoCapitalize = 'none',
   disabled,
+  useBottomSheetInput,
 }: TextFieldProps) {
   const inputProps = useSharedInputProps();
 
@@ -31,6 +33,7 @@ export function TextField({
       textColor={inputProps.textColor}
       backgroundColor={inputProps.backgroundColor}
       borderRadius={inputProps.borderRadius}
+      useBottomSheetInput={useBottomSheetInput}
     />
   );
 }

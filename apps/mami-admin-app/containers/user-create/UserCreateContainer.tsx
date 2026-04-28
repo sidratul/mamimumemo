@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ScreenHeader } from '@mami/ui';
 
+import { AppPageHeader } from '../../components/common/AppPageHeader';
 import { ScreenContainer } from '../../components/common/ScreenContainer';
 import { ADMIN_MANAGED_ROLE_OPTIONS } from '../../components/input/RoleSelect';
 import { createUser, type UserRole } from '../../services/users';
@@ -42,7 +42,7 @@ export function UserCreateContainer() {
 
   return (
     <ScreenContainer>
-      <ScreenHeader title="Tambah User" subtitle="Buat akun baru untuk sistem admin dan operasional daycare." onBack={() => router.back()} />
+      <AppPageHeader title="Tambah User" onBack={() => router.back()} />
 
       <UserCreateSummarySection />
       <UserCreateFormSection loading={loading} error={error} roleOptions={ADMIN_MANAGED_ROLE_OPTIONS} onSubmit={handleSubmit} />

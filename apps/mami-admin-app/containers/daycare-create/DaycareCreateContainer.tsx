@@ -1,11 +1,11 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
-import { ScreenHeader, ScreenSection } from '@mami/ui';
+import { ScrollView } from 'react-native';
 
-import { ScreenContainer } from '../../components/common/ScreenContainer';
+import { AppPageHeader } from '../../components/common/AppPageHeader';
 import { registerDaycare } from '../../services/daycare-admin';
 import { pickAndUploadDaycareLogo } from '../../services/uploads';
-import { Text } from '../../theme/theme';
+import { Box } from '../../theme/theme';
 import { DaycareCreateInfoSection } from './DaycareCreateInfoSection';
 import { DaycareCreateOwnerSection } from './DaycareCreateOwnerSection';
 
@@ -45,6 +45,7 @@ export function DaycareCreateContainer() {
       });
       router.replace('/(app)/(tabs)/daycares');
     } catch (nextError) {
+      console.error('[UI:DaycareCreate] submit failed', nextError);
       setError(nextError instanceof Error ? nextError.message : 'Gagal mendaftarkan daycare.');
     } finally {
       setLoading(false);
@@ -52,53 +53,49 @@ export function DaycareCreateContainer() {
   }
 
   return (
-    <ScreenContainer>
-      <ScreenHeader title="Register Daycare" subtitle="Daftarkan owner dan daycare baru dalam satu proses." onBack={() => router.back()} />
+    <Box flex={1} style={{ backgroundColor: '#F7F9FC' }}>
+      <AppPageHeader title="Buat Daycare" onBack={() => router.back()} />
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32, gap: 16 }}>
+        <DaycareCreateOwnerSection
+          ownerName={ownerName}
+          ownerEmail={ownerEmail}
+          ownerPhone={ownerPhone}
+          ownerPassword={ownerPassword}
+          onChangeOwnerName={setOwnerName}
+          onChangeOwnerEmail={setOwnerEmail}
+          onChangeOwnerPhone={setOwnerPhone}
+          onChangeOwnerPassword={setOwnerPassword}
+        />
 
-      <ScreenSection gap={8}>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Ringkasan</Text>
-        <Text variant="subtitle">Daycare baru akan langsung masuk antrean review setelah berhasil didaftarkan.</Text>
-      </ScreenSection>
-
-      <DaycareCreateOwnerSection
-        ownerName={ownerName}
-        ownerEmail={ownerEmail}
-        ownerPhone={ownerPhone}
-        ownerPassword={ownerPassword}
-        onChangeOwnerName={setOwnerName}
-        onChangeOwnerEmail={setOwnerEmail}
-        onChangeOwnerPhone={setOwnerPhone}
-        onChangeOwnerPassword={setOwnerPassword}
-      />
-
-      <DaycareCreateInfoSection
-        daycareName={daycareName}
-        logoUrl={logoUrl}
-        uploadingLogo={uploadingLogo}
-        city={city}
-        address={address}
-        description={description}
-        error={error}
-        loading={loading}
-        onChangeDaycareName={setDaycareName}
-        onPickLogo={() => {
-          void (async () => {
-            try {
-              setUploadingLogo(true);
-              const uploaded = await pickAndUploadDaycareLogo();
-              if (uploaded?.url) {
-                setLogoUrl(uploaded.url);
+        <DaycareCreateInfoSection
+          daycareName={daycareName}
+          logoUrl={logoUrl}
+          uploadingLogo={uploadingLogo}
+          city={city}
+          address={address}
+          description={description}
+          error={error}
+          loading={loading}
+          onChangeDaycareName={setDaycareName}
+          onPickLogo={() => {
+            void (async () => {
+              try {
+                setUploadingLogo(true);
+                const uploaded = await pickAndUploadDaycareLogo();
+                if (uploaded?.url) {
+                  setLogoUrl(uploaded.url);
+                }
+              } finally {
+                setUploadingLogo(false);
               }
-            } finally {
-              setUploadingLogo(false);
-            }
-          })();
-        }}
-        onChangeCity={setCity}
-        onChangeAddress={setAddress}
-        onChangeDescription={setDescription}
-        onSubmit={() => void handleSubmit()}
-      />
-    </ScreenContainer>
+            })();
+          }}
+          onChangeCity={setCity}
+          onChangeAddress={setAddress}
+          onChangeDescription={setDescription}
+          onSubmit={() => void handleSubmit()}
+        />
+      </ScrollView>
+    </Box>
   );
 }

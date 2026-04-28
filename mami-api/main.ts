@@ -24,8 +24,6 @@ import { resolvers as DailyCareRecordsResolvers } from "@/daily_care_records/dai
 import { typeDefs as DailyCareRecordsTypeDefs } from "@/daily_care_records/daily_care_records.typedef.ts";
 import { resolvers as ScheduleTemplatesResolvers } from "@/schedule_templates/schedule_templates.resolver.ts";
 import { typeDefs as ScheduleTemplatesTypeDefs } from "@/schedule_templates/schedule_templates.typedef.ts";
-import { resolvers as WeeklySchedulesResolvers } from "@/weekly_schedules/weekly_schedules.resolver.ts";
-import { typeDefs as WeeklySchedulesTypeDefs } from "@/weekly_schedules/weekly_schedules.typedef.ts";
 import { resolvers as InvoicesResolvers } from "@/invoices/invoices.resolver.ts";
 import { typeDefs as InvoicesTypeDefs } from "@/invoices/invoices.typedef.ts";
 import { resolvers as StaffPaymentsResolvers } from "@/staff_payments/staff_payments.resolver.ts";
@@ -66,7 +64,6 @@ const schema = makeExecutableSchema({
     MasterActivitiesResolvers,
     DailyCareRecordsResolvers,
     ScheduleTemplatesResolvers,
-    WeeklySchedulesResolvers,
     InvoicesResolvers,
     StaffPaymentsResolvers,
     MenusResolvers,
@@ -91,7 +88,6 @@ const schema = makeExecutableSchema({
     MasterActivitiesTypeDefs,
     DailyCareRecordsTypeDefs,
     ScheduleTemplatesTypeDefs,
-    WeeklySchedulesTypeDefs,
     InvoicesTypeDefs,
     StaffPaymentsTypeDefs,
     MenusTypeDefs,

@@ -1,9 +1,8 @@
 import { Button } from 'react-native-paper';
-import { ScreenSection } from '@mami/ui';
 import { Image } from 'expo-image';
 
 import { TextAreaField, TextField } from '../../components/input';
-import { Text } from '../../theme/theme';
+import { Box, Text } from '../../theme/theme';
 
 type DaycareCreateInfoSectionProps = {
   daycareName: string;
@@ -39,7 +38,7 @@ export function DaycareCreateInfoSection({
   onSubmit,
 }: DaycareCreateInfoSectionProps) {
   return (
-    <ScreenSection>
+    <Box gap="md">
       <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Data Daycare</Text>
       <TextField value={daycareName} placeholder="Nama daycare" onChange={onChangeDaycareName} />
       {logoUrl ? (
@@ -57,6 +56,6 @@ export function DaycareCreateInfoSection({
       <Button mode="contained" onPress={onSubmit} loading={loading} disabled={loading}>
         Daftarkan Daycare
       </Button>
-    </ScreenSection>
+    </Box>
   );
 }

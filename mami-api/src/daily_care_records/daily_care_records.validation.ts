@@ -7,6 +7,7 @@ import {
   ToiletingTypeEnum,
   MoodEnum,
   IntensityEnum,
+  SitterRoleEnum,
 } from "#shared/types/enums.ts";
 
 function normalizeEnumValue<TSchema extends z.ZodTypeAny>(schema: TSchema) {
@@ -62,6 +63,16 @@ export const dailyActivityInput = z.object({
   materials: z.string().optional(),
 });
 
+export const plannedDailyActivityInput = z.object({
+  masterActivityId: z.string().optional(),
+  activityName: z.string().min(1, "Activity name is required"),
+  category: normalizeEnumValue(z.nativeEnum(ActivityCategoryEnum)),
+  startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
+  endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)").optional(),
+  duration: z.number().positive().optional(),
+  defaultSitterRole: normalizeEnumValue(z.nativeEnum(SitterRoleEnum)).optional(),
+});
+
 // Assigned Sitter schema
 export const assignedSitterInput = z.object({
   userId: z.string(),
@@ -88,12 +99,22 @@ export const childDailyRecordInput = z.object({
 export const createDailyCareRecordInput = z.object({
   daycareId: z.string(),
   date: z.string().or(z.date()),
+  templateId: z.string().optional(),
+  plannedActivities: z.array(plannedDailyActivityInput).optional(),
   children: z.array(childDailyRecordInput),
 });
 
 // Update Daily Care Record schema
 export const updateDailyCareRecordInput = z.object({
+  templateId: z.string().optional(),
+  plannedActivities: z.array(plannedDailyActivityInput).optional(),
   children: z.array(childDailyRecordInput).optional(),
+});
+
+export const applyScheduleTemplateInput = z.object({
+  daycareId: z.string(),
+  date: z.string().or(z.date()),
+  templateId: z.string(),
 });
 
 // Check-in mutation input

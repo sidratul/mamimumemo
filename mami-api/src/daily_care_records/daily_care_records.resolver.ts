@@ -5,6 +5,7 @@ import {
   checkInChildInput,
   checkOutChildInput,
   logDailyActivityInput,
+  applyScheduleTemplateInput,
 } from "./daily_care_records.validation.ts";
 import { AppContext } from "#shared/config/context.ts";
 
@@ -117,6 +118,14 @@ export const resolvers = {
     ) => {
       logDailyActivityInput.parse(input);
       return dailyCareRecordsService.logDailyActivity(input, context);
+    },
+    applyScheduleTemplate: (
+      _: unknown,
+      { input }: { input: typeof applyScheduleTemplateInput._type },
+      context: AppContext
+    ) => {
+      applyScheduleTemplateInput.parse(input);
+      return dailyCareRecordsService.applyScheduleTemplate(input, context);
     },
   },
 };

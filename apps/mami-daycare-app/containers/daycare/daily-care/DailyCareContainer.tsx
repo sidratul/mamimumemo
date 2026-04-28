@@ -9,6 +9,7 @@ import { useSession } from '../../../providers/session-provider';
 import {
   checkInChildForToday,
   checkOutChildForToday,
+  type DailyCareRecord,
   getDaycareRoster,
   getMyDaycareRegistration,
   getTodayDailyCare,
@@ -162,10 +163,28 @@ function SummaryCard({ label, value }: { label: string; value: number }) {
   );
 }
 
+function getPlannedCategoryLabel(category: string) {
+  switch (category) {
+    case 'MEAL':
+      return 'Makan';
+    case 'NAP':
+      return 'Tidur';
+    case 'CARE':
+      return 'Perawatan';
+    case 'PLAY':
+      return 'Main';
+    case 'LEARNING':
+      return 'Belajar';
+    default:
+      return category;
+  }
+}
+
 export function DailyCareContainer() {
   const { isLoading, session } = useSession();
   const [gate, setGate] = useState<Gate>('loading');
   const [children, setChildren] = useState<Array<{ id: string; name: string }>>([]);
+  const [todayRecord, setTodayRecord] = useState<DailyCareRecord | null>(null);
   const [recordChildren, setRecordChildren] = useState<DailyCareChildRecord[]>([]);
   const [viewer, setViewer] = useState<ViewerProfile | null>(null);
   const [attendanceFilter, setAttendanceFilter] = useState<AttendanceFilter>('all');
@@ -188,6 +207,7 @@ export function DailyCareContainer() {
     if (!registration || registration.approvalStatus !== 'APPROVED') {
       setGate('pending');
       setChildren([]);
+      setTodayRecord(null);
       setRecordChildren([]);
       return;
     }
@@ -206,6 +226,7 @@ export function DailyCareContainer() {
       name: child.profile.name,
     }));
     setChildren(nextChildren);
+    setTodayRecord(today);
     setRecordChildren(today?.children || []);
     setForm((current) => ({
       ...current,
@@ -259,6 +280,7 @@ export function DailyCareContainer() {
       setErrorMessage('');
       const daycareId = activeSession.daycareId || (await getMyDaycareRegistration(activeSession.token))?.id || '';
       const record = await checkInChildForToday(activeSession.token, daycareId, childId, viewer);
+      setTodayRecord(record);
       setRecordChildren(record.children);
       setSuccessMessage('Check-in berhasil dicatat.');
     } catch (error) {
@@ -278,6 +300,7 @@ export function DailyCareContainer() {
       setErrorMessage('');
       const daycareId = activeSession.daycareId || (await getMyDaycareRegistration(activeSession.token))?.id || '';
       const record = await checkOutChildForToday(activeSession.token, daycareId, childId, viewer);
+      setTodayRecord(record);
       setRecordChildren(record.children);
       setSuccessMessage('Check-out berhasil dicatat.');
     } catch (error) {
@@ -308,6 +331,7 @@ export function DailyCareContainer() {
         description: values.description,
         startTime: values.startTime,
       });
+      setTodayRecord(record);
       setRecordChildren(record.children);
       setForm((current) => ({
         ...current,
@@ -369,6 +393,54 @@ export function DailyCareContainer() {
 
       {!loading ? (
         <>
+          <Box gap="md">
+            <Box flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Text style={{ fontSize: 20, fontWeight: '700' }}>Template Hari Ini</Text>
+              <Pressable onPress={() => router.push('/(daycare)/daily-record-create')}>
+                <Box backgroundColor="background" borderRadius="lg" borderWidth={1} borderColor="border" paddingHorizontal="md" paddingVertical="sm">
+                  <Text style={{ fontWeight: '700' }}>Pilih Template</Text>
+                </Box>
+              </Pressable>
+            </Box>
+
+            {todayRecord?.plannedActivities?.length ? (
+              <Box backgroundColor="surface" borderRadius="xl" borderWidth={1} borderColor="border" padding="lg" gap="md">
+                <Box gap="xs">
+                  <Text style={{ fontSize: 18, fontWeight: '700' }}>
+                    {todayRecord.appliedTemplate?.templateName || 'Template terpasang'}
+                  </Text>
+                  <Text color="textSecondary">Aktivitas default hari ini sudah terdefinisi dari template.</Text>
+                </Box>
+                <Box gap="sm">
+                  {todayRecord.plannedActivities.map((activity, index) => (
+                    <Box
+                      key={`${activity.activityName}-${index}`}
+                      backgroundColor="background"
+                      borderRadius="lg"
+                      borderWidth={1}
+                      borderColor="border"
+                      padding="md"
+                      gap="xs">
+                      <Box flexDirection="row" justifyContent="space-between" alignItems="center" gap="sm">
+                        <Text style={{ fontWeight: '700', flex: 1 }}>{activity.activityName}</Text>
+                        <Text color="textSecondary">
+                          {activity.startTime}
+                          {activity.endTime ? ` - ${activity.endTime}` : ''}
+                        </Text>
+                      </Box>
+                      <Text color="textSecondary">{getPlannedCategoryLabel(activity.category)}</Text>
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+            ) : (
+              <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="xs">
+                <Text style={{ fontWeight: '700' }}>Belum ada template</Text>
+                <Text color="textSecondary">Pilih template untuk mengisi aktivitas default hari ini.</Text>
+              </Box>
+            )}
+          </Box>
+
           <Box gap="md">
             <Box flexDirection="row" justifyContent="space-between" alignItems="center">
               <Text style={{ fontSize: 20, fontWeight: '700' }}>Absensi</Text>

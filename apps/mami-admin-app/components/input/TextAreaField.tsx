@@ -6,9 +6,17 @@ import { useSharedInputProps } from './shared';
 type TextAreaFieldProps = InputComponentProps<string> & {
   disabled?: boolean;
   numberOfLines?: number;
+  useBottomSheetInput?: boolean;
 };
 
-export function TextAreaField({ value, placeholder, onChange, disabled, numberOfLines = 4 }: TextAreaFieldProps) {
+export function TextAreaField({
+  value,
+  placeholder,
+  onChange,
+  disabled,
+  numberOfLines = 4,
+  useBottomSheetInput,
+}: TextAreaFieldProps) {
   const inputProps = useSharedInputProps();
 
   return (
@@ -21,6 +29,7 @@ export function TextAreaField({ value, placeholder, onChange, disabled, numberOf
       textColor={inputProps.textColor}
       backgroundColor={inputProps.backgroundColor}
       borderRadius={inputProps.borderRadius}
+      useBottomSheetInput={useBottomSheetInput}
     />
   );
 }

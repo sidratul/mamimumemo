@@ -195,6 +195,15 @@ export const SitterRoleEnum = {
 
 export type SitterRole = typeof SitterRoleEnum[keyof typeof SitterRoleEnum];
 
+export const ScheduleTemplateTargetTypeEnum = {
+  DAY_OF_WEEK: "day_of_week",
+  DATE_RANGE: "date_range",
+  SPECIFIC_DATE: "specific_date",
+} as const;
+
+export type ScheduleTemplateTargetType =
+  typeof ScheduleTemplateTargetTypeEnum[keyof typeof ScheduleTemplateTargetTypeEnum];
+
 // Attendance Status
 export const AttendanceStatusEnum = {
   PRESENT: "present",

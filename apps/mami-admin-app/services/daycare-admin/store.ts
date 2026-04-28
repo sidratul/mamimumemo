@@ -2,6 +2,7 @@ import { gql } from '@apollo/client';
 import { getApprovalStatusLabel as getSharedApprovalStatusLabel } from '@mami/core';
 
 import { apolloClient } from '../apollo';
+import { getApolloErrorMessage, logApolloError } from '../apollo/errors';
 
 export type ApprovalStatus =
   | 'DRAFT'
@@ -411,15 +412,24 @@ export async function registerDaycare(input: {
     city: string;
   };
 }) {
-  const response = await apolloClient.mutate<RegisterDaycareResponse>({
-    mutation: REGISTER_DAYCARE_MUTATION,
-    variables: { input },
-  });
+  try {
+    const response = await apolloClient.mutate<RegisterDaycareResponse>({
+      mutation: REGISTER_DAYCARE_MUTATION,
+      variables: { input },
+    });
 
-  if (!response.data?.registerDaycare) {
-    throw new Error('Gagal mendaftarkan daycare.');
+    if (!response.data?.registerDaycare) {
+      throw new Error('Gagal mendaftarkan daycare.');
+    }
+
+    invalidateDaycareData();
+    return response.data.registerDaycare;
+  } catch (error) {
+    logApolloError('registerDaycare', error, {
+      ownerEmail: input.owner.email,
+      daycareName: input.daycare.name,
+      city: input.daycare.city,
+    });
+    throw new Error(getApolloErrorMessage(error, 'Gagal mendaftarkan daycare.'));
   }
-
-  invalidateDaycareData();
-  return response.data.registerDaycare;
 }

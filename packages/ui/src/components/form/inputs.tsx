@@ -6,6 +6,7 @@ type BaseProps = {
   textColor?: string;
   backgroundColor?: string;
   borderRadius?: number;
+  useBottomSheetInput?: boolean;
 };
 
 type TextFieldProps = InputComponentProps<string> &
@@ -24,6 +25,7 @@ export function TextField({
   textColor,
   backgroundColor,
   borderRadius,
+  useBottomSheetInput,
 }: TextFieldProps) {
   return (
     <SharedTextInput
@@ -36,6 +38,7 @@ export function TextField({
       textColor={textColor}
       backgroundColor={backgroundColor}
       borderRadius={borderRadius}
+      useBottomSheetInput={useBottomSheetInput}
     />
   );
 }
@@ -50,6 +53,7 @@ export function PasswordField({
   textColor,
   backgroundColor,
   borderRadius,
+  useBottomSheetInput,
 }: PasswordFieldProps) {
   return (
     <PasswordInput
@@ -60,6 +64,7 @@ export function PasswordField({
       textColor={textColor}
       backgroundColor={backgroundColor}
       borderRadius={borderRadius}
+      useBottomSheetInput={useBottomSheetInput}
     />
   );
 }
@@ -74,6 +79,7 @@ export function NumberField({
   textColor,
   backgroundColor,
   borderRadius,
+  useBottomSheetInput,
 }: NumberFieldProps) {
   return (
     <SharedNumberInput
@@ -84,6 +90,7 @@ export function NumberField({
       textColor={textColor}
       backgroundColor={backgroundColor}
       borderRadius={borderRadius}
+      useBottomSheetInput={useBottomSheetInput}
     />
   );
 }
@@ -102,6 +109,7 @@ export function TextAreaField({
   textColor,
   backgroundColor,
   borderRadius,
+  useBottomSheetInput,
 }: TextAreaFieldProps) {
   return (
     <SharedTextAreaInput
@@ -113,6 +121,7 @@ export function TextAreaField({
       textColor={textColor}
       backgroundColor={backgroundColor}
       borderRadius={borderRadius}
+      useBottomSheetInput={useBottomSheetInput}
     />
   );
 }

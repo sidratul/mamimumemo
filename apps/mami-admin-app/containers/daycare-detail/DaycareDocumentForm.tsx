@@ -42,6 +42,7 @@ export function DaycareDocumentForm({
             value={document.type}
             onChange={(value) => onChangeType(index, value)}
             disabled={loading}
+            useBottomSheetInput
           />
           <Box
             flexDirection="row"

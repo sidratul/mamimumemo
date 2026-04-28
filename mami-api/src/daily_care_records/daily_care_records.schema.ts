@@ -56,6 +56,29 @@ const dailyActivitySchema = new mongoose.Schema<Record<string, unknown>>({
   loggedAt: { type: Date, default: Date.now },
 });
 
+const plannedDailyActivitySchema = new mongoose.Schema<Record<string, unknown>>({
+  _id: false,
+  masterActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "MasterActivity" },
+  activityName: { type: String, required: true },
+  category: {
+    type: String,
+    enum: [
+      "meal", "nap", "toileting", "care", "play",
+      "learning", "creative", "physical", "outdoor",
+      "routine", "social", "development"
+    ],
+    required: true
+  },
+  startTime: { type: String, required: true },
+  endTime: { type: String },
+  duration: { type: Number },
+  defaultSitterRole: {
+    type: String,
+    enum: ["any", "senior_sitter", "junior_sitter"],
+    default: "any",
+  },
+});
+
 // Assigned Sitter subdocument
 const assignedSitterSchema = new mongoose.Schema<Record<string, unknown>>({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
@@ -82,6 +105,12 @@ const childDailyRecordSchema = new mongoose.Schema<Record<string, unknown>>({
 const dailyCareRecordSchema = new mongoose.Schema<Record<string, unknown>>({
   daycareId: { type: mongoose.Schema.Types.ObjectId, ref: "Daycare", required: true },
   date: { type: Date, required: true },
+  appliedTemplate: {
+    templateId: { type: mongoose.Schema.Types.ObjectId, ref: "ScheduleTemplate" },
+    templateName: String,
+    appliedAt: Date,
+  },
+  plannedActivities: [plannedDailyActivitySchema],
   children: [childDailyRecordSchema],
 }, { 
   timestamps: true,

@@ -30,6 +30,20 @@ type LogActivityResponse = {
 export type DailyCareRecord = {
   id: string;
   date: string;
+  appliedTemplate?: {
+    templateId: string;
+    templateName: string;
+    appliedAt: string;
+  } | null;
+  plannedActivities: Array<{
+    masterActivityId?: string | null;
+    activityName: string;
+    category: string;
+    startTime: string;
+    endTime?: string | null;
+    duration?: number | null;
+    defaultSitterRole?: string | null;
+  }>;
   totalChildren: number;
   children: DailyCareChildRecord[];
 };
@@ -95,6 +109,20 @@ const TODAY_DAILY_CARE_QUERY = `
     todayDailyCare(daycareId: $daycareId) {
       id
       date
+      appliedTemplate {
+        templateId
+        templateName
+        appliedAt
+      }
+      plannedActivities {
+        masterActivityId
+        activityName
+        category
+        startTime
+        endTime
+        duration
+        defaultSitterRole
+      }
       totalChildren
       children {
         childId
@@ -137,6 +165,20 @@ const CHILD_DAILY_RECORDS_QUERY = `
     childDailyRecords(childId: $childId, startDate: $startDate, endDate: $endDate) {
       id
       date
+      appliedTemplate {
+        templateId
+        templateName
+        appliedAt
+      }
+      plannedActivities {
+        masterActivityId
+        activityName
+        category
+        startTime
+        endTime
+        duration
+        defaultSitterRole
+      }
       totalChildren
       children {
         childId
@@ -179,6 +221,20 @@ const CHECK_IN_CHILD_MUTATION = `
     checkInChild(input: $input) {
       id
       date
+      appliedTemplate {
+        templateId
+        templateName
+        appliedAt
+      }
+      plannedActivities {
+        masterActivityId
+        activityName
+        category
+        startTime
+        endTime
+        duration
+        defaultSitterRole
+      }
       totalChildren
       children {
         childId
@@ -221,6 +277,20 @@ const CHECK_OUT_CHILD_MUTATION = `
     checkOutChild(input: $input) {
       id
       date
+      appliedTemplate {
+        templateId
+        templateName
+        appliedAt
+      }
+      plannedActivities {
+        masterActivityId
+        activityName
+        category
+        startTime
+        endTime
+        duration
+        defaultSitterRole
+      }
       totalChildren
       children {
         childId
@@ -263,6 +333,20 @@ const LOG_DAILY_ACTIVITY_MUTATION = `
     logDailyActivity(input: $input) {
       id
       date
+      appliedTemplate {
+        templateId
+        templateName
+        appliedAt
+      }
+      plannedActivities {
+        masterActivityId
+        activityName
+        category
+        startTime
+        endTime
+        duration
+        defaultSitterRole
+      }
       totalChildren
       children {
         childId

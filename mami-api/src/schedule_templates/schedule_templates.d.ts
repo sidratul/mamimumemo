@@ -1,18 +1,20 @@
 import { Types } from "mongoose";
-import { ActivityCategory, SitterRole } from "#shared/types/enums.ts";
+import { ActivityCategory, DayOfWeek, ScheduleTemplateTargetType, SitterRole } from "#shared/types/enums.ts";
 
 export interface IScheduleTemplate {
   _id: Types.ObjectId;
   daycareId: Types.ObjectId;
   name: string;
-  dayOfWeek: number[]; // JavaScript standard: 0=Sunday, 6=Saturday
+  targetType: ScheduleTemplateTargetType;
+  dayOfWeek?: DayOfWeek[];
+  startDate?: Date;
+  endDate?: Date;
+  specificDate?: Date;
   activities: ITemplateActivity[];
   active: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
-
-export type DayOfWeek = number; // 0-6
 
 export interface ITemplateActivity {
   masterActivityId?: Types.ObjectId;

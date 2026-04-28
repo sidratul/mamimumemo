@@ -1,9 +1,19 @@
 export const typeDefs = `
+  enum ScheduleTemplateTargetType {
+    DAY_OF_WEEK
+    DATE_RANGE
+    SPECIFIC_DATE
+  }
+
   type ScheduleTemplate {
     id: ObjectId!
     daycareId: ObjectId!
     name: String!
-    dayOfWeek: [Int!]!
+    targetType: ScheduleTemplateTargetType!
+    dayOfWeek: [Int!]
+    startDate: Date
+    endDate: Date
+    specificDate: Date
     activities: [TemplateActivity!]!
     active: Boolean!
     createdAt: Date!
@@ -39,13 +49,21 @@ export const typeDefs = `
   input CreateScheduleTemplateInput {
     daycareId: ObjectId!
     name: String!
-    dayOfWeek: [Int!]!
+    targetType: ScheduleTemplateTargetType!
+    dayOfWeek: [Int!]
+    startDate: Date
+    endDate: Date
+    specificDate: Date
     activities: [TemplateActivityInput!]!
   }
 
   input UpdateScheduleTemplateInput {
     name: String
+    targetType: ScheduleTemplateTargetType
     dayOfWeek: [Int!]
+    startDate: Date
+    endDate: Date
+    specificDate: Date
     activities: [TemplateActivityInput!]
     active: Boolean
   }

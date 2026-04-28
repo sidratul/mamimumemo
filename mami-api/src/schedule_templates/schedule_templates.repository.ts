@@ -1,7 +1,4 @@
 import ScheduleTemplateModel from "./schedule_templates.schema.ts";
-import { GraphQLError } from "graphql";
-import { AppContext } from "#shared/config/context.ts";
-import { MESSAGES } from "#shared/enums/constant.ts";
 
 export class ScheduleTemplatesRepository {
   async findByDaycareId(daycareId: string, active?: boolean) {
@@ -19,9 +16,39 @@ export class ScheduleTemplatesRepository {
   async findByDayOfWeek(daycareId: string, dayOfWeek: number) {
     return await ScheduleTemplateModel.find({
       daycareId,
+      targetType: "day_of_week",
       dayOfWeek: dayOfWeek,
       active: true,
     }).exec();
+  }
+
+  async findMatchingTemplateForDate(daycareId: string, date: Date) {
+    const normalized = new Date(date);
+    normalized.setHours(0, 0, 0, 0);
+    const dayOfWeek = normalized.getDay();
+
+    return await ScheduleTemplateModel.findOne({
+      daycareId,
+      active: true,
+      $or: [
+        {
+          targetType: "specific_date",
+          specificDate: {
+            $gte: normalized,
+            $lte: new Date(normalized.getTime() + 24 * 60 * 60 * 1000 - 1),
+          },
+        },
+        {
+          targetType: "date_range",
+          startDate: { $lte: normalized },
+          endDate: { $gte: normalized },
+        },
+        {
+          targetType: "day_of_week",
+          dayOfWeek,
+        },
+      ],
+    }).sort({ targetType: -1, updatedAt: -1 }).exec();
   }
 
   async create(data: any) {

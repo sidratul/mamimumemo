@@ -1,5 +1,10 @@
 import { z } from "zod";
-import { ActivityCategoryEnum, DayOfWeekEnum, SitterRoleEnum } from "#shared/types/enums.ts";
+import {
+  ActivityCategoryEnum,
+  DayOfWeekEnum,
+  ScheduleTemplateTargetTypeEnum,
+  SitterRoleEnum,
+} from "#shared/types/enums.ts";
 
 export const templateActivityInput = z.object({
   masterActivityId: z.string().optional(),
@@ -14,13 +19,33 @@ export const templateActivityInput = z.object({
 export const createScheduleTemplateInput = z.object({
   daycareId: z.string(),
   name: z.string().min(1, "Template name is required"),
-  dayOfWeek: z.array(z.nativeEnum(DayOfWeekEnum)),
+  targetType: z.nativeEnum(ScheduleTemplateTargetTypeEnum),
+  dayOfWeek: z.array(z.nativeEnum(DayOfWeekEnum)).optional(),
+  startDate: z.string().or(z.date()).optional(),
+  endDate: z.string().or(z.date()).optional(),
+  specificDate: z.string().or(z.date()).optional(),
   activities: z.array(templateActivityInput),
+}).superRefine((value, ctx) => {
+  if (value.targetType === ScheduleTemplateTargetTypeEnum.DAY_OF_WEEK && (!value.dayOfWeek || value.dayOfWeek.length === 0)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "dayOfWeek wajib diisi untuk target harian.", path: ["dayOfWeek"] });
+  }
+
+  if (value.targetType === ScheduleTemplateTargetTypeEnum.DATE_RANGE && (!value.startDate || !value.endDate)) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "startDate dan endDate wajib diisi untuk target rentang tanggal.", path: ["startDate"] });
+  }
+
+  if (value.targetType === ScheduleTemplateTargetTypeEnum.SPECIFIC_DATE && !value.specificDate) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: "specificDate wajib diisi untuk target tanggal tertentu.", path: ["specificDate"] });
+  }
 });
 
 export const updateScheduleTemplateInput = z.object({
   name: z.string().min(1).optional(),
+  targetType: z.nativeEnum(ScheduleTemplateTargetTypeEnum).optional(),
   dayOfWeek: z.array(z.nativeEnum(DayOfWeekEnum)).optional(),
+  startDate: z.string().or(z.date()).optional(),
+  endDate: z.string().or(z.date()).optional(),
+  specificDate: z.string().or(z.date()).optional(),
   activities: z.array(templateActivityInput).optional(),
   active: z.boolean().optional(),
 });

@@ -3,10 +3,28 @@ export const typeDefs = `
     id: ObjectId!
     daycareId: ObjectId!
     date: Date!
+    appliedTemplate: AppliedScheduleTemplate
+    plannedActivities: [PlannedDailyActivity!]!
     children: [ChildDailyRecord!]!
     totalChildren: Int!
     createdAt: Date!
     updatedAt: Date!
+  }
+
+  type AppliedScheduleTemplate {
+    templateId: ObjectId!
+    templateName: String!
+    appliedAt: Date!
+  }
+
+  type PlannedDailyActivity {
+    masterActivityId: ObjectId
+    activityName: String!
+    category: ActivityCategory!
+    startTime: String!
+    endTime: String
+    duration: Int
+    defaultSitterRole: SitterRole
   }
 
   type ChildDailyRecord {
@@ -150,11 +168,31 @@ export const typeDefs = `
   input CreateDailyCareRecordInput {
     daycareId: ObjectId!
     date: Date!
+    templateId: ObjectId
+    plannedActivities: [PlannedDailyActivityInput!]
     children: [ChildDailyRecordInput!]!
   }
 
   input UpdateDailyCareRecordInput {
+    templateId: ObjectId
+    plannedActivities: [PlannedDailyActivityInput!]
     children: [ChildDailyRecordInput!]
+  }
+
+  input PlannedDailyActivityInput {
+    masterActivityId: ObjectId
+    activityName: String!
+    category: ActivityCategory!
+    startTime: String!
+    endTime: String
+    duration: Int
+    defaultSitterRole: SitterRole
+  }
+
+  input ApplyScheduleTemplateInput {
+    daycareId: ObjectId!
+    date: Date!
+    templateId: ObjectId!
   }
 
   input CheckInChildInput {
@@ -207,5 +245,8 @@ export const typeDefs = `
     
     "Log activity for child"
     logDailyActivity(input: LogDailyActivityInput!): DailyCareRecord!
+
+    "Apply schedule template to a specific date"
+    applyScheduleTemplate(input: ApplyScheduleTemplateInput!): DailyCareRecord!
   }
 `;
