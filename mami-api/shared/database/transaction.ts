@@ -2,7 +2,7 @@ import mongoose, { ClientSession } from "mongoose";
 import { AppContext } from "#shared/config/context.ts";
 
 export async function runInTransaction<T>(
-  context: AppContext,
+  _context: AppContext,
   callback: (session?: ClientSession) => Promise<T>,
 ): Promise<T> {
   const supportsTransactions = await canUseTransactions();
@@ -10,18 +10,24 @@ export async function runInTransaction<T>(
     return await callback();
   }
 
-  await context.startTransaction();
+  const session = await mongoose.startSession();
+  session.startTransaction();
 
   try {
-    const session = await context.getDbSession();
     const result = await callback(session);
-    await context.commitTransaction();
+    if (session.inTransaction()) {
+      await session.commitTransaction();
+    }
     return result;
   } catch (error) {
-    await context.abortTransaction();
+    if (session.inTransaction()) {
+      await session.abortTransaction();
+    }
     throw error;
   } finally {
-    await context.endSession();
+    if (!session.hasEnded) {
+      await session.endSession();
+    }
   }
 }
 

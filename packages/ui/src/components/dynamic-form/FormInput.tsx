@@ -14,7 +14,12 @@ export function FormInput<T extends Record<string, unknown>>({ fieldKey }: FormI
 
   return (
     <View style={styles.container}>
-      {field.label ? <Text style={styles.label}>{field.label}</Text> : null}
+      {field.label ? (
+        <Text style={styles.label}>
+          {field.label}
+          {field.required ? <Text style={styles.required}> *</Text> : null}
+        </Text>
+      ) : null}
       {field.input({
         ...field.props,
         value,
@@ -36,6 +41,9 @@ const styles = StyleSheet.create({
     color: '#3D2218',
     fontWeight: '600',
     fontSize: 14,
+  },
+  required: {
+    color: '#D14343',
   },
   error: {
     color: '#C6285A',

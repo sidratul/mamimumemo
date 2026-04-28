@@ -52,25 +52,30 @@ export function UserCreateFormSection({
   const fields: FormFieldProps<UserCreateFormData> = {
     name: {
       label: 'Nama lengkap',
+      required: true,
       input: TextField,
       props: { placeholder: 'Nama lengkap' },
     },
     email: {
       label: 'Email',
+      required: true,
       input: TextField,
       props: { placeholder: 'Email', keyboardType: 'email-address' },
     },
     phone: {
       label: 'Nomor telepon',
+      required: true,
       input: TextField,
       props: { placeholder: 'Nomor telepon', keyboardType: 'phone-pad' },
     },
     role: {
       label: 'Role',
+      required: true,
       input: (props) => UserRoleField(roleOptions, props),
     },
     password: {
       label: 'Password',
+      required: true,
       input: PasswordField,
       props: { placeholder: 'Password' },
     },

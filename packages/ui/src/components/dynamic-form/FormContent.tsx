@@ -17,9 +17,18 @@ export function FormContent<T extends Record<string, unknown>>() {
 
   return (
     <View style={[styles.container, inputsContainerStyle]}>
-      {visibleFieldKeys.map((key) => (
-        <FormInput<T> key={`form-field-${key}`} fieldKey={key} />
-      ))}
+      {visibleFieldKeys.map((key, index) => {
+        const field = fields[key as keyof T];
+        const previousField = index > 0 ? fields[visibleFieldKeys[index - 1] as keyof T] : undefined;
+        const showSection = Boolean(field.section) && field.section !== previousField?.section;
+
+        return (
+          <View key={`form-field-${key}`} style={styles.fieldBlock}>
+            {showSection ? <Text style={styles.sectionTitle}>{field.section}</Text> : null}
+            <FormInput<T> fieldKey={key} />
+          </View>
+        );
+      })}
 
       {!readOnly && showSubmitButton ? (
         <Pressable disabled={loading} onPress={() => void formik.submitForm()}>
@@ -35,6 +44,15 @@ export function FormContent<T extends Record<string, unknown>>() {
 const styles = StyleSheet.create({
   container: {
     gap: 12,
+  },
+  fieldBlock: {
+    gap: 12,
+  },
+  sectionTitle: {
+    color: '#24324B',
+    fontSize: 18,
+    fontWeight: '700',
+    marginTop: 4,
   },
   button: {
     backgroundColor: '#C75B39',

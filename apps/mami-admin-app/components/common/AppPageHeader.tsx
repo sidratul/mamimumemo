@@ -4,15 +4,22 @@ import { Appbar } from 'react-native-paper';
 type AppPageHeaderProps = {
   title: string;
   onBack?: () => void;
+  backgroundColor?: string;
+  borderBottomColor?: string;
 };
 
-export function AppPageHeader({ title, onBack }: AppPageHeaderProps) {
+export function AppPageHeader({
+  title,
+  onBack,
+  backgroundColor = '#F7F9FC',
+  borderBottomColor = '#E8ECF4',
+}: AppPageHeaderProps) {
   return (
     <Appbar.Header
       style={{
-        backgroundColor: '#F7F9FC',
+        backgroundColor,
         borderBottomWidth: 1,
-        borderBottomColor: '#E8ECF4',
+        borderBottomColor,
         elevation: 0,
         shadowOpacity: 0,
         height: 56,

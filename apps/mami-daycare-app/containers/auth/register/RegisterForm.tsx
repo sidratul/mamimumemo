@@ -4,7 +4,7 @@ import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import { DynamicForm, NumberField, PasswordField, TextAreaField, TextField, type FormFieldProps } from '@mami/ui';
 import { daycareRegistrationDaycareStepSchema, daycareRegistrationOwnerStepSchema } from '@mami/core';
-import { HelperText } from 'react-native-paper';
+import { Button, HelperText } from 'react-native-paper';
 
 import { useSession } from '../../../providers/session-provider';
 import { submitDaycareRegistration } from '../../../services/registration';
@@ -73,6 +73,7 @@ type OwnerStepData = Pick<RegisterData, 'ownerName' | 'ownerEmail' | 'ownerPhone
 const daycareFields: FormFieldProps<DaycareStepData> = {
   daycareName: {
     label: 'Nama Daycare',
+    required: true,
     input: TextField,
     props: {
       placeholder: 'Contoh: Mami Daycare Kemang',
@@ -82,6 +83,7 @@ const daycareFields: FormFieldProps<DaycareStepData> = {
   },
   city: {
     label: 'Kota',
+    required: true,
     input: TextField,
     props: {
       placeholder: 'Contoh: Jakarta Selatan',
@@ -91,6 +93,7 @@ const daycareFields: FormFieldProps<DaycareStepData> = {
   },
   address: {
     label: 'Alamat Daycare',
+    required: true,
     input: TextAreaField,
     props: {
       placeholder: 'Alamat lengkap daycare',
@@ -101,6 +104,7 @@ const daycareFields: FormFieldProps<DaycareStepData> = {
   },
   description: {
     label: 'Deskripsi Singkat',
+    required: true,
     input: TextAreaField,
     props: {
       placeholder: 'Deskripsi operasional daycare, jam layanan, kapasitas, dll.',
@@ -114,6 +118,7 @@ const daycareFields: FormFieldProps<DaycareStepData> = {
 const ownerFields: FormFieldProps<OwnerStepData> = {
   ownerName: {
     label: 'Nama Owner',
+    required: true,
     input: TextField,
     props: {
       placeholder: 'Contoh: Nadia Putri',
@@ -123,6 +128,7 @@ const ownerFields: FormFieldProps<OwnerStepData> = {
   },
   ownerEmail: {
     label: 'Email Owner',
+    required: true,
     input: TextField,
     props: {
       placeholder: 'owner@daycare.id',
@@ -134,6 +140,7 @@ const ownerFields: FormFieldProps<OwnerStepData> = {
   },
   ownerPhone: {
     label: 'Nomor Telepon Owner',
+    required: true,
     input: NumberField,
     props: {
       placeholder: '08xxxxxxxxxx',
@@ -143,6 +150,7 @@ const ownerFields: FormFieldProps<OwnerStepData> = {
   },
   password: {
     label: 'Password Akun',
+    required: true,
     input: PasswordField,
     props: {
       placeholder: 'Minimal 6 karakter',
@@ -206,17 +214,15 @@ export function RegisterForm() {
   }
 
   return (
-    <Box gap="md">
-      <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="md" gap="sm">
-        <Box flexDirection="row" alignItems="center">
-          <StepItem label="Daycare" icon="apartment" active={step === 'daycare'} done={step === 'owner'} />
-          <Box flex={1} height={1} style={{ backgroundColor: '#F0D5C9' }} marginHorizontal="sm" />
-          <StepItem label="Owner" icon="person-outline" active={step === 'owner'} done={false} />
-        </Box>
+    <Box gap="sm" paddingHorizontal="xs">
+      <Box flexDirection="row" alignItems="center" paddingVertical="xs">
+        <StepItem label="Daycare" icon="apartment" active={step === 'daycare'} done={step === 'owner'} />
+        <Box flex={1} height={1} style={{ backgroundColor: '#F0D5C9' }} marginHorizontal="sm" />
+        <StepItem label="Owner" icon="person-outline" active={step === 'owner'} done={false} />
       </Box>
 
       {step === 'daycare' ? (
-        <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="md" gap="md">
+        <Box gap="sm">
           <DynamicForm<DaycareStepData>
             fields={daycareFields}
             defaultValue={{
@@ -227,6 +233,7 @@ export function RegisterForm() {
             }}
             schema={daycareRegistrationDaycareStepSchema}
             submitLabel="Lanjut"
+            inputsContainerStyle={{ gap: 12 }}
             onSubmit={handleNextStep}
           />
           <Box flexDirection="row" justifyContent="center" alignItems="center" gap="xs">
@@ -239,7 +246,7 @@ export function RegisterForm() {
       ) : null}
 
       {step === 'owner' ? (
-        <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="md" gap="md">
+        <Box gap="sm">
           <DynamicForm<OwnerStepData>
             fields={ownerFields}
             defaultValue={{
@@ -251,22 +258,19 @@ export function RegisterForm() {
             schema={daycareRegistrationOwnerStepSchema}
             submitLabel={isSubmitting ? 'Mengirim...' : 'Kirim'}
             loading={isSubmitting}
+            inputsContainerStyle={{ gap: 12 }}
             onSubmit={onSubmit}
           />
-          <Box flexDirection="row" gap="sm">
-            <Pressable onPress={handlePreviousStep} style={{ flex: 1 }}>
-              <Box backgroundColor="background" borderRadius="lg" borderWidth={1} borderColor="border" padding="md" alignItems="center">
-                <Text style={{ fontWeight: '700' }}>Kembali</Text>
-              </Box>
-            </Pressable>
-          </Box>
+          <Button mode="text" onPress={handlePreviousStep} compact contentStyle={{ minHeight: 36, justifyContent: 'flex-start' }}>
+            Kembali
+          </Button>
         </Box>
       ) : null}
 
       {errorMessage ? <HelperText type="error">{errorMessage}</HelperText> : null}
 
       {successMessage ? (
-        <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="xs">
+        <Box gap="xs">
           <Text color="success" style={{ fontWeight: '700' }}>Registrasi Berhasil</Text>
           <Text>{successMessage}</Text>
           <Text color="textSecondary">ID Daycare: {daycareId}</Text>

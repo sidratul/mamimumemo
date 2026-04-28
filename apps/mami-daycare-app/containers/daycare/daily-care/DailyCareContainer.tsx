@@ -59,6 +59,7 @@ function validateActivity(values: ActivityForm) {
 const activityFields: FormFieldProps<ActivityTextForm> = {
   activityName: {
     label: 'Nama Aktivitas',
+    required: true,
     input: TextField,
     props: {
       placeholder: 'Contoh: Free play di indoor corner',
@@ -68,6 +69,7 @@ const activityFields: FormFieldProps<ActivityTextForm> = {
   },
   startTime: {
     label: 'Jam Mulai',
+    required: true,
     input: TextField,
     props: {
       placeholder: 'HH:mm',

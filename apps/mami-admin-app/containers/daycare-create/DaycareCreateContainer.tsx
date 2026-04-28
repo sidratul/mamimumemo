@@ -1,46 +1,38 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { ScrollView } from 'react-native';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPageHeader } from '../../components/common/AppPageHeader';
 import { registerDaycare } from '../../services/daycare-admin';
 import { pickAndUploadDaycareLogo } from '../../services/uploads';
 import { Box } from '../../theme/theme';
-import { DaycareCreateInfoSection } from './DaycareCreateInfoSection';
-import { DaycareCreateOwnerSection } from './DaycareCreateOwnerSection';
+import { DaycareCreateFormData, DaycareCreateFormSection } from './DaycareCreateFormSection';
 
 export function DaycareCreateContainer() {
   const router = useRouter();
-  const [ownerName, setOwnerName] = useState('');
-  const [ownerEmail, setOwnerEmail] = useState('');
-  const [ownerPassword, setOwnerPassword] = useState('');
-  const [ownerPhone, setOwnerPhone] = useState('');
-  const [daycareName, setDaycareName] = useState('');
-  const [logoUrl, setLogoUrl] = useState('');
+  const insets = useSafeAreaInsets();
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [description, setDescription] = useState('');
-  const [address, setAddress] = useState('');
-  const [city, setCity] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  async function handleSubmit() {
+  async function handleSubmit(values: DaycareCreateFormData) {
     try {
       setLoading(true);
       setError('');
       await registerDaycare({
         owner: {
-          name: ownerName.trim(),
-          email: ownerEmail.trim(),
-          password: ownerPassword,
-          phone: ownerPhone.trim(),
+          name: values.ownerName.trim(),
+          email: values.ownerEmail.trim(),
+          password: values.ownerPassword,
+          phone: values.ownerPhone.trim(),
         },
         daycare: {
-          name: daycareName.trim(),
-          logoUrl: logoUrl.trim(),
-          description: description.trim(),
-          address: address.trim(),
-          city: city.trim(),
+          name: values.daycareName.trim(),
+          logoUrl: values.logoUrl.trim(),
+          description: values.description.trim(),
+          address: values.address.trim(),
+          city: values.city.trim(),
         },
       });
       router.replace('/(app)/(tabs)/daycares');
@@ -53,49 +45,32 @@ export function DaycareCreateContainer() {
   }
 
   return (
-    <Box flex={1} style={{ backgroundColor: '#F7F9FC' }}>
-      <AppPageHeader title="Buat Daycare" onBack={() => router.back()} />
-      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 16, paddingBottom: 32, gap: 16 }}>
-        <DaycareCreateOwnerSection
-          ownerName={ownerName}
-          ownerEmail={ownerEmail}
-          ownerPhone={ownerPhone}
-          ownerPassword={ownerPassword}
-          onChangeOwnerName={setOwnerName}
-          onChangeOwnerEmail={setOwnerEmail}
-          onChangeOwnerPhone={setOwnerPhone}
-          onChangeOwnerPassword={setOwnerPassword}
-        />
-
-        <DaycareCreateInfoSection
-          daycareName={daycareName}
-          logoUrl={logoUrl}
-          uploadingLogo={uploadingLogo}
-          city={city}
-          address={address}
-          description={description}
-          error={error}
-          loading={loading}
-          onChangeDaycareName={setDaycareName}
-          onPickLogo={() => {
-            void (async () => {
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }} edges={['left', 'right', 'bottom']}>
+      <AppPageHeader
+        title="Buat Daycare"
+        onBack={() => router.back()}
+        backgroundColor="#FFFFFF"
+        borderBottomColor="#EEF2F7"
+      />
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 24 }}>
+        <Box paddingBottom="lg" style={{ paddingBottom: Math.max(insets.bottom, 16) + 16 }}>
+          <DaycareCreateFormSection
+            uploadingLogo={uploadingLogo}
+            error={error}
+            loading={loading}
+            onPickLogo={async () => {
               try {
                 setUploadingLogo(true);
                 const uploaded = await pickAndUploadDaycareLogo();
-                if (uploaded?.url) {
-                  setLogoUrl(uploaded.url);
-                }
+                return uploaded?.url ?? null;
               } finally {
                 setUploadingLogo(false);
               }
-            })();
-          }}
-          onChangeCity={setCity}
-          onChangeAddress={setAddress}
-          onChangeDescription={setDescription}
-          onSubmit={() => void handleSubmit()}
-        />
+            }}
+            onSubmit={(values) => void handleSubmit(values)}
+          />
+        </Box>
       </ScrollView>
-    </Box>
+    </SafeAreaView>
   );
 }

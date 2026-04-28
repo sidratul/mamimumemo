@@ -95,22 +95,27 @@ type ChildEditForm = {
 
 const enrollmentFields: FormFieldProps<EnrollmentForm> = {
   parentName: {
+    section: 'Data Parent',
     label: 'Nama Parent',
+    required: true,
     input: TextField,
     props: { placeholder: 'Contoh: Ayu Maharani', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   parentEmail: {
     label: 'Email Parent',
+    required: true,
     input: TextField,
     props: { placeholder: 'parent@example.com', keyboardType: 'email-address', autoCapitalize: 'none', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   parentPhone: {
     label: 'Nomor Telepon',
+    required: true,
     input: NumberField,
     props: { placeholder: '08xxxxxxxxxx', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   parentPassword: {
     label: 'Password Sementara',
+    required: true,
     input: PasswordField,
     props: { placeholder: 'Minimal 6 karakter', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
@@ -120,12 +125,15 @@ const enrollmentFields: FormFieldProps<EnrollmentForm> = {
     props: { placeholder: 'Akses pickup, catatan keluarga, dll.', borderRadius: 14, backgroundColor: '#FFFFFF', numberOfLines: 3 },
   },
   childName: {
+    section: 'Data Child',
     label: 'Nama Child',
+    required: true,
     input: TextField,
     props: { placeholder: 'Contoh: Alma Putri', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   childBirthDate: {
     label: 'Tanggal Lahir',
+    required: true,
     input: TextField,
     props: { placeholder: 'YYYY-MM-DD', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
@@ -152,11 +160,13 @@ const parentEditFields: FormFieldProps<ParentEditForm> = {
 const childEditFields: FormFieldProps<ChildEditForm> = {
   name: {
     label: 'Nama Child',
+    required: true,
     input: TextField,
     props: { placeholder: 'Nama child', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
   birthDate: {
     label: 'Tanggal Lahir',
+    required: true,
     input: TextField,
     props: { placeholder: 'YYYY-MM-DD', borderRadius: 14, backgroundColor: '#FFFFFF' },
   },
