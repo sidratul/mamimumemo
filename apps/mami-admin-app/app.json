@@ -44,8 +44,8 @@
       ]
     ],
     "extra": {
-      "apiBaseUrl": "https://api.example.com",
-      "graphqlUrl": "https://api.example.com/graphql"
+      "apiBaseUrl": "https://mamimumemo.sidratul.deno.net",
+      "graphqlUrl": "https://mamimumemo.sidratul.deno.net/graphql"
     },
     "experiments": {
       "typedRoutes": true

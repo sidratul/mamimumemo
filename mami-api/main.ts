@@ -101,6 +101,7 @@ const schema = makeExecutableSchema({
 
 const yoga = createYoga({
   schema,
+  maskedErrors: false,
   context: async (ctx) => {
     const { user } = await createAuthContext(ctx);
     return new AppContext(user);
