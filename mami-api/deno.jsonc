@@ -1,0 +1,19 @@
+{
+  "nodeModulesDir": "auto",
+  "importMap": "./import_map.json",
+  "tasks": {
+    "start": "deno run -A main.ts",
+    "dev": "deno run -A --watch --env-file=.env main.ts",
+    "test": "deno test -A --env-file=.env",
+    "build": "deno check main.ts",
+    "deploy": "deno deploy --prod",
+    "deploy:preview": "deno deploy",
+    "seed:admin": "deno run -A --env-file=.env scripts/seed-admin.ts",
+    "cleanup:tmp-uploads": "deno run -A --env-file=.env scripts/cleanup-temp-uploads.ts",
+    "migrate": "deno run -A --env-file=.env",
+    "migrate:all": "deno run -A --env-file=.env scripts/run-migrations.ts",
+    "predeploy": "deno task migrate:all",
+    "migration:new": "deno run -A scripts/create-migration.ts",
+    "g": "deno run -A scripts/scaffold.ts"
+  }
+}

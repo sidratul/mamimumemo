@@ -1,6 +1,5 @@
 # Deno cache and dependencies
 /deno.lock
-/deno.jsonc
 /vendor/
 
 # Logs
