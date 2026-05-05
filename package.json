@@ -16,7 +16,7 @@
     "admin:build:ios:production": "npm run build:ios:production -w @mami/admin-app",
     "admin:build:android:production": "npm run build:android:production -w @mami/admin-app",
     "admin:build:android:production:local": "npm run build:android:production:local -w @mami/admin-app",
-    "owner:start": "npm run start -w @mami/owner-app",
+    "parent:start": "npm run start -w @mami/parent-app",
     "daycare:start": "npm run start -w @mami/daycare-app",
     "build:packages": "npm run build -w @mami/core && npm run build -w @mami/ui && npm run build -w @mami/graphql"
   }

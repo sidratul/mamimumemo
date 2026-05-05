@@ -1,6 +1,6 @@
 import { ActivityIndicator } from 'react-native-paper';
+import { DetailScreen } from '@mami/ui';
 
-import { ScreenContainer } from '../../components/common/ScreenContainer';
 import { Box, Text } from '../../theme/theme';
 
 type UserDetailStateProps =
@@ -14,7 +14,7 @@ type UserDetailStateProps =
 
 export function UserDetailState(props: UserDetailStateProps) {
   return (
-    <ScreenContainer>
+    <DetailScreen title="Detail User" scrollable={false}>
       <Box
         backgroundColor="surface"
         borderColor="border"
@@ -22,7 +22,6 @@ export function UserDetailState(props: UserDetailStateProps) {
         borderRadius="lg"
         padding="xl"
         gap="sm"
-        marginHorizontal="xl"
         marginTop="xxl"
         alignItems={props.type === 'loading' ? 'center' : undefined}>
         {props.type === 'loading' ? (
@@ -39,6 +38,6 @@ export function UserDetailState(props: UserDetailStateProps) {
           </>
         )}
       </Box>
-    </ScreenContainer>
+    </DetailScreen>
   );
 }

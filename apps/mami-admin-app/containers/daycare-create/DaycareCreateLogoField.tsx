@@ -1,6 +1,5 @@
-import { Button } from 'react-native-paper';
 import { Image } from 'expo-image';
-import { InputComponentProps } from '@mami/ui';
+import { Button, InputComponentProps } from '@mami/ui';
 
 import { Box, Text } from '../../theme/theme';
 
@@ -36,8 +35,8 @@ export function DaycareCreateLogoField({
         </Box>
       )}
       <Button
-        mode="outlined"
-        loading={uploading}
+        label={uploading ? 'Mengunggah...' : value ? 'Ganti Logo' : 'Upload Logo'}
+        variant="secondary"
         disabled={disabled || uploading}
         onPress={() => {
           void (async () => {
@@ -46,9 +45,8 @@ export function DaycareCreateLogoField({
               onChange(nextValue);
             }
           })();
-        }}>
-        {value ? 'Ganti Logo' : 'Upload Logo'}
-      </Button>
+        }}
+      />
     </Box>
   );
 }

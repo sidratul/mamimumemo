@@ -1,6 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Pressable } from 'react-native';
-import { Button } from 'react-native-paper';
+import { View } from 'react-native';
 
 import { DaycareDetailSection } from './DaycareDetailSection';
 import { type DaycareMembershipRecord } from '../../services/daycare-memberships/store';
@@ -12,74 +11,69 @@ const personaLabelMap: Record<DaycareMembershipRecord['persona'], string> = {
   SITTER: 'Karyawan Daycare',
 };
 
-const statusLabelMap: Record<DaycareMembershipRecord['status'], string> = {
-  ACTIVE: 'Aktif',
-  INACTIVE: 'Nonaktif',
-};
-
 type DaycareMembershipsSectionProps = {
+  owner: {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+  };
   memberships: DaycareMembershipRecord[];
-  busyMembershipId?: string;
-  onAddPress: () => void;
-  onDeactivateMembership: (membershipId: string) => void;
 };
 
 export function DaycareMembershipsSection({
+  owner,
   memberships,
-  busyMembershipId,
-  onAddPress,
-  onDeactivateMembership,
 }: DaycareMembershipsSectionProps) {
+  const staffMemberships = memberships.filter(
+    (membership) =>
+      membership.status === 'ACTIVE' &&
+      membership.user.role !== 'SUPER_ADMIN' &&
+      membership.user.id !== owner.id &&
+      membership.persona !== 'OWNER'
+  );
+
   return (
-    <DaycareDetailSection
-      title="Staff & Persona"
-      action={
-        <Button
-          mode="contained"
-          compact
-          icon="plus"
-          onPress={onAddPress}
-          contentStyle={{ height: 32, alignItems: 'center', justifyContent: 'center' }}
-          labelStyle={{ marginVertical: 0, lineHeight: 14 }}
-          style={{ borderRadius: 10 }}>
-          Tambah
-        </Button>
-      }>
-      {memberships.length === 0 ? (
-        <Text color="textSecondary">Belum ada staff atau persona daycare lain.</Text>
-      ) : (
-        <Box gap="sm">
-          {memberships.map((membership) => (
+    <DaycareDetailSection title="Owner & Staff">
+      <Box gap="sm">
+        <Box
+          paddingBottom="md"
+          gap="xs"
+          style={{ borderBottomWidth: 1, borderBottomColor: '#F1D6E4' }}>
+          <Text style={{ fontWeight: '700', color: '#24324B' }}>{owner.name}</Text>
+          <Text color="textSecondary">{owner.email}</Text>
+          <Text color="textSecondary">Owner</Text>
+          {owner.phone ? (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+              <MaterialCommunityIcons name="phone-outline" size={14} color="#7A869A" />
+              <Text color="textSecondary">{owner.phone}</Text>
+            </View>
+          ) : null}
+        </Box>
+
+        {staffMemberships.length === 0 ? (
+          <Text color="textSecondary">Belum ada staff daycare lain yang aktif.</Text>
+        ) : (
+          staffMemberships.map((membership) => (
             <Box
               key={membership.id}
-              padding="md"
+              paddingBottom="md"
               gap="xs"
-              style={{
-                borderWidth: 1,
-                borderColor: '#E8ECF4',
-                borderRadius: 10,
-                backgroundColor: '#F7F9FC',
-              }}>
+              style={{ borderBottomWidth: 1, borderBottomColor: '#F1D6E4' }}>
               <Text style={{ fontWeight: '700', color: '#24324B' }}>{membership.user.name}</Text>
               <Text color="textSecondary">{membership.user.email}</Text>
-              <Text color="textSecondary">
-                {personaLabelMap[membership.persona]} · {statusLabelMap[membership.status]}
-              </Text>
-              {membership.notes ? <Text color="textSecondary">{membership.notes}</Text> : null}
-              {membership.status === 'ACTIVE' ? (
-                <Pressable onPress={() => onDeactivateMembership(membership.id)}>
-                  <Box flexDirection="row" alignItems="center" gap="xs" marginTop="xs">
-                    <MaterialCommunityIcons name="close-circle-outline" size={16} color="#FF4D4D" />
-                    <Text color="danger">
-                      {busyMembershipId === membership.id ? 'Memproses...' : 'Nonaktifkan membership'}
-                    </Text>
-                  </Box>
-                </Pressable>
+              <Text color="textSecondary">{personaLabelMap[membership.persona]}</Text>
+              {membership.user.phone ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
+                  <MaterialCommunityIcons name="phone-outline" size={14} color="#7A869A" />
+                  <Text color="textSecondary">{membership.user.phone}</Text>
+                </View>
               ) : null}
+              {membership.notes ? <Text color="textSecondary">{membership.notes}</Text> : null}
             </Box>
-          ))}
-        </Box>
-      )}
+          ))
+        )}
+      </Box>
     </DaycareDetailSection>
   );
 }

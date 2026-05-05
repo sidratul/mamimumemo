@@ -1,8 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { BottomDrawer, type SelectOption } from '@mami/ui';
+import { BottomDrawer, DetailScreen, type SelectOption } from '@mami/ui';
 
-import { ScreenContainer } from '../../components/common/ScreenContainer';
 import { listDaycares } from '../../services/daycare-admin';
 import { addExistingUserToDaycare, deactivateDaycareMembership, type DaycareMembershipPersona } from '../../services/daycare-memberships/store';
 import {
@@ -17,7 +16,6 @@ import {
 } from '../../services/users';
 import { Box, Text } from '../../theme/theme';
 import { UserDangerSection } from './UserDangerSection';
-import { UserDetailHeader } from './UserDetailHeader';
 import { UserDetailState } from './UserDetailState';
 import { UserMembershipForm } from './UserMembershipForm';
 import { UserMembershipsSection } from './UserMembershipsSection';
@@ -186,9 +184,7 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
   }
 
   return (
-    <ScreenContainer>
-      <UserDetailHeader title={user.name} onBack={() => router.back()} />
-
+    <DetailScreen title={user.name} onBack={() => router.back()} contentContainerStyle={{ gap: 24 }}>
       <UserSummarySection user={user} />
       <UserMembershipsSection
         memberships={memberships}
@@ -225,7 +221,6 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
         onSubmit={() => void handleResetPassword()}
       />
       <UserDangerSection userName={user.name} loading={deleting} onConfirmDelete={() => void handleDelete()} />
-
       <BottomDrawer visible={membershipDrawerVisible} onDismiss={() => setMembershipDrawerVisible(false)}>
         <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Tambah Membership Daycare</Text>
         <UserMembershipForm
@@ -242,6 +237,6 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
           onSubmit={() => void handleAddMembership()}
         />
       </BottomDrawer>
-    </ScreenContainer>
+    </DetailScreen>
   );
 }

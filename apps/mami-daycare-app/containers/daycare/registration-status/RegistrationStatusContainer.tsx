@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Redirect, router } from 'expo-router';
 import { Button } from 'react-native-paper';
-import { ScreenHeader, ScreenSection } from '@mami/ui';
+import { ScreenHeader, ScreenSection, useConfirm } from '@mami/ui';
 import { formatDateTimeId } from '@mami/core';
 
 import { useSession } from '../../../providers/session-provider';
@@ -30,6 +30,7 @@ const statusLabels: Record<DaycareRegistrationStatus['approvalStatus'], string> 
 
 export function RegistrationStatusContainer() {
   const { isLoading, session, signOut } = useSession();
+  const { showConfirm } = useConfirm();
   const [status, setStatus] = useState<DaycareRegistrationStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -135,7 +136,17 @@ export function RegistrationStatusContainer() {
       ) : null}
 
       <Box paddingHorizontal="xl">
-        <Button mode="outlined" onPress={() => void signOut()}>
+        <Button
+          mode="outlined"
+          onPress={() => {
+            showConfirm({
+              title: 'Keluar',
+              description: 'Yakin ingin keluar dari sesi daycare ini?',
+              confirmLabel: 'Keluar',
+              cancelLabel: 'Batal',
+              onConfirm: signOut,
+            });
+          }}>
           Keluar
         </Button>
       </Box>

@@ -1,6 +1,9 @@
-import { SelectInput as SharedSelectInput, type SelectOption as SharedSelectOption } from '@mami/ui';
+import {
+  SelectInput as SharedSelectInput,
+  type InputComponentProps,
+  type SelectOption as SharedSelectOption,
+} from '@mami/ui';
 
-import { InputComponentProps } from '../form/form.types';
 import { useSharedInputProps } from './shared';
 
 export type SelectOption = SharedSelectOption;

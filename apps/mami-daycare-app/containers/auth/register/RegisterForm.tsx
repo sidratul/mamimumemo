@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { Pressable } from 'react-native';
 import { router } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
-import { DynamicForm, NumberField, PasswordField, TextAreaField, TextField, type FormFieldProps } from '@mami/ui';
+import { Button, DynamicForm, NumberField, PasswordField, TextAreaField, TextField, TextMuted, type FormFieldProps } from '@mami/ui';
 import { daycareRegistrationDaycareStepSchema, daycareRegistrationOwnerStepSchema } from '@mami/core';
-import { Button, HelperText } from 'react-native-paper';
+import { HelperText } from 'react-native-paper';
 
 import { useSession } from '../../../providers/session-provider';
 import { submitDaycareRegistration } from '../../../services/registration';
@@ -237,7 +237,7 @@ export function RegisterForm() {
             onSubmit={handleNextStep}
           />
           <Box flexDirection="row" justifyContent="center" alignItems="center" gap="xs">
-            <Text color="textSecondary">Sudah punya akun?</Text>
+            <TextMuted>Sudah punya akun?</TextMuted>
             <Pressable onPress={() => router.push('/(auth)/login')}>
               <Text color="primary" style={{ fontWeight: '700' }}>Masuk</Text>
             </Pressable>
@@ -261,9 +261,7 @@ export function RegisterForm() {
             inputsContainerStyle={{ gap: 12 }}
             onSubmit={onSubmit}
           />
-          <Button mode="text" onPress={handlePreviousStep} compact contentStyle={{ minHeight: 36, justifyContent: 'flex-start' }}>
-            Kembali
-          </Button>
+          <Button label="Kembali" variant="ghost" onPress={handlePreviousStep} />
         </Box>
       ) : null}
 

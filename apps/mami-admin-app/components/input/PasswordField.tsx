@@ -1,6 +1,5 @@
-import { PasswordInput as SharedPasswordInput } from '@mami/ui';
+import { PasswordInput as SharedPasswordInput, type InputComponentProps } from '@mami/ui';
 
-import { InputComponentProps } from '../form/form.types';
 import { useSharedInputProps } from './shared';
 
 type PasswordFieldProps = InputComponentProps<string> & {

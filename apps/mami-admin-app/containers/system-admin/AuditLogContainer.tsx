@@ -1,17 +1,12 @@
-import { ScreenContainer } from '../../components/common/ScreenContainer';
-import { SectionCard } from '../../components/common/SectionCard';
+import { Screen, ScreenSection, TextMuted } from '@mami/ui';
 import { BulletList } from '../../components/common/BulletList';
-import { Box, Text } from '../../theme/theme';
+import { Text } from '../../theme/theme';
 
 export function AuditLogContainer() {
   return (
-    <ScreenContainer>
-      <Box gap="xs">
-        <Text variant="title">Audit Log</Text>
-        <Text variant="subtitle">Riwayat aksi admin untuk perubahan status dan akses.</Text>
-      </Box>
-
-      <SectionCard title="Tracked Events">
+    <Screen title="Audit Log" subtitle="Riwayat aksi admin untuk perubahan status dan akses.">
+      <ScreenSection>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Tracked Events</Text>
         <BulletList
           items={[
             'Daycare approval status updated',
@@ -19,11 +14,13 @@ export function AuditLogContainer() {
             'System setting modified',
           ]}
         />
-      </SectionCard>
+      </ScreenSection>
 
-      <SectionCard title="Filters">
+      <ScreenSection>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Filters</Text>
+        <TextMuted>Placeholder scope untuk filter audit log yang nanti dipasang ke query GraphQL.</TextMuted>
         <BulletList items={['Date range', 'Actor', 'Action type', 'Target daycare/user']} />
-      </SectionCard>
-    </ScreenContainer>
+      </ScreenSection>
+    </Screen>
   );
 }

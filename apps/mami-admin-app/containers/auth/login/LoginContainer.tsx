@@ -1,8 +1,7 @@
 import { Redirect } from 'expo-router';
-import { Image } from 'react-native';
+import { AuthScreen } from '@mami/ui';
 
 import { useSession } from '../../../providers/session-provider';
-import { Box, Text } from '../../../theme/theme';
 import { LoginForm } from './LoginForm';
 
 export function LoginContainer() {
@@ -17,27 +16,13 @@ export function LoginContainer() {
   }
 
   return (
-    <Box flex={1} backgroundColor="background" justifyContent="center" padding="xl" gap="lg" paddingTop="xxl">
-      <Box gap="md">
-        <Image
-          source={require('../../../assets/images/logo-admin.png')}
-          style={{ width: 210, height: 160, resizeMode: 'contain', alignSelf: 'center' }}
-        />
-        <Box gap="xs">
-          <Text variant="title">Mami Admin</Text>
-          <Text variant="subtitle">Masuk untuk mengelola operasional daycare harian.</Text>
-        </Box>
-      </Box>
-
-      <Box
-        backgroundColor="surface"
-        borderRadius="lg"
-        borderWidth={1}
-        borderColor="border"
-        padding="lg"
-        gap="md">
-        <LoginForm />
-      </Box>
-    </Box>
+    <AuthScreen
+      heroTitle="Mami"
+      heroSubtitle="Kelola operasional daycare dengan cepat dan rapi."
+      heroLogoSource={require('../../../assets/images/logo-admin.png')}
+      cardTitle="Login"
+      cardSubtitle="Masuk ke panel admin.">
+      <LoginForm />
+    </AuthScreen>
   );
 }

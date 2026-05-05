@@ -1,17 +1,12 @@
-import { ScreenContainer } from '../../components/common/ScreenContainer';
-import { SectionCard } from '../../components/common/SectionCard';
+import { Screen, ScreenSection, TextMuted } from '@mami/ui';
 import { BulletList } from '../../components/common/BulletList';
-import { Box, Text } from '../../theme/theme';
+import { Text } from '../../theme/theme';
 
 export function RoleAccessContainer() {
   return (
-    <ScreenContainer>
-      <Box gap="xs">
-        <Text variant="title">Role & Access</Text>
-        <Text variant="subtitle">Kontrol role system-level untuk semua aplikasi.</Text>
-      </Box>
-
-      <SectionCard title="Supported Roles">
+    <Screen title="Role & Access" subtitle="Kontrol role system-level untuk semua aplikasi.">
+      <ScreenSection>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Supported Roles</Text>
         <BulletList
           items={[
             'SUPER_ADMIN',
@@ -21,9 +16,11 @@ export function RoleAccessContainer() {
             'PARENT',
           ]}
         />
-      </SectionCard>
+      </ScreenSection>
 
-      <SectionCard title="Planned Actions">
+      <ScreenSection>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Planned Actions</Text>
+        <TextMuted>Placeholder kontrol akses ini nanti lebih tepat dibaca dari schema/permission GraphQL, bukan hardcoded screen-local.</TextMuted>
         <BulletList
           items={[
             'Assign role to user',
@@ -31,7 +28,7 @@ export function RoleAccessContainer() {
             'Set active role policy per app',
           ]}
         />
-      </SectionCard>
-    </ScreenContainer>
+      </ScreenSection>
+    </Screen>
   );
 }

@@ -2,7 +2,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { ThemeProvider as RestyleThemeProvider } from '@shopify/restyle';
 import { PaperProvider } from 'react-native-paper';
-import { BottomSheetModalProvider } from '@mami/ui';
+import { BottomSheetModalProvider, OverlayProvider } from '@mami/ui';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { SessionProvider } from '../providers/session-provider';
@@ -16,11 +16,13 @@ export default function RootLayout() {
         <SessionProvider>
           <PaperProvider theme={paperTheme}>
             <BottomSheetModalProvider>
-              <Stack screenOptions={{ headerShown: false }}>
-                <Stack.Screen name="(auth)" />
-                <Stack.Screen name="(daycare)" />
-              </Stack>
-              <StatusBar style="dark" />
+              <OverlayProvider>
+                <Stack screenOptions={{ headerShown: false }}>
+                  <Stack.Screen name="(auth)" />
+                  <Stack.Screen name="(daycare)" />
+                </Stack>
+                <StatusBar style="dark" />
+              </OverlayProvider>
             </BottomSheetModalProvider>
           </PaperProvider>
         </SessionProvider>

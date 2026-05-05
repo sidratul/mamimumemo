@@ -42,7 +42,7 @@ export function UserProfileSection({
       <TextField value={email} placeholder="Email" onChange={onChangeEmail} keyboardType="email-address" />
       <TextField value={phone} placeholder="Nomor telepon" onChange={onChangePhone} keyboardType="phone-pad" />
       {canManageRole ? (
-        <RoleSelect value={role} onChange={(value) => onChangeRole(value as UserRole)} options={ADMIN_MANAGED_ROLE_OPTIONS} />
+        <RoleSelect value={role} onChange={(value: string) => onChangeRole(value as UserRole)} options={ADMIN_MANAGED_ROLE_OPTIONS} />
       ) : (
         <Box gap="xs">
           <Text color="textSecondary">Role</Text>

@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { router } from 'expo-router';
-import { DynamicForm, PasswordField, TextField, type FormFieldProps } from '@mami/ui';
+import { DynamicForm, PasswordField, TextField, useToast, type FormFieldProps } from '@mami/ui';
 import { loginSchema } from '@mami/core';
-import { HelperText } from 'react-native-paper';
 
 import { useSession } from '../../../providers/session-provider';
 import { signInDaycareOwner } from '../../../services/registration';
@@ -21,6 +20,7 @@ const initialValues: LoginData = {
 const fields: FormFieldProps<LoginData> = {
   email: {
     label: 'Email',
+    required: true,
     input: TextField,
     props: {
       placeholder: 'owner@daycare.id',
@@ -32,6 +32,7 @@ const fields: FormFieldProps<LoginData> = {
   },
   password: {
     label: 'Password',
+    required: true,
     input: PasswordField,
     props: {
       placeholder: 'Masukkan password',
@@ -43,13 +44,12 @@ const fields: FormFieldProps<LoginData> = {
 
 export function LoginForm() {
   const { saveSession } = useSession();
+  const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [errorMessage, setErrorMessage] = useState('');
 
   async function onSubmit(values: LoginData) {
     try {
       setIsSubmitting(true);
-      setErrorMessage('');
       const result = await signInDaycareOwner(values);
       await saveSession({
         token: result.token,
@@ -60,7 +60,10 @@ export function LoginForm() {
       });
       router.replace('/(daycare)');
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Gagal masuk. Silakan coba lagi.');
+      showToast({
+        message: error instanceof Error ? error.message : 'Gagal masuk. Silakan coba lagi.',
+        tone: 'danger',
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -76,8 +79,6 @@ export function LoginForm() {
         loading={isSubmitting}
         onSubmit={onSubmit}
       />
-
-      {errorMessage ? <HelperText type="error">{errorMessage}</HelperText> : null}
     </Box>
   );
 }

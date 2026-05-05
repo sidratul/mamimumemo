@@ -1,24 +1,27 @@
 import { Pressable } from 'react-native';
 import { router } from 'expo-router';
-import { ScreenHeader, ScreenSection } from '@mami/ui';
+import { AuthScreen } from '@mami/ui';
 
 import { Box, Text } from '../../../theme/theme';
 import { LoginForm } from './LoginForm';
 
 export function LoginContainer() {
   return (
-    <Box flex={1} backgroundColor="background" justifyContent="center" padding="xl" gap="lg">
-      <ScreenSection padded={false}>
-        <ScreenHeader title="Masuk" subtitle="Lanjutkan ke dashboard daycare." />
+    <AuthScreen
+      heroTitle="Mami"
+      heroSubtitle="Lanjutkan ke dashboard daycare dan operasional harian."
+      heroLogoSource={require('../../../../mami-admin-app/assets/images/logo-admin.png')}
+      cardTitle="Login"
+      cardSubtitle="Masuk ke akun daycare.">
+      <Box gap="md">
         <LoginForm />
-      </ScreenSection>
-
+      </Box>
       <Box flexDirection="row" justifyContent="center" alignItems="center" gap="xs">
         <Text color="textSecondary">Belum punya akun?</Text>
         <Pressable onPress={() => router.push('/(auth)/register')}>
           <Text color="primary" style={{ fontWeight: '700' }}>Daftar</Text>
         </Pressable>
       </Box>
-    </Box>
+    </AuthScreen>
   );
 }

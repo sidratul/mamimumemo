@@ -1,5 +1,4 @@
 export * from './DaycareDetailContainer';
-export * from './DaycareDetailHeader';
 export * from './DaycareHeroSection';
 export * from './DaycareDetailSection';
 export * from './DaycareStatusForm';

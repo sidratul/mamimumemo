@@ -1,6 +1,5 @@
-import { DaycareStatusInput } from '@mami/ui';
+import { DaycareStatusInput, type InputComponentProps } from '@mami/ui';
 
-import { InputComponentProps } from '../form/form.types';
 import { type SelectOption } from './Select';
 
 type ApprovalStatusSelectProps = InputComponentProps<string> & {

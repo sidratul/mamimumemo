@@ -1,7 +1,6 @@
 import { KeyboardTypeOptions } from 'react-native';
-import { TextInput as SharedTextInput } from '@mami/ui';
+import { TextInput as SharedTextInput, type InputComponentProps } from '@mami/ui';
 
-import { InputComponentProps } from '../form/form.types';
 import { useSharedInputProps } from './shared';
 
 type TextFieldProps = InputComponentProps<string> & {

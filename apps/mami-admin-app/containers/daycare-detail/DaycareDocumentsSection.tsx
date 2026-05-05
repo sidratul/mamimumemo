@@ -1,5 +1,5 @@
 import { Divider, List } from 'react-native-paper';
-import { Button } from 'react-native-paper';
+import { Button } from '@mami/ui';
 
 import { DaycareDetailSection } from './DaycareDetailSection';
 import { Box, Text } from '../../theme/theme';
@@ -23,15 +23,11 @@ export function DaycareDocumentsSection({
 }: DaycareDocumentsSectionProps) {
   return (
     <DaycareDetailSection title="Dokumen">
-      <Box
-        backgroundColor="background"
-        style={{ borderWidth: 1, borderColor: '#E8ECF4', overflow: 'hidden', borderRadius: 10 }}>
-        {legalDocuments.length === 0 ? (
-          <Box padding="md">
-            <Text color="textSecondary">Belum ada dokumen.</Text>
-          </Box>
-        ) : (
-          legalDocuments.map((document, index) => (
+      {legalDocuments.length === 0 ? (
+        <Text color="textSecondary">Belum ada dokumen.</Text>
+      ) : (
+        <Box>
+          {legalDocuments.map((document, index) => (
             <Box key={`${document.type}-${index}`}>
               {index > 0 ? <Divider /> : null}
               <List.Item
@@ -58,12 +54,10 @@ export function DaycareDocumentsSection({
                 right={() => <List.Icon icon="chevron-right" />}
               />
             </Box>
-          ))
-        )}
-      </Box>
-      <Button mode="outlined" onPress={onPressUpdate}>
-        Upload Dokumen
-      </Button>
+          ))}
+        </Box>
+      )}
+      <Button label="Upload Dokumen" onPress={onPressUpdate} variant="secondary" />
     </DaycareDetailSection>
   );
 }

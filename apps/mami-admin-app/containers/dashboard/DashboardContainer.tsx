@@ -63,8 +63,6 @@ export function DashboardContainer() {
             submitted={metrics.submitted}
             inReview={metrics.inReview}
             approved={metrics.approved}
-            primaryColor={theme.colors.primary}
-            successColor={theme.colors.success}
           />
           <DashboardChartSection
             loading={loading}

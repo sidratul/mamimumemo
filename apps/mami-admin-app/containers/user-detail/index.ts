@@ -1,5 +1,4 @@
 export * from './UserDetailContainer';
-export * from './UserDetailHeader';
 export * from './UserDetailState';
 export * from './UserSummarySection';
 export * from './UserMembershipForm';

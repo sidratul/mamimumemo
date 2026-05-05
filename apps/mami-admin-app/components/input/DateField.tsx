@@ -1,7 +1,7 @@
 import { TextInput } from 'react-native-paper';
+import { type InputComponentProps } from '@mami/ui';
 
 import { useAppTheme } from '../../theme/theme';
-import { InputComponentProps } from '../form/form.types';
 
 type DateFieldProps = InputComponentProps<string> & {
   disabled?: boolean;

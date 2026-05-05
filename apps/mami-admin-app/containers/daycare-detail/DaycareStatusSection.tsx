@@ -1,5 +1,4 @@
-import { Button } from 'react-native-paper';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { Button, InlineMessage } from '@mami/ui';
 
 import { DaycareDetailSection } from './DaycareDetailSection';
 import { ApprovalStatusBadge } from '../daycare/shared/ApprovalStatusBadge';
@@ -23,31 +22,13 @@ export function DaycareStatusSection({
 }: DaycareStatusSectionProps) {
   return (
     <DaycareDetailSection title="Status Daycare">
-      <Box
-        backgroundColor="background"
-        padding="md"
-        gap="sm"
-        style={{ borderWidth: 1, borderColor: '#E8ECF4', borderRadius: 10 }}>
+      <Box gap="sm">
         <Box alignItems="flex-start" gap="xs">
           <ApprovalStatusBadge status={status} />
           <Text color="textSecondary">Telah diajukan {submittedLabel}</Text>
         </Box>
-        {helperText ? (
-          <Box
-            flexDirection="row"
-            alignItems="center"
-            justifyContent="space-between"
-            padding="sm"
-            style={{ backgroundColor: '#FFF6E5', borderRadius: 8 }}>
-            <Box flexDirection="row" alignItems="center" gap="xs" flex={1}>
-              <MaterialCommunityIcons name="alert-outline" size={16} color="#D18B00" />
-              <Text style={{ color: '#7A5A00' }}>{helperText}</Text>
-            </Box>
-          </Box>
-        ) : null}
-        <Button mode="outlined" onPress={onPressUpdate} disabled={!canUpdate}>
-          Update Status
-        </Button>
+        {helperText ? <InlineMessage tone="warning">{helperText}</InlineMessage> : null}
+        <Button label="Update Status" onPress={onPressUpdate} disabled={!canUpdate} variant="secondary" />
       </Box>
     </DaycareDetailSection>
   );

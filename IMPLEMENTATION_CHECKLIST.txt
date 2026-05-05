@@ -14,7 +14,7 @@ Status Legend
 
 Snapshot Saat Ini
 
-| Feature | Admin App | Daycare App | Owner App | API | Status | Notes |
+| Feature | Admin App | Daycare App | Parent App | API | Status | Notes |
 |---|---|---|---|---|---|---|
 | Admin login | FE Done | - | - | BE Done | In Progress | Login admin sekarang memverifikasi role SUPER_ADMIN |
 | Daycare owner registration | - | FE Done | - | BE Done | Integrated | Daycare app register owner, login, create draft, lalu submit registration |
@@ -30,7 +30,7 @@ Snapshot Saat Ini
 | Child onboarding | - | FE Done | - | BE Done | Integrated | Flow parent pertama + child pertama sudah tersambung |
 | Attendance harian | - | FE Done | - | BE Done | Integrated | Check-in dan check-out child sudah masuk daily care |
 | Daily activity log | - | FE Done | - | BE Done | Integrated | Quick activity log untuk operasional harian sudah ada |
-| Owner app foundation | - | - | Placeholder | - | Placeholder | mami-owner-app masih placeholder |
+| Parent app foundation | - | - | FE Done | - | Placeholder | mami-parent-app scaffold baseline tersedia, belum tersambung ke auth/session nyata |
 
 Backend Modules
 
@@ -83,15 +83,15 @@ apps/mami-daycare-app
 | Attendance | Integrated | Ada flow check-in dan check-out di layar daily care |
 | Daily care records | Integrated | Ada layar daily care dan quick activity log |
 
-apps/mami-owner-app
+apps/mami-parent-app
 
 | Area | Status | Notes |
 |---|---|---|
-| App foundation | Placeholder | Baru package dan README |
-| Owner dashboard | Not Started | Belum dibuat |
-| Invoice view | Not Started | Belum dibuat |
-| Contract view | Not Started | Belum dibuat |
-| Daycare status tracking | Not Started | Belum dibuat |
+| App foundation | FE Done | Expo Router, route groups, tab shell, dan container per page sudah ada |
+| Parent dashboard | Placeholder | Masih dummy content |
+| Children view | Placeholder | Masih dummy content |
+| Reports view | Placeholder | Masih dummy content |
+| Profile update | Placeholder | Masih dummy content |
 
 Recommended Next Steps
 
@@ -99,7 +99,7 @@ Recommended Next Steps
 2. mami-daycare-app: tambah edit/deactivate untuk parent dan child
 3. mami-daycare-app: tambah ringkasan harian atau timeline per child
 4. mami-admin-app: sambungkan audit log dan role access jika modul backend siap
-5. mami-owner-app: tentukan dulu apakah benar-benar perlu app terpisah untuk MVP
+5. mami-parent-app: sambungkan auth/session GraphQL shared jika role parent memang perlu app terpisah untuk MVP
 
 Maintenance Rule
 

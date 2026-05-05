@@ -5,3 +5,4 @@ export * from './auth/resolve-app';
 export * from './utils/date';
 export * from './forms';
 export * from './schemas';
+export * from './storage/persisted-storage';

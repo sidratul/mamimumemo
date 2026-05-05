@@ -1,6 +1,6 @@
 import { ThemeProvider } from '@shopify/restyle';
 import { PaperProvider } from 'react-native-paper';
-import { BottomSheetModalProvider } from '@mami/ui';
+import { BottomSheetModalProvider, OverlayProvider } from '@mami/ui';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 import { SessionProvider } from './session-provider';
@@ -17,7 +17,9 @@ export function AppProvider({ children }: AppProviderProps) {
       <SessionProvider>
         <ThemeProvider theme={theme}>
           <PaperProvider theme={paperTheme}>
-            <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+            <BottomSheetModalProvider>
+              <OverlayProvider>{children}</OverlayProvider>
+            </BottomSheetModalProvider>
           </PaperProvider>
         </ThemeProvider>
       </SessionProvider>

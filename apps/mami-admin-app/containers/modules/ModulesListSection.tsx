@@ -8,7 +8,7 @@ export function ModulesListSection() {
   const router = useRouter();
 
   return (
-    <Box gap="md" paddingHorizontal="lg">
+    <Box gap="md">
       {moduleDefinitions.map((moduleDef) => (
         <ModuleCard
           key={moduleDef.slug}

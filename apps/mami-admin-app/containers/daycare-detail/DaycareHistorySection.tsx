@@ -14,18 +14,14 @@ type DaycareHistorySectionProps = {
 export function DaycareHistorySection({ history, getInitials }: DaycareHistorySectionProps) {
   return (
     <DaycareDetailSection title="Riwayat">
-      <Box
-        backgroundColor="background"
-        style={{ borderWidth: 1, borderColor: '#E8ECF4', overflow: 'hidden', borderRadius: 10 }}>
-        {history.length === 0 ? (
-          <Box padding="md">
-            <Text color="textSecondary">Belum ada riwayat approval.</Text>
-          </Box>
-        ) : (
-          history.map((item, index) => (
+      {history.length === 0 ? (
+        <Text color="textSecondary">Belum ada riwayat approval.</Text>
+      ) : (
+        <Box>
+          {history.map((item, index) => (
             <Box key={`${item.changedAt}-${index}`}>
               {index > 0 ? <Divider /> : null}
-              <Box flexDirection="row" alignItems="flex-start" justifyContent="space-between" padding="md" gap="sm">
+              <Box flexDirection="row" alignItems="flex-start" justifyContent="space-between" paddingVertical="md" gap="sm">
                 <Box flexDirection="row" gap="sm" flex={1}>
                   <Avatar.Text
                     size={38}
@@ -50,9 +46,9 @@ export function DaycareHistorySection({ history, getInitials }: DaycareHistorySe
                 </Text>
               </Box>
             </Box>
-          ))
-        )}
-      </Box>
+          ))}
+        </Box>
+      )}
     </DaycareDetailSection>
   );
 }

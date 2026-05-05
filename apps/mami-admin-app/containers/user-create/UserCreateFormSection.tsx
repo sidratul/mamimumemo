@@ -1,8 +1,15 @@
-import { DynamicForm, PasswordField, TextField, type FormFieldProps, ScreenSection } from '@mami/ui';
+import {
+  DynamicForm,
+  PasswordField,
+  TextField,
+  TextMuted,
+  type FormFieldProps,
+  type InputComponentProps,
+} from '@mami/ui';
 import { adminUserCreateSchema } from '@mami/core';
+import { View } from 'react-native';
 
 import { RoleSelect } from '../../components/input';
-import { Text } from '../../theme/theme';
 import { type UserRole } from '../../services/users';
 
 type RoleOption = {
@@ -71,7 +78,7 @@ export function UserCreateFormSection({
     role: {
       label: 'Role',
       required: true,
-      input: (props) => UserRoleField(roleOptions, props),
+      input: (props: InputComponentProps<UserRole>) => UserRoleField(roleOptions, props),
     },
     password: {
       label: 'Password',
@@ -82,8 +89,7 @@ export function UserCreateFormSection({
   };
 
   return (
-    <ScreenSection>
-      <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Informasi Akun</Text>
+    <View style={{ gap: 12 }}>
       <DynamicForm<UserCreateFormData>
         fields={fields}
         defaultValue={{
@@ -98,8 +104,8 @@ export function UserCreateFormSection({
         loading={loading}
         onSubmit={onSubmit}
       />
-      <Text color="textSecondary">User yang dibuat manual dari admin app hanya untuk Super Admin dan Daycare Admin.</Text>
-      {error ? <Text color="danger">{error}</Text> : null}
-    </ScreenSection>
+      <TextMuted>User yang dibuat manual dari admin app hanya untuk Super Admin dan Daycare Admin.</TextMuted>
+      {error ? <TextMuted>{error}</TextMuted> : null}
+    </View>
   );
 }

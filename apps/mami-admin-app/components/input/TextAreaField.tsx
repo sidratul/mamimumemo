@@ -1,6 +1,5 @@
-import { TextAreaInput as SharedTextAreaInput } from '@mami/ui';
+import { TextAreaInput as SharedTextAreaInput, type InputComponentProps } from '@mami/ui';
 
-import { InputComponentProps } from '../form/form.types';
 import { useSharedInputProps } from './shared';
 
 type TextAreaFieldProps = InputComponentProps<string> & {

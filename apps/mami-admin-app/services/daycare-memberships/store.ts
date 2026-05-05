@@ -21,6 +21,7 @@ export type DaycareMembershipRecord = {
     name: string;
     email: string;
     phone?: string;
+    role?: string;
   };
 };
 
@@ -52,6 +53,7 @@ type DaycareMembershipsResponse = {
       name: string;
       email: string;
       phone?: string | null;
+      role?: string | null;
     };
   }>;
 };
@@ -100,6 +102,7 @@ const DAYCARE_MEMBERSHIPS_QUERY = gql`
         name
         email
         phone
+        role
       }
     }
   }
@@ -120,6 +123,7 @@ function mapMembership(node: DaycareMembershipsResponse['daycareMemberships'][nu
       name: node.user.name,
       email: node.user.email,
       phone: node.user.phone ?? '',
+      role: node.user.role ?? '',
     },
   };
 }

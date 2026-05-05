@@ -24,4 +24,4 @@ Repo ini sudah memiliki cakupan dokumentasi TDD untuk seluruh modul bisnis utama
 ## Catatan
 
 - File-file status lama yang menyebut progres `2/16`, `4/16`, atau `5/16` tidak lagi dipakai sebagai sumber kebenaran.
-- Untuk status implementasi nyata, selalu cocokkan dengan kode di `mami-api`, `apps/mami-admin-app`, `apps/mami-daycare-app`, dan `apps/mami-owner-app`.
+- Untuk status implementasi nyata, selalu cocokkan dengan kode di `mami-api`, `apps/mami-admin-app`, `apps/mami-daycare-app`, dan `apps/mami-parent-app`.

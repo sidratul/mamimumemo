@@ -1,6 +1,6 @@
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { Pressable } from 'react-native';
 import { type ComponentProps } from 'react';
+import { ActionTile } from '@mami/ui';
 
 import { Box, Text } from '../../theme/theme';
 
@@ -22,16 +22,11 @@ function QuickAction({
   iconBackground: string;
 }) {
   return (
-    <Pressable onPress={onPress}>
-      <Box
-        flex={1}
-        backgroundColor="surface"
-        borderRadius="md"
-        borderWidth={1}
-        borderColor="border"
-        padding="lg"
-        gap="xs"
-        minWidth={150}>
+    <ActionTile
+      title={label}
+      description={value}
+      onPress={onPress}
+      icon={
         <Box
           width={36}
           height={36}
@@ -41,10 +36,8 @@ function QuickAction({
           style={{ backgroundColor: iconBackground }}>
           <MaterialIcons name={icon} size={18} color={iconColor} />
         </Box>
-        <Text style={{ fontWeight: '700' }}>{label}</Text>
-        <Text color="textSecondary">{value}</Text>
-      </Box>
-    </Pressable>
+      }
+    />
   );
 }
 

@@ -1,13 +1,13 @@
 # Daycare Monorepo
 
-Monorepo ini berisi backend GraphQL berbasis Deno dan tiga target aplikasi mobile untuk sistem manajemen daycare.
+Monorepo ini berisi backend GraphQL berbasis Deno dan target aplikasi mobile untuk sistem manajemen daycare.
 
 ## Struktur
 
 - `mami-api` - Backend GraphQL (Deno + MongoDB + JWT)
 - `apps/mami-admin-app` - App system admin, paling aktif saat ini
 - `apps/mami-daycare-app` - App daycare, masih tahap bootstrap
-- `apps/mami-owner-app` - App owner, masih placeholder
+- `apps/mami-parent-app` - App parent, scaffold baseline
 - `packages/core` - Role, session type, app resolver bersama
 - `packages/ui` - Brand tokens dan helper UI bersama
 - `packages/graphql` - Placeholder untuk generated GraphQL artifacts
@@ -19,13 +19,13 @@ Monorepo ini berisi backend GraphQL berbasis Deno dan tiga target aplikasi mobil
 - `mami-admin-app` sudah memiliki flow login, session storage, Apollo client, dashboard, daycare queue, detail approval, dan beberapa layar admin lain.
 - `mami-admin-app` masih memakai mock/in-memory data untuk fitur daycare approval, jadi belum semuanya terhubung ke API nyata.
 - `mami-daycare-app` baru memiliki flow registrasi daycare dasar dan submit simulatif.
-- `mami-owner-app` masih placeholder.
+- `mami-parent-app` sudah punya scaffold baseline untuk route groups, container per page, dan dynamic form shared.
 
 ## Commands
 
 - `npm run admin:start` - Menjalankan admin app
 - `npm run admin:check` - Lint + typecheck admin app
-- `npm run owner:start` - Menjalankan owner app placeholder
+- `npm run parent:start` - Menjalankan parent app
 - `npm run daycare:start` - Menjalankan daycare app
 - `npm run build:packages` - Build shared packages
 

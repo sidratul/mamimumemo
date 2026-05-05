@@ -1,12 +1,12 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
+import { ScrollView } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { AppPageHeader } from '../../components/common/AppPageHeader';
-import { ScreenContainer } from '../../components/common/ScreenContainer';
 import { ADMIN_MANAGED_ROLE_OPTIONS } from '../../components/input/RoleSelect';
 import { createUser, type UserRole } from '../../services/users';
 import { UserCreateFormSection } from './UserCreateFormSection';
-import { UserCreateSummarySection } from './UserCreateSummarySection';
 
 type UserCreateFormData = {
   name: string;
@@ -41,11 +41,11 @@ export function UserCreateContainer() {
   }
 
   return (
-    <ScreenContainer>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }} edges={['left', 'right', 'bottom']}>
       <AppPageHeader title="Tambah User" onBack={() => router.back()} />
-
-      <UserCreateSummarySection />
-      <UserCreateFormSection loading={loading} error={error} roleOptions={ADMIN_MANAGED_ROLE_OPTIONS} onSubmit={handleSubmit} />
-    </ScreenContainer>
+      <ScrollView contentContainerStyle={{ paddingHorizontal: 16, paddingTop: 12, paddingBottom: 24 }}>
+        <UserCreateFormSection loading={loading} error={error} roleOptions={ADMIN_MANAGED_ROLE_OPTIONS} onSubmit={handleSubmit} />
+      </ScrollView>
+    </SafeAreaView>
   );
 }

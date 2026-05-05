@@ -1,0 +1,17 @@
+{
+  "expo": {
+    "name": "Mami Parent",
+    "slug": "mami-parent-app",
+    "scheme": "mami-parent-app",
+    "plugins": [
+      "expo-router"
+    ],
+    "extra": {
+      "apiBaseUrl": "https://api.example.com",
+      "graphqlUrl": "https://api.example.com/graphql"
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}

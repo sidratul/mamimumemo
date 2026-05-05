@@ -1,4 +1,4 @@
-import { InputComponentProps } from '../form/form.types';
+import { type InputComponentProps } from '@mami/ui';
 import { Select } from './Select';
 
 type RoleSelectProps = InputComponentProps<string> & {

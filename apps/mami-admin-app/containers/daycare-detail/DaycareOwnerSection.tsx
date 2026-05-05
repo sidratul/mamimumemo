@@ -1,5 +1,6 @@
 import { Avatar } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { InlineMessage } from '@mami/ui';
 
 import { DaycareDetailSection } from './DaycareDetailSection';
 import { Box, Text } from '../../theme/theme';
@@ -32,6 +33,7 @@ export function DaycareOwnerSection({ owner, getInitials }: DaycareOwnerSectionP
           </Box>
         </Box>
       </Box>
+      {!owner.phone ? <InlineMessage tone="default">Nomor telepon owner belum tersedia.</InlineMessage> : null}
     </DaycareDetailSection>
   );
 }

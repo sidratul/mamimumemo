@@ -1,4 +1,4 @@
-import * as SecureStore from 'expo-secure-store';
+import { deletePersistedItem, getPersistedItem, setPersistedItem } from '@mami/core';
 
 const SESSION_KEY = 'mami_daycare_session';
 
@@ -19,7 +19,7 @@ function notify(session: DaycareSession | null) {
 }
 
 export async function getDaycareSession() {
-  const raw = await SecureStore.getItemAsync(SESSION_KEY);
+  const raw = await getPersistedItem(SESSION_KEY);
   if (!raw) {
     return null;
   }
@@ -27,7 +27,7 @@ export async function getDaycareSession() {
   try {
     return JSON.parse(raw) as DaycareSession;
   } catch {
-    await SecureStore.deleteItemAsync(SESSION_KEY);
+    await deletePersistedItem(SESSION_KEY);
     notify(null);
     return null;
   }
@@ -41,7 +41,7 @@ export function subscribeDaycareSession(listener: (session: DaycareSession | nul
 }
 
 export async function setDaycareSession(session: DaycareSession) {
-  await SecureStore.setItemAsync(SESSION_KEY, JSON.stringify(session));
+  await setPersistedItem(SESSION_KEY, JSON.stringify(session));
   notify(session);
 }
 
@@ -62,6 +62,6 @@ export async function updateDaycareSessionTokens(token: string, refreshToken?: s
 }
 
 export async function clearDaycareSession() {
-  await SecureStore.deleteItemAsync(SESSION_KEY);
+  await deletePersistedItem(SESSION_KEY);
   notify(null);
 }

@@ -1,6 +1,6 @@
 import { type AdminUser, type UserPersona } from '../../services/users';
 import { Box, Text } from '../../theme/theme';
-import { ScreenSection } from '@mami/ui';
+import { InfoGroup, SectionCard } from '@mami/ui';
 
 const personaLabelMap: Record<UserPersona, string> = {
   SUPER_ADMIN: 'Superuser',
@@ -24,17 +24,13 @@ type UserSummarySectionProps = {
 
 export function UserSummarySection({ user }: UserSummarySectionProps) {
   return (
-    <ScreenSection>
-      <Box flexDirection="row" justifyContent="space-between" gap="md">
-        <Box flex={1} gap="xs">
-          <Text color="textSecondary">Email</Text>
-          <Text numberOfLines={1}>{user.email}</Text>
-        </Box>
-        <Box flex={1} gap="xs">
-          <Text color="textSecondary">Phone</Text>
-          <Text numberOfLines={1}>{user.phone || '-'}</Text>
-        </Box>
-      </Box>
+    <SectionCard title="Ringkasan">
+      <InfoGroup
+        items={[
+          { label: 'Email', value: user.email },
+          { label: 'Phone', value: user.phone || '-' },
+        ]}
+      />
       <Box gap="xs" marginTop="md">
         <Text color="textSecondary">Persona</Text>
         <Box flexDirection="row" flexWrap="wrap" gap="xs">
@@ -56,6 +52,6 @@ export function UserSummarySection({ user }: UserSummarySectionProps) {
           )}
         </Box>
       </Box>
-    </ScreenSection>
+    </SectionCard>
   );
 }

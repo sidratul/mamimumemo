@@ -1,7 +1,7 @@
-import { DynamicForm, PasswordField, TextAreaField, TextField, type FormFieldProps } from '@mami/ui';
+import { DynamicForm, PasswordField, TextAreaField, TextField, TextMuted, type FormFieldProps } from '@mami/ui';
 import { adminDaycareCreateSchema } from '@mami/core';
+import { View } from 'react-native';
 
-import { Text } from '../../theme/theme';
 import { DaycareCreateLogoField } from './DaycareCreateLogoField';
 
 export type DaycareCreateFormData = {
@@ -88,7 +88,7 @@ export function DaycareCreateFormSection({
   };
 
   return (
-    <>
+    <View style={{ gap: 12 }}>
       <DynamicForm<DaycareCreateFormData>
         fields={fields}
         defaultValue={{
@@ -108,7 +108,7 @@ export function DaycareCreateFormSection({
         inputsContainerStyle={{ gap: 12 }}
         onSubmit={onSubmit}
       />
-      {error ? <Text color="danger">{error}</Text> : null}
-    </>
+      {error ? <TextMuted>{error}</TextMuted> : null}
+    </View>
   );
 }

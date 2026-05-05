@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Pressable, ScrollView } from 'react-native';
 import { Redirect, router } from 'expo-router';
-import { DynamicForm, NumberField, PasswordField, TextAreaField, TextField, type FormFieldProps } from '@mami/ui';
+import { DynamicForm, NumberField, PasswordField, TextAreaField, TextField, type FormFieldProps, useConfirm } from '@mami/ui';
 import { daycareChildEditSchema, daycareEnrollmentSchema, daycareParentNotesSchema } from '@mami/core';
 import { HelperText } from 'react-native-paper';
 
@@ -217,6 +217,7 @@ function SummaryCard({ label, value }: { label: string; value: number }) {
 }
 
 export function DaycareOperationsContainer() {
+  const { showConfirm } = useConfirm();
   const { isLoading, session, signOut } = useSession();
   const [gate, setGate] = useState<RegistrationGate>('loading');
   const [parents, setParents] = useState<DaycareParent[]>([]);
@@ -681,7 +682,16 @@ export function DaycareOperationsContainer() {
             <Text color="primary" style={{ fontWeight: '700' }}>Lihat Status</Text>
           </Box>
         </Pressable>
-        <Pressable onPress={() => void signOut()}>
+        <Pressable
+          onPress={() => {
+            showConfirm({
+              title: 'Keluar',
+              description: 'Yakin ingin keluar dari sesi daycare ini?',
+              confirmLabel: 'Keluar',
+              cancelLabel: 'Batal',
+              onConfirm: signOut,
+            });
+          }}>
           <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" alignItems="center">
             <Text color="danger" style={{ fontWeight: '700' }}>Keluar</Text>
           </Box>

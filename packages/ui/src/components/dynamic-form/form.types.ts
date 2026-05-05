@@ -1,7 +1,6 @@
 import { FormikHelpers, FormikProps } from 'formik';
 import { createContext, ReactNode, useContext } from 'react';
 import { ViewStyle } from 'react-native';
-import { AnySchema } from 'yup';
 import { ZodType } from 'zod';
 
 export type InputComponentProps<V> = {
@@ -20,7 +19,6 @@ export interface FormField<TForm, TValue, TProps = unknown> {
   required?: boolean;
   section?: string;
   input: InputComponent<TValue>;
-  validation?: AnySchema;
   props?: (Partial<InputComponentProps<TValue>> & TProps & Record<string, unknown>) | undefined;
   show?: (data: TForm) => boolean;
 }
@@ -33,7 +31,7 @@ export interface DynamicFormProps<T extends Record<string, unknown>> {
   fields: FormFieldProps<T>;
   defaultValue?: T;
   data?: T;
-  schema?: AnySchema | ZodType<T>;
+  schema?: ZodType<T>;
   onSubmit?: (data: T, helper: FormikHelpers<T>) => void | Promise<void>;
   submitLabel?: string;
   loading?: boolean;
