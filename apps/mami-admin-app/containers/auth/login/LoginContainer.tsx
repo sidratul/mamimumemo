@@ -17,11 +17,11 @@ export function LoginContainer() {
 
   return (
     <AuthScreen
-      heroTitle="Mami"
-      heroSubtitle="Kelola operasional daycare dengan cepat dan rapi."
+      heroTitle="mamimumemo"
+      heroSubtitle="Setiap cerita kecil si buah hati, jadi Memo ceria buat Mamimu."
       heroLogoSource={require('../../../assets/images/logo-admin.png')}
-      cardTitle="Login"
-      cardSubtitle="Masuk ke panel admin.">
+      cardTitle="Halo, Admin!"
+      cardSubtitle="Masuk untuk mulai mengelola hari ini.">
       <LoginForm />
     </AuthScreen>
   );

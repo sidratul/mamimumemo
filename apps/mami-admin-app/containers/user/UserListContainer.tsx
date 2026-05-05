@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Box } from '../../theme/theme';
 import { usePaginatedResource } from '../../hooks/use-paginated-resource';
-import { getUserCount, getUserDataVersion, listUsers, type AdminUser, type UserPersona } from '../../services/users';
+import { getUserCount, getUserDataVersion, listUsers, type AdminUser, type UserAccess } from '../../services/users';
 import { UserListFooter } from './UserListFooter';
 import { UserListHeader } from './UserListHeader';
 import { UserListItem } from './UserListItem';
@@ -16,16 +16,16 @@ const PAGE_SIZE = 20;
 
 export function UserListContainer() {
   const router = useRouter();
-  const [persona, setPersona] = useState<UserPersona | 'ALL'>('ALL');
+  const [access, setAccess] = useState<UserAccess | 'ALL'>('ALL');
   const [search, setSearch] = useState('');
   const [seenDataVersion, setSeenDataVersion] = useState(() => getUserDataVersion());
   const { items, total, loading, refreshing, loadingMore, error, refresh, loadMore } = usePaginatedResource<AdminUser>({
     pageSize: PAGE_SIZE,
-    deps: [persona, search],
+    deps: [access, search],
     loadPage: async (page, pageSize) => {
       const [nextItems, nextTotal] = await Promise.all([
-        listUsers({ persona, search, page, limit: pageSize }),
-        getUserCount({ persona, search }),
+        listUsers({ access, search, page, limit: pageSize }),
+        getUserCount({ access, search }),
       ]);
 
       return {
@@ -48,9 +48,9 @@ export function UserListContainer() {
   const header = (
     <Box>
       <UserListHeader
-        persona={persona}
+        access={access}
         search={search}
-        onChangePersona={setPersona}
+        onChangeAccess={setAccess}
         onChangeSearch={setSearch}
         onPressAdd={() => router.push('/(app)/users/create' as never)}
       />

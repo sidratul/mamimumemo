@@ -2,9 +2,9 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
 
 import { Box, Text } from '../../theme/theme';
-import { type AdminUser, type UserPersona } from '../../services/users';
+import { type AdminUser, type UserAccess } from '../../services/users';
 
-const personaLabelMap: Record<UserPersona, string> = {
+const accessLabelMap: Record<UserAccess, string> = {
   SUPER_ADMIN: 'Superuser',
   PARENT: 'Parent',
   OWNER: 'Owner',
@@ -12,7 +12,7 @@ const personaLabelMap: Record<UserPersona, string> = {
   DAYCARE_SITTER: 'Karyawan',
 };
 
-const personaColorMap: Record<UserPersona, { text: string; background: string }> = {
+const accessColorMap: Record<UserAccess, { text: string; background: string }> = {
   SUPER_ADMIN: { text: '#4F46E5', background: '#EEF2FF' }, // Indigo
   PARENT: { text: '#8B5CF6', background: '#F5F3FF' }, // Violet
   OWNER: { text: '#10B981', background: '#ECFDF5' }, // Emerald
@@ -65,17 +65,17 @@ export function UserListItem({ user, onPress }: UserListItemProps) {
             </Box>
 
             <Box flexDirection="row" flexWrap="wrap" gap="xs" marginTop="xs">
-              {user.personas.length > 0 ? user.personas.map((persona) => (
+              {user.accesses.length > 0 ? user.accesses.map((access) => (
                 <Box
-                  key={persona}
+                  key={access}
                   paddingHorizontal="sm"
                   paddingVertical="xs"
                   style={{
                     borderRadius: 8,
-                    backgroundColor: personaColorMap[persona].background,
+                    backgroundColor: accessColorMap[access].background,
                   }}>
-                  <Text style={{ fontSize: 11, fontWeight: '800', color: personaColorMap[persona].text, textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                    {personaLabelMap[persona]}
+                  <Text style={{ fontSize: 11, fontWeight: '800', color: accessColorMap[access].text, textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                    {accessLabelMap[access]}
                   </Text>
                 </Box>
               )) : (

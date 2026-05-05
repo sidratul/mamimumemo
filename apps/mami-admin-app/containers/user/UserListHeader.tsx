@@ -2,18 +2,18 @@ import { Button } from '@mami/ui';
 import { ListFilterBar } from '@mami/ui';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-import { type UserPersona } from '../../services/users';
+import { type UserAccess } from '../../services/users';
 import { Box, Text } from '../../theme/theme';
 
 type UserListHeaderProps = {
-  persona: UserPersona | 'ALL';
+  access: UserAccess | 'ALL';
   search: string;
-  onChangePersona: (value: UserPersona | 'ALL') => void;
+  onChangeAccess: (value: UserAccess | 'ALL') => void;
   onChangeSearch: (value: string) => void;
   onPressAdd: () => void;
 };
 
-const personaOptions: Array<{ label: string; value: UserPersona | 'ALL' }> = [
+const accessOptions: Array<{ label: string; value: UserAccess | 'ALL' }> = [
   { label: 'Semua', value: 'ALL' },
   { label: 'Super Admin', value: 'SUPER_ADMIN' },
   { label: 'Parent', value: 'PARENT' },
@@ -23,9 +23,9 @@ const personaOptions: Array<{ label: string; value: UserPersona | 'ALL' }> = [
 ];
 
 export function UserListHeader({
-  persona,
+  access,
   search,
-  onChangePersona,
+  onChangeAccess,
   onChangeSearch,
   onPressAdd,
 }: UserListHeaderProps) {
@@ -42,16 +42,16 @@ export function UserListHeader({
             style={{ paddingHorizontal: 16, height: 40, borderRadius: 12 }}
           />
         </Box>
-        <Text variant="subtitle">Kelola akun utama dan persona yang dimiliki setiap user.</Text>
+        <Text variant="subtitle">Kelola akun utama dan daftar akses yang dimiliki setiap user.</Text>
       </Box>
 
       <ListFilterBar
         searchPlaceholder="Cari nama atau email user"
         searchValue={search}
         onSearchChange={onChangeSearch}
-        options={personaOptions}
-        selectedValue={persona}
-        onSelect={(value) => onChangePersona(value as UserPersona | 'ALL')}
+        options={accessOptions}
+        selectedValue={access}
+        onSelect={(value) => onChangeAccess(value as UserAccess | 'ALL')}
       />
     </Box>
   );

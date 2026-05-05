@@ -3,23 +3,23 @@ import { DrawerFormActions, SelectInput, type SelectOption } from '@mami/ui';
 
 import { TextAreaField } from '../../components/input';
 import { Box, Text } from '../../theme/theme';
-import { type DaycareMembershipPersona } from '../../services/daycare-memberships/store';
+import { type DaycareMembershipAccess } from '../../services/daycare-memberships/store';
 
 type UserMembershipFormProps = {
   loading: boolean;
   error?: string;
   daycareId: string;
-  persona: DaycareMembershipPersona;
+  access: DaycareMembershipAccess;
   notes: string;
   daycareOptions: SelectOption[];
   onCancel: () => void;
   onChangeDaycareId: (value: string) => void;
-  onChangePersona: (value: DaycareMembershipPersona) => void;
+  onChangeAkses: (value: DaycareMembershipAccess) => void;
   onChangeNotes: (value: string) => void;
   onSubmit: () => void;
 };
 
-const personaOptions: SelectOption[] = [
+const accessOptions: SelectOption[] = [
   { label: 'Owner', value: 'OWNER' },
   { label: 'Admin Daycare', value: 'ADMIN' },
   { label: 'Karyawan Daycare', value: 'SITTER' },
@@ -29,12 +29,12 @@ export function UserMembershipForm({
   loading,
   error,
   daycareId,
-  persona,
+  access,
   notes,
   daycareOptions,
   onCancel,
   onChangeDaycareId,
-  onChangePersona,
+  onChangeAkses,
   onChangeNotes,
   onSubmit,
 }: UserMembershipFormProps) {
@@ -68,14 +68,14 @@ export function UserMembershipForm({
       </Box>
 
       <Box gap="xs">
-        <Text style={{ fontSize: 12, fontWeight: '700', color: '#24324B' }}>Persona</Text>
+        <Text style={{ fontSize: 12, fontWeight: '700', color: '#24324B' }}>Akses</Text>
         <SelectInput
-          value={persona}
-          placeholder="Pilih persona"
-          onChange={(value) => onChangePersona(value as DaycareMembershipPersona)}
+          value={access}
+          placeholder="Pilih access"
+          onChange={(value) => onChangeAkses(value as DaycareMembershipAccess)}
           disabled={loading}
-          options={personaOptions}
-          title="Pilih Persona"
+          options={accessOptions}
+          title="Pilih Akses"
         />
       </Box>
 
