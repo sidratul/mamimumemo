@@ -6,29 +6,29 @@ export const typeDefs = `
     DAYCARE_SITTER
     PARENT
   }
-enum UserAccess {
-  SUPER_ADMIN
-  PARENT
-  OWNER
-  DAYCARE_ADMIN
-  DAYCARE_SITTER
-}
 
-type User {
-  _id: ObjectId!
-  name: String!
-  email: String!
-  phone: String
-  role: UserRole
-  accesses: [UserAccess!]!
-  createdAt: Date
-  updatedAt: Date
-}
-...
-input UserFilterInput {
-  search: String
-  accesses: [UserAccess!]
-}
+  enum UserAccess {
+    SUPER_ADMIN
+    PARENT
+    OWNER
+    DAYCARE_ADMIN
+    DAYCARE_SITTER
+  }
+
+  type User {
+    _id: ObjectId!
+    name: String!
+    email: String!
+    phone: String
+    role: UserRole
+    accesses: [UserAccess!]!
+    createdAt: Date
+    updatedAt: Date
+  }
+
+  input CreateUserInput {
+    name: String!
+    email: String!
     password: String!
     phone: String
     role: UserRole
@@ -48,7 +48,7 @@ input UserFilterInput {
 
   input UserFilterInput {
     search: String
-    personas: [UserPersona!]
+    accesses: [UserAccess!]
   }
 
   extend type Query {
