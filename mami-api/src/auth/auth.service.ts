@@ -73,17 +73,26 @@ export class AuthService {
   }
 
   async login(input: typeof loginInput._type) {
+    console.log(`[Auth] Attempting login for email: ${input.email}`);
     loginInput.parse(input);
     const userOrNull = await usersService.findUserByEmail(input.email);
+    
     if (!userOrNull) {
+      console.error(`[Auth] Login failed: User with email ${input.email} not found.`);
       throw new GraphQLError(MESSAGES.AUTH.INVALID_CREDENTIALS);
     }
 
+    console.log(`[Auth] User found: ${userOrNull.name} (Role: ${userOrNull.role})`);
+    
     const isPasswordValid = await bcrypt.compare(input.password, userOrNull.password);
     if (!isPasswordValid) {
+      console.error(`[Auth] Login failed: Password mismatch for user ${input.email}.`);
+      console.log(`[Auth] Debug - Input password length: ${input.password.length}`);
+      console.log(`[Auth] Debug - Stored hash prefix: ${userOrNull.password.substring(0, 7)}...`);
       throw new GraphQLError(MESSAGES.AUTH.INVALID_CREDENTIALS);
     }
 
+    console.log(`[Auth] Login successful for ${input.email}. Building token...`);
     const tokenPayload = await this.buildAccessTokenPayload(userOrNull);
     const accessToken = createAccessToken(tokenPayload);
     const refreshToken = createRefreshToken({

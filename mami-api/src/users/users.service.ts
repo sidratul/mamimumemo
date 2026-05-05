@@ -10,7 +10,7 @@ import { User, UserAccess, UserQueryOptions } from "./users.d.ts";
 import usersRepository from "./users.repository.ts";
 import { DaycareMembershipsRepository } from "@/daycare_memberships/daycare_memberships.repository.ts";
 import { DaycareMembershipAccess } from "@/daycare_memberships/daycare_memberships.enum.ts";
-import { mapMembershipAccessToUserAccess } from "./users.access.ts";
+import { mapMembershipAccessToUserAccess } from "@/users/users.access.ts";
 import { createUserInput, updateUserInput, updateUserPasswordInput } from "./users.validation.ts";
 
 const daycareMembershipsRepository = new DaycareMembershipsRepository();

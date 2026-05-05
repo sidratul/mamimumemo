@@ -16,5 +16,10 @@
     "predeploy": "deno task migrate:all",
     "migration:new": "deno run -A scripts/create-migration.ts",
     "g": "deno run -A scripts/scaffold.ts"
+  },
+  "deploy": {
+    "org": "sidratul",
+    "app": "mamimumemo"
   }
 }
+
