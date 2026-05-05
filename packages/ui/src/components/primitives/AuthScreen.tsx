@@ -2,9 +2,6 @@ import type { ReactNode } from 'react';
 import { Image, KeyboardAvoidingView, Platform, ScrollView, View, type ImageSourcePropType } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { brandColors } from '../../theme/brand';
-import { TextBody, TextHeading, TextMuted, TextStrong } from './Typography';
-
 type AuthScreenProps = {
   heroTitle: string;
   heroSubtitle?: string;
@@ -25,7 +22,7 @@ export function AuthScreen({
   footer,
 }: AuthScreenProps) {
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }} edges={['left', 'right', 'bottom']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8FAFC' }} edges={['left', 'right', 'bottom', 'top']}>
       <KeyboardAvoidingView
         style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -34,82 +31,79 @@ export function AuthScreen({
           bounces={false}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ flexGrow: 1, backgroundColor: '#FFFFFF' }}>
-          <View style={{ flex: 1, backgroundColor: '#FFFFFF' }}>
-            <View
-              style={{
-                minHeight: 250,
-                paddingHorizontal: 24,
-                paddingTop: 24,
-                paddingBottom: 44,
-                backgroundColor: brandColors.primary,
-                overflow: 'hidden',
-                justifyContent: 'center',
-              }}>
-              <View
-                style={{
-                  position: 'absolute',
-                  top: -24,
-                  left: -28,
-                  width: 110,
-                  height: 110,
-                  borderRadius: 55,
-                  backgroundColor: 'rgba(255,255,255,0.12)',
-                }}
-              />
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 14,
-                  left: 12,
-                  width: 56,
-                  height: 56,
-                  borderRadius: 28,
-                  backgroundColor: 'rgba(255,255,255,0.14)',
-                }}
-              />
-              <View style={{ gap: 8, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 20 }}>
-                {heroLogoSource ? (
-                  <Image
-                    source={heroLogoSource}
-                    style={{ width: 320, height: 152, resizeMode: 'contain' }}
-                  />
-                ) : (
-                  <TextHeading style={{ color: '#FFFFFF', fontSize: 44, textAlign: 'center' }}>{heroTitle}</TextHeading>
-                )}
+          contentContainerStyle={{ flexGrow: 1 }}>
+          <View style={{ flex: 1, paddingHorizontal: 24, justifyContent: 'center', paddingVertical: 40 }}>
+            <View style={{ alignItems: 'center', marginBottom: 48, gap: 12 }}>
+              {heroLogoSource ? (
+                <Image
+                  source={heroLogoSource}
+                  style={{ width: 180, height: 60, marginBottom: 8 }}
+                  resizeMode="contain"
+                />
+              ) : (
+                <View style={{ width: 64, height: 64, borderRadius: 16, backgroundColor: '#4F46E5', alignItems: 'center', justifyContent: 'center' }}>
+                   <View style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: '#FFFFFF' }} />
+                </View>
+              )}
+              <View style={{ alignItems: 'center', gap: 4 }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <View style={{ width: 8, height: 8, borderRadius: 4, backgroundColor: '#4F46E5' }} />
+                  <Text style={{ fontSize: 28, fontWeight: '900', color: '#0F172A', letterSpacing: -1 }}>{heroTitle}</Text>
+                </View>
                 {heroSubtitle ? (
-                  <TextBody style={{ color: 'rgba(255,255,255,0.84)', textAlign: 'center' }}>{heroSubtitle}</TextBody>
+                  <Text style={{ fontSize: 15, color: '#64748B', textAlign: 'center', lineHeight: 22, maxWidth: 280 }}>
+                    {heroSubtitle}
+                  </Text>
                 ) : null}
               </View>
             </View>
 
             <View
               style={{
-                flex: 1,
-                marginTop: -18,
                 backgroundColor: '#FFFFFF',
-                borderTopLeftRadius: 28,
-                borderTopRightRadius: 28,
-                paddingHorizontal: 20,
-                paddingTop: 22,
-                paddingBottom: 28,
-                gap: 18,
-                shadowColor: '#0F7F86',
-                shadowOpacity: 0.08,
-                shadowRadius: 18,
+                borderRadius: 24,
+                paddingHorizontal: 24,
+                paddingVertical: 32,
+                gap: 24,
+                shadowColor: '#0F172A',
+                shadowOpacity: 0.06,
+                shadowRadius: 20,
                 shadowOffset: { width: 0, height: 10 },
-                elevation: 6,
+                elevation: 4,
+                borderWidth: 1,
+                borderColor: '#F1F5F9',
               }}>
-              <View style={{ gap: 6 }}>
-                <TextStrong style={{ fontSize: 30, color: '#0F7F86' }}>{cardTitle}</TextStrong>
-                {cardSubtitle ? <TextMuted>{cardSubtitle}</TextMuted> : null}
+              <View style={{ gap: 4 }}>
+                <Text style={{ fontSize: 24, fontWeight: '800', color: '#0F172A', letterSpacing: -0.5 }}>{cardTitle}</Text>
+                {cardSubtitle ? (
+                  <Text style={{ fontSize: 14, color: '#64748B' }}>{cardSubtitle}</Text>
+                ) : null}
               </View>
-              {children}
-              {footer ? <View style={{ paddingTop: 4 }}>{footer}</View> : null}
+              
+              <View style={{ gap: 20 }}>
+                {children}
+              </View>
+
+              {footer ? (
+                <View style={{ paddingTop: 8, borderTopWidth: 1, borderTopColor: '#F1F5F9' }}>
+                  {footer}
+                </View>
+              ) : null}
+            </View>
+            
+            <View style={{ marginTop: 32, alignItems: 'center' }}>
+               <Text style={{ fontSize: 13, color: '#94A3B8' }}>&copy; 2026 Mamimumemo Team</Text>
             </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
+}
+
+// Minimal placeholder for missing Typography imports if needed, 
+// but let's assume standard Text for now for maximum compatibility since we removed them.
+function Text({ style, children, ...props }: any) {
+    const { Text: RNText } = require('react-native');
+    return <RNText style={style} {...props}>{children}</RNText>;
 }

@@ -1,6 +1,6 @@
-import { Button } from 'react-native-paper';
-import { ScreenSection } from '@mami/ui';
+import { Button } from '@mami/ui';
 
+import { DetailSection } from './DetailSection';
 import { RoleSelect, TextField } from '../../components/input';
 import { ADMIN_MANAGED_ROLE_OPTIONS } from '../../components/input/RoleSelect';
 import { getUserRoleLabel, type UserRole } from '../../services/users';
@@ -36,26 +36,37 @@ export function UserProfileSection({
   onSubmit,
 }: UserProfileSectionProps) {
   return (
-    <ScreenSection>
-      <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Profil User</Text>
-      <TextField value={name} placeholder="Nama lengkap" onChange={onChangeName} />
-      <TextField value={email} placeholder="Email" onChange={onChangeEmail} keyboardType="email-address" />
-      <TextField value={phone} placeholder="Nomor telepon" onChange={onChangePhone} keyboardType="phone-pad" />
-      {canManageRole ? (
-        <RoleSelect value={role} onChange={(value: string) => onChangeRole(value as UserRole)} options={ADMIN_MANAGED_ROLE_OPTIONS} />
-      ) : (
-        <Box gap="xs">
-          <Text color="textSecondary">Role</Text>
-          <Box backgroundColor="background" borderRadius="md" borderColor="border" borderWidth={1} padding="md">
-            <Text>{getUserRoleLabel(role)}</Text>
+    <DetailSection title="Profil User">
+      <Box gap="md">
+        <TextField value={name} placeholder="Nama lengkap" onChange={onChangeName} />
+        <TextField value={email} placeholder="Email" onChange={onChangeEmail} keyboardType="email-address" />
+        <TextField value={phone} placeholder="Nomor telepon" onChange={onChangePhone} keyboardType="phone-pad" />
+        
+        {canManageRole ? (
+          <Box gap="xs">
+             <Text variant="bodySmall" fontWeight="700" color="textSecondary" marginLeft="xs">ROLE SISTEM</Text>
+             <RoleSelect value={role} onChange={(value: string) => onChangeRole(value as UserRole)} options={ADMIN_MANAGED_ROLE_OPTIONS} />
           </Box>
-          <Text color="textSecondary">Role akun ini bukan sumber kebenaran utama untuk persona. Persona daycare ditentukan lewat membership.</Text>
-        </Box>
-      )}
-      {error ? <Text color="danger">{error}</Text> : null}
-      <Button mode="contained" onPress={onSubmit} loading={saving} disabled={saving}>
-        Simpan Perubahan
-      </Button>
-    </ScreenSection>
+        ) : (
+          <Box gap="xs">
+            <Text variant="bodySmall" fontWeight="700" color="textSecondary" marginLeft="xs">ROLE SISTEM</Text>
+            <Box backgroundColor="background" borderRadius="md" borderColor="border" borderWidth={1} padding="md">
+              <Text fontWeight="700">{getUserRoleLabel(role)}</Text>
+            </Box>
+            <Text variant="bodySmall" color="textSecondary">Role ini tidak bisa diubah oleh admin level ini.</Text>
+          </Box>
+        )}
+        
+        {error ? <Text color="danger" variant="bodySmall" fontWeight="700">{error}</Text> : null}
+        
+        <Button 
+          label={saving ? 'Menyimpan...' : 'Simpan Perubahan'} 
+          onPress={onSubmit} 
+          disabled={saving} 
+          variant="primary" 
+          style={{ marginTop: 8 }}
+        />
+      </Box>
+    </DetailSection>
   );
 }

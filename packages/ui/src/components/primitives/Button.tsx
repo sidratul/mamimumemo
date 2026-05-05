@@ -1,4 +1,5 @@
-import { Pressable, Text, type ViewStyle } from 'react-native';
+import { ReactNode } from 'react';
+import { Pressable, Text, View, type ViewStyle } from 'react-native';
 
 import { brandColors } from '../../theme/brand';
 
@@ -9,10 +10,11 @@ export type ButtonProps = {
   onPress: () => void;
   variant?: ButtonVariant;
   disabled?: boolean;
+  icon?: ReactNode;
   style?: ViewStyle;
 };
 
-export function Button({ label, onPress, variant = 'primary', disabled = false, style }: ButtonProps) {
+export function Button({ label, onPress, variant = 'primary', disabled = false, icon, style }: ButtonProps) {
   const isPrimary = variant === 'primary';
   const isDanger = variant === 'danger';
   const isGhost = variant === 'ghost';
@@ -36,6 +38,7 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
       style={{
         minHeight: isGhost ? 40 : 48,
         borderRadius: 12,
+        flexDirection: 'row',
         alignItems: 'center',
         justifyContent: 'center',
         backgroundColor,
@@ -45,6 +48,7 @@ export function Button({ label, onPress, variant = 'primary', disabled = false, 
         opacity: disabled ? 0.6 : 1,
         ...style,
       }}>
+      {icon ? <View style={{ marginRight: 8 }}>{icon}</View> : null}
       <Text style={{ color: textColor, fontWeight: isPrimary || isDanger ? '700' : '600', fontSize: 14 }}>{label}</Text>
     </Pressable>
   );

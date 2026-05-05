@@ -2,14 +2,14 @@ import { createBox, createText, createTheme, useTheme as useRestyleTheme } from 
 
 export const theme = createTheme({
   colors: {
-    background: '#F7F9FC',
+    background: '#F8FAFC',
     surface: '#FFFFFF',
-    primary: '#4D96FF',
-    textPrimary: '#24324B',
-    textSecondary: '#5F6C84',
-    border: '#E2E8F2',
-    success: '#6BCB77',
-    danger: '#FF4D4D',
+    primary: '#4F46E5', // Indigo 600
+    textPrimary: '#0F172A', // Slate 900
+    textSecondary: '#64748B', // Slate 500
+    border: '#E2E8F0', // Slate 200
+    success: '#10B981', // Emerald 500
+    danger: '#EF4444', // Red 500
   },
   spacing: {
     none: 0,
@@ -19,41 +19,54 @@ export const theme = createTheme({
     lg: 16,
     xl: 24,
     xxl: 32,
+    xxxl: 40,
   },
   borderRadii: {
     none: 0,
-    sm: 6,
-    md: 10,
+    xs: 4,
+    sm: 8,
+    md: 12,
     lg: 16,
     xl: 24,
+    full: 9999,
   },
   textVariants: {
     defaults: {
       color: 'textPrimary',
-      fontSize: 14,
+      fontSize: 15,
+      lineHeight: 22,
     },
     title: {
       color: 'textPrimary',
-      fontSize: 28,
-      fontWeight: '700',
+      fontSize: 32,
+      fontWeight: '800',
+      letterSpacing: -0.5,
     },
     subtitle: {
       color: 'textSecondary',
-      fontSize: 15,
+      fontSize: 16,
+      lineHeight: 24,
     },
     cardTitle: {
       color: 'textSecondary',
-      fontSize: 13,
+      fontSize: 14,
+      fontWeight: '600',
+      textTransform: 'uppercase',
+      letterSpacing: 0.5,
     },
     cardValue: {
       color: 'textPrimary',
-      fontSize: 24,
-      fontWeight: '700',
+      fontSize: 28,
+      fontWeight: '800',
     },
     buttonLabel: {
       color: 'surface',
-      fontSize: 15,
-      fontWeight: '600',
+      fontSize: 16,
+      fontWeight: '700',
+    },
+    bodySmall: {
+      color: 'textSecondary',
+      fontSize: 13,
     },
   },
 });

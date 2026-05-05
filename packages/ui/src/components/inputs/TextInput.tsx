@@ -29,9 +29,9 @@ export function TextInput({
   secureTextEntry,
   multiline,
   numberOfLines,
-  textColor = '#3D2218',
+  textColor = '#0F172A', // Slate 900
   backgroundColor = '#FFFFFF',
-  borderRadius = 10,
+  borderRadius = 12,
   right,
   useBottomSheetInput = false,
 }: SharedTextInputProps) {

@@ -10,23 +10,28 @@ type DaycareHeroSectionProps = {
 };
 
 export function DaycareHeroSection({ name, address, logoUrl }: DaycareHeroSectionProps) {
-  const logoSource = logoUrl ? { uri: logoUrl } : require('../../assets/images/logo.png');
+  const logoSource = logoUrl ? { uri: logoUrl } : null;
 
   return (
-    <Box flexDirection="row" gap="md" alignItems="center">
+    <Box flexDirection="row" gap="lg" alignItems="center" paddingHorizontal="xs">
       <Box
-        width={56}
-        height={56}
+        width={64}
+        height={64}
         alignItems="center"
         justifyContent="center"
-        style={{ backgroundColor: '#EEF3FF', overflow: 'hidden', borderRadius: 12 }}>
-        <Image source={logoSource} style={{ width: 56, height: 56 }} contentFit="cover" />
+        backgroundColor="background"
+        style={{ overflow: 'hidden', borderRadius: 16, borderWidth: 1, borderColor: '#F1F5F9' }}>
+        {logoSource ? (
+          <Image source={logoSource} style={{ width: 64, height: 64 }} contentFit="cover" />
+        ) : (
+          <MaterialCommunityIcons name="office-building" size={32} color="#CBD5E1" />
+        )}
       </Box>
       <Box flex={1} gap="xs">
-        <Text style={{ fontSize: 17, fontWeight: '700', color: '#24324B' }}>{name}</Text>
+        <Text variant="subtitle" fontWeight="800" fontSize={20} color="textPrimary">{name}</Text>
         <Box flexDirection="row" alignItems="center" gap="xs">
-          <MaterialCommunityIcons name="map-marker-outline" size={16} color="#7A869A" />
-          <Text color="textSecondary">{address}</Text>
+          <MaterialCommunityIcons name="map-marker-radius-outline" size={16} color="#64748B" />
+          <Text variant="bodySmall" color="textSecondary">{address}</Text>
         </Box>
       </Box>
     </Box>

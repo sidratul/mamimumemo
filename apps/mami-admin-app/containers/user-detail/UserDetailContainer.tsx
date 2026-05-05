@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
-import { BottomDrawer, DetailScreen, type SelectOption } from '@mami/ui';
+import { BottomDrawer, DetailScreen, SegmentTabs, type SelectOption } from '@mami/ui';
 
 import { listDaycares } from '../../services/daycare-admin';
 import { addExistingUserToDaycare, deactivateDaycareMembership, type DaycareMembershipPersona } from '../../services/daycare-memberships/store';
@@ -176,53 +176,95 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
   }
 
   if (loading) {
-    return <UserDetailState type="loading" />;
+    return (
+      <DetailScreen title="Detail User" onBack={() => router.back()} scrollable={false}>
+        <UserDetailState type="loading" />
+      </DetailScreen>
+    );
   }
 
   if (!user || error) {
-    return <UserDetailState type="error" message={error || 'User tidak ditemukan.'} />;
+    return (
+      <DetailScreen title="Detail User" onBack={() => router.back()} scrollable={false}>
+        <UserDetailState type="error" message={error || 'User tidak ditemukan.'} />
+      </DetailScreen>
+    );
   }
 
   return (
-    <DetailScreen title={user.name} onBack={() => router.back()} contentContainerStyle={{ gap: 24 }}>
+    <DetailScreen 
+      title="Detail User" 
+      onBack={() => router.back()} 
+      scrollable={false}
+      contentContainerStyle={{ flex: 1, paddingTop: 20, gap: 24, paddingBottom: 0 }}
+      style={{ backgroundColor: '#F8FAFC' }}
+    >
       <UserSummarySection user={user} />
-      <UserMembershipsSection
-        memberships={memberships}
-        busyMembershipId={busyMembershipId}
-        onAddPress={() => {
-          setMembershipError('');
-          const firstAvailableDaycare = daycareOptions.find((option) => !activeMembershipDaycareIds.has(option.value));
-          setSelectedDaycareId(firstAvailableDaycare?.value ?? '');
-          setSelectedMembershipPersona('ADMIN');
-          setMembershipNotes('');
-          setMembershipDrawerVisible(true);
-        }}
-        onDeactivateMembership={(membershipId) => void handleDeactivateMembership(membershipId)}
+      
+      <SegmentTabs
+        initialKey="profile"
+        contentContainerStyle={{ paddingBottom: 40 }}
+        items={[
+          {
+            key: 'profile',
+            label: 'Profil',
+            content: (
+              <Box gap="xl">
+                <UserProfileSection
+                  name={name}
+                  email={email}
+                  phone={phone}
+                  role={role}
+                  canManageRole={canManageRole}
+                  saving={savingProfile}
+                  error={submitError}
+                  onChangeName={setName}
+                  onChangeEmail={setEmail}
+                  onChangePhone={setPhone}
+                  onChangeRole={setRole}
+                  onSubmit={() => void handleSaveProfile()}
+                />
+                <UserDangerSection userName={user.name} loading={deleting} onConfirmDelete={() => void handleDelete()} />
+              </Box>
+            ),
+          },
+          {
+            key: 'membership',
+            label: 'Membership',
+            content: (
+              <UserMembershipsSection
+                memberships={memberships}
+                busyMembershipId={busyMembershipId}
+                onAddPress={() => {
+                  setMembershipError('');
+                  const firstAvailableDaycare = daycareOptions.find((option) => !activeMembershipDaycareIds.has(option.value));
+                  setSelectedDaycareId(firstAvailableDaycare?.value ?? '');
+                  setSelectedMembershipPersona('ADMIN');
+                  setMembershipNotes('');
+                  setMembershipDrawerVisible(true);
+                }}
+                onDeactivateMembership={(membershipId) => void handleDeactivateMembership(membershipId)}
+              />
+            ),
+          },
+          {
+            key: 'security',
+            label: 'Keamanan',
+            content: (
+              <UserPasswordSection
+                password={newPassword}
+                loading={savingPassword}
+                error={passwordError}
+                onChangePassword={setNewPassword}
+                onSubmit={() => void handleResetPassword()}
+              />
+            ),
+          },
+        ]}
       />
-      <UserProfileSection
-        name={name}
-        email={email}
-        phone={phone}
-        role={role}
-        canManageRole={canManageRole}
-        saving={savingProfile}
-        error={submitError}
-        onChangeName={setName}
-        onChangeEmail={setEmail}
-        onChangePhone={setPhone}
-        onChangeRole={setRole}
-        onSubmit={() => void handleSaveProfile()}
-      />
-      <UserPasswordSection
-        password={newPassword}
-        loading={savingPassword}
-        error={passwordError}
-        onChangePassword={setNewPassword}
-        onSubmit={() => void handleResetPassword()}
-      />
-      <UserDangerSection userName={user.name} loading={deleting} onConfirmDelete={() => void handleDelete()} />
+
       <BottomDrawer visible={membershipDrawerVisible} onDismiss={() => setMembershipDrawerVisible(false)}>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Tambah Membership Daycare</Text>
+        <Text style={{ fontSize: 18, fontWeight: '800', color: '#0F172A', marginBottom: 16 }}>Tambah Membership Daycare</Text>
         <UserMembershipForm
           loading={membershipLoading}
           error={membershipError}

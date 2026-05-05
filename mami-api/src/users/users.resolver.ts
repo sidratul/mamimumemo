@@ -44,8 +44,8 @@ export const resolvers = {
     },
   },
   User: {
-    personas: async (user: { _id: ObjectId; role?: string | null }) => {
-      return await usersService.getUserPersonas(user._id, user.role as never);
+    accesses: async (user: { _id: ObjectId; role?: string | null }) => {
+      return await usersService.getUserAccesses(user._id, user.role as never);
     },
   },
   Mutation: {

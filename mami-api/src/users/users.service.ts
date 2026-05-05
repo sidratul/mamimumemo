@@ -6,11 +6,11 @@ import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { RoleType, UserRole } from "#shared/enums/enum.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
 import { ObjectId } from "#shared/types/objectid.type.ts";
-import { User, UserPersona, UserQueryOptions } from "./users.d.ts";
+import { User, UserAccess, UserQueryOptions } from "./users.d.ts";
 import usersRepository from "./users.repository.ts";
 import { DaycareMembershipsRepository } from "@/daycare_memberships/daycare_memberships.repository.ts";
-import { DaycareMembershipPersona } from "@/daycare_memberships/daycare_memberships.enum.ts";
-import { mapMembershipPersonaToUserPersona } from "./users.persona.ts";
+import { DaycareMembershipAccess } from "@/daycare_memberships/daycare_memberships.enum.ts";
+import { mapMembershipAccessToUserAccess } from "./users.access.ts";
 import { createUserInput, updateUserInput, updateUserPasswordInput } from "./users.validation.ts";
 
 const daycareMembershipsRepository = new DaycareMembershipsRepository();
@@ -148,15 +148,15 @@ export class UsersService {
     return await usersRepository.deleteByIdOrEmail(input, options);
   }
 
-  async getUserPersonas(userId: ObjectId, fallbackRole?: RoleType): Promise<UserPersona[]> {
-    const personas = new Set<UserPersona>();
+  async getUserAccesses(userId: ObjectId, fallbackRole?: RoleType): Promise<UserAccess[]> {
+    const accesses = new Set<UserAccess>();
 
     if (fallbackRole === UserRole.SUPER_ADMIN) {
-      personas.add("SUPER_ADMIN");
+      accesses.add("SUPER_ADMIN");
     }
 
     if (fallbackRole === UserRole.PARENT) {
-      personas.add("PARENT");
+      accesses.add("PARENT");
     }
 
     const memberships = await daycareMembershipsRepository.listByUserId(userId);
@@ -164,20 +164,20 @@ export class UsersService {
       if (membership.status !== "ACTIVE") {
         continue;
       }
-      personas.add(mapMembershipPersonaToUserPersona(membership.persona));
+      accesses.add(mapMembershipAccessToUserAccess(membership.access));
     }
 
-    if (personas.size === 0 && fallbackRole) {
+    if (accesses.size === 0 && fallbackRole) {
       if (fallbackRole === UserRole.DAYCARE_OWNER) {
-        personas.add("OWNER");
+        accesses.add("OWNER");
       } else if (fallbackRole === UserRole.DAYCARE_ADMIN) {
-        personas.add("DAYCARE_ADMIN");
+        accesses.add("DAYCARE_ADMIN");
       } else if (fallbackRole === UserRole.DAYCARE_SITTER) {
-        personas.add("DAYCARE_SITTER");
+        accesses.add("DAYCARE_SITTER");
       }
     }
 
-    return [...personas];
+    return [...accesses];
   }
 
   private async buildUserFilter(options?: UserQueryOptions) {
@@ -191,25 +191,25 @@ export class UsersService {
       ];
     }
 
-    const personas = options?.personas ?? [];
-    if (personas.length === 0) {
+    const accesses = options?.accesses ?? [];
+    if (accesses.length === 0) {
       return filter;
     }
 
     const roleFilters: RoleType[] = [];
-    const membershipPersonaFilters: DaycareMembershipPersona[] = [];
+    const membershipAccessFilters: DaycareMembershipAccess[] = [];
 
-    for (const persona of personas) {
-      if (persona === "SUPER_ADMIN") {
+    for (const access of accesses) {
+      if (access === "SUPER_ADMIN") {
         roleFilters.push(UserRole.SUPER_ADMIN);
-      } else if (persona === "PARENT") {
+      } else if (access === "PARENT") {
         roleFilters.push(UserRole.PARENT);
-      } else if (persona === "OWNER") {
-        membershipPersonaFilters.push(DaycareMembershipPersona.OWNER);
-      } else if (persona === "DAYCARE_ADMIN") {
-        membershipPersonaFilters.push(DaycareMembershipPersona.ADMIN);
-      } else if (persona === "DAYCARE_SITTER") {
-        membershipPersonaFilters.push(DaycareMembershipPersona.SITTER);
+      } else if (access === "OWNER") {
+        membershipAccessFilters.push(DaycareMembershipAccess.OWNER);
+      } else if (access === "DAYCARE_ADMIN") {
+        membershipAccessFilters.push(DaycareMembershipAccess.ADMIN);
+      } else if (access === "DAYCARE_SITTER") {
+        membershipAccessFilters.push(DaycareMembershipAccess.SITTER);
       }
     }
 
@@ -219,8 +219,8 @@ export class UsersService {
       orFilters.push({ role: { $in: roleFilters } });
     }
 
-    if (membershipPersonaFilters.length > 0) {
-      const membershipUserIds = await daycareMembershipsRepository.findActiveUserIdsByPersonas(membershipPersonaFilters);
+    if (membershipAccessFilters.length > 0) {
+      const membershipUserIds = await daycareMembershipsRepository.findActiveUserIdsByAccesses(membershipAccessFilters);
       if (membershipUserIds.length > 0) {
         orFilters.push({ _id: { $in: membershipUserIds } });
       }

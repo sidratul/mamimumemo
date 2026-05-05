@@ -2,7 +2,7 @@ import { ClientSession, ProjectionType } from "mongoose";
 import { ObjectId } from "#shared/index.ts";
 import DaycareMembershipModel from "./daycare_memberships.schema.ts";
 import { DaycareMembershipDocShape, DaycareMembershipRecord } from "./daycare_memberships.d.ts";
-import { DaycareMembershipPersona, DaycareMembershipStatus } from "./daycare_memberships.enum.ts";
+import { DaycareMembershipAccess, DaycareMembershipStatus } from "./daycare_memberships.enum.ts";
 
 export class DaycareMembershipsRepository {
   async create(
@@ -42,7 +42,7 @@ export class DaycareMembershipsRepository {
   async findActiveOwnerByDaycareId(daycareId: ObjectId): Promise<DaycareMembershipRecord | null> {
     return await DaycareMembershipModel.findOne({
       "daycare._id": daycareId,
-      persona: DaycareMembershipPersona.OWNER,
+      access: DaycareMembershipAccess.OWNER,
       status: DaycareMembershipStatus.ACTIVE,
     }).sort({ createdAt: -1 }).lean<DaycareMembershipRecord | null>().exec();
   }
@@ -88,14 +88,14 @@ export class DaycareMembershipsRepository {
     }).sort({ createdAt: -1 }).lean<DaycareMembershipRecord[]>().exec();
   }
 
-  async findActiveUserIdsByPersonas(personas: DaycareMembershipPersona[]): Promise<ObjectId[]> {
-    if (personas.length === 0) {
+  async findActiveUserIdsByAccesses(accesses: DaycareMembershipAccess[]): Promise<ObjectId[]> {
+    if (accesses.length === 0) {
       return [];
     }
 
     const records = await DaycareMembershipModel.find(
       {
-        persona: { $in: personas },
+        access: { $in: accesses },
         status: DaycareMembershipStatus.ACTIVE,
       },
       { "user._id": 1 },

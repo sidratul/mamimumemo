@@ -1,4 +1,5 @@
 import { ActivityIndicator } from 'react-native-paper';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 
 import { Box, Text } from '../../theme/theme';
 
@@ -17,28 +18,34 @@ type UserListStateProps =
 export function UserListState(props: UserListStateProps) {
   if (props.type === 'loading') {
     return (
-      <Box paddingHorizontal="lg" paddingVertical="md" alignItems="center" gap="sm">
-        <ActivityIndicator color="#4D96FF" />
-        <Text color="textSecondary">Memuat daftar user...</Text>
+      <Box paddingHorizontal="lg" paddingVertical="xxl" alignItems="center" gap="md">
+        <ActivityIndicator color="#4F46E5" />
+        <Text variant="bodySmall" color="textSecondary">Memuat daftar pengguna...</Text>
       </Box>
     );
   }
 
   if (props.type === 'error') {
     return (
-      <Box paddingHorizontal="lg" gap="xs">
-        <Text color="danger" style={{ fontWeight: '700' }}>
-          Gagal memuat data
+      <Box paddingHorizontal="lg" paddingVertical="xxl" alignItems="center" gap="sm">
+        <MaterialCommunityIcons name="alert-circle-outline" size={48} color="#EF4444" />
+        <Text variant="defaults" fontWeight="800" color="danger">
+          Gagal Memuat Data
         </Text>
-        <Text color="textSecondary">{props.message}</Text>
+        <Text variant="bodySmall" color="textSecondary" textAlign="center">{props.message}</Text>
       </Box>
     );
   }
 
   return (
-    <Box paddingHorizontal="lg" paddingVertical="xl" gap="xs" alignItems="center">
-      <Text variant="cardValue">Belum ada data</Text>
-      <Text color="textSecondary">Tidak ada user yang cocok dengan filter saat ini.</Text>
+    <Box paddingHorizontal="lg" paddingVertical="xxxl" gap="sm" alignItems="center">
+      <Box width={64} height={64} borderRadius="full" backgroundColor="background" alignItems="center" justifyContent="center" marginBottom="sm">
+        <MaterialCommunityIcons name="account-search-outline" size={32} color="#94A3B8" />
+      </Box>
+      <Text variant="subtitle" fontWeight="800" color="textPrimary">Belum Ada Pengguna</Text>
+      <Text variant="bodySmall" color="textSecondary" textAlign="center" style={{ maxWidth: 240 }}>
+        Tidak ada user yang ditemukan. Tambahkan user baru untuk memulai.
+      </Text>
     </Box>
   );
 }

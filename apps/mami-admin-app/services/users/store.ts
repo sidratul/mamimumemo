@@ -10,7 +10,7 @@ export type UserRole =
   | 'DAYCARE_SITTER'
   | 'PARENT';
 
-export type UserPersona =
+export type UserAccess =
   | 'SUPER_ADMIN'
   | 'PARENT'
   | 'OWNER'
@@ -23,14 +23,14 @@ export type AdminUser = {
   email: string;
   phone: string;
   role: UserRole;
-  personas: UserPersona[];
+  accesses: UserAccess[];
   createdAt?: string;
   updatedAt?: string;
 };
 
 export type UserDaycareMembership = {
   id: string;
-  persona: 'OWNER' | 'ADMIN' | 'SITTER';
+  access: 'OWNER' | 'ADMIN' | 'SITTER';
   status: 'ACTIVE' | 'INACTIVE';
   joinedAt?: string;
   endedAt?: string;
@@ -42,7 +42,7 @@ export type UserDaycareMembership = {
 };
 
 type ListUsersInput = {
-  persona?: UserPersona | 'ALL';
+  access?: UserAccess | 'ALL';
   search?: string;
   page?: number;
   limit?: number;
@@ -84,7 +84,7 @@ type DeleteUserResponse = {
 type UserDaycareMembershipsResponse = {
   userDaycareMemberships: Array<{
     _id: string;
-    persona: 'OWNER' | 'ADMIN' | 'SITTER';
+    access: 'OWNER' | 'ADMIN' | 'SITTER';
     status: 'ACTIVE' | 'INACTIVE';
     joinedAt?: string | null;
     endedAt?: string | null;
@@ -102,7 +102,7 @@ type UserApiNode = {
   email: string;
   phone?: string | null;
   role?: UserRole | null;
-  personas?: UserPersona[] | null;
+  accesses?: UserAccess[] | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 };
@@ -124,7 +124,7 @@ const USER_FIELDS = gql`
     email
     phone
     role
-    personas
+    accesses
     createdAt
     updatedAt
   }
@@ -194,7 +194,7 @@ const USER_DAYCARE_MEMBERSHIPS_QUERY = gql`
   query UserDaycareMemberships($userId: ObjectId!) {
     userDaycareMemberships(userId: $userId) {
       _id
-      persona
+      access
       status
       joinedAt
       endedAt
@@ -214,18 +214,18 @@ function mapUser(node: UserApiNode): AdminUser {
     email: node.email,
     phone: node.phone ?? '',
     role: node.role ?? 'PARENT',
-    personas: node.personas ?? [],
+    accesses: node.accesses ?? [],
     createdAt: node.createdAt ?? '',
     updatedAt: node.updatedAt ?? '',
   };
 }
 
-export async function listUsers({ persona = 'ALL', search = '', page = 1, limit = 20 }: ListUsersInput = {}) {
+export async function listUsers({ access = 'ALL', search = '', page = 1, limit = 20 }: ListUsersInput = {}) {
   const response = await apolloClient.query<UsersResponse>({
     query: LIST_USERS_QUERY,
     variables: {
       filter: {
-        personas: persona === 'ALL' ? undefined : [persona],
+        accesses: access === 'ALL' ? undefined : [access],
         search: search.trim() || undefined,
       },
       sort: {
@@ -243,12 +243,12 @@ export async function listUsers({ persona = 'ALL', search = '', page = 1, limit 
   return response.data.users.map(mapUser);
 }
 
-export async function getUserCount({ persona = 'ALL', search = '' }: ListUsersInput = {}) {
+export async function getUserCount({ access = 'ALL', search = '' }: ListUsersInput = {}) {
   const response = await apolloClient.query<UserCountResponse>({
     query: USER_COUNT_QUERY,
     variables: {
       filter: {
-        personas: persona === 'ALL' ? undefined : [persona],
+        accesses: access === 'ALL' ? undefined : [access],
         search: search.trim() || undefined,
       },
     },
@@ -357,7 +357,7 @@ export async function getUserDaycareMemberships(userId: string): Promise<UserDay
 
   return response.data.userDaycareMemberships.map((membership) => ({
     id: membership._id,
-    persona: membership.persona,
+    access: membership.access,
     status: membership.status,
     joinedAt: membership.joinedAt ?? '',
     endedAt: membership.endedAt ?? '',

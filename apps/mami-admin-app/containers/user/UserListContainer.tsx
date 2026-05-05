@@ -61,7 +61,7 @@ export function UserListContainer() {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#F7F9FC' }} edges={['top', 'left', 'right']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8FAFC' }} edges={['top', 'left', 'right']}>
       <FlatList
         data={loading || error ? [] : items}
         keyExtractor={(item) => item.id}

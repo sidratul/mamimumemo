@@ -1,8 +1,8 @@
-import { Button } from 'react-native-paper';
-import { ScreenSection } from '@mami/ui';
+import { Button } from '@mami/ui';
 
+import { DetailSection } from './DetailSection';
 import { PasswordField } from '../../components/input';
-import { Text } from '../../theme/theme';
+import { Box, Text } from '../../theme/theme';
 
 type UserPasswordSectionProps = {
   password: string;
@@ -20,13 +20,17 @@ export function UserPasswordSection({
   onSubmit,
 }: UserPasswordSectionProps) {
   return (
-    <ScreenSection>
-      <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Reset Password</Text>
-      <PasswordField value={password} placeholder="Password baru" onChange={onChangePassword} />
-      {error ? <Text color="danger">{error}</Text> : null}
-      <Button mode="outlined" onPress={onSubmit} loading={loading} disabled={loading}>
-        Update Password
-      </Button>
-    </ScreenSection>
+    <DetailSection title="Keamanan Akun">
+      <Box gap="md">
+        <PasswordField value={password} placeholder="Password baru" onChange={onChangePassword} />
+        {error ? <Text color="danger" variant="bodySmall" fontWeight="700">{error}</Text> : null}
+        <Button 
+          label={loading ? 'Memperbarui...' : 'Update Password'} 
+          onPress={onSubmit} 
+          variant="secondary" 
+          disabled={loading} 
+        />
+      </Box>
+    </DetailSection>
   );
 }

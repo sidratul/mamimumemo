@@ -1,5 +1,6 @@
-import { Button, ScreenSection, useConfirm } from '@mami/ui';
+import { Button, useConfirm } from '@mami/ui';
 
+import { DetailSection } from './DetailSection';
 import { Text } from '../../theme/theme';
 
 type UserDangerSectionProps = {
@@ -12,11 +13,12 @@ export function UserDangerSection({ userName, loading, onConfirmDelete }: UserDa
   const { showConfirm } = useConfirm();
 
   return (
-    <ScreenSection gap={8}>
-      <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Danger Zone</Text>
-      <Text color="textSecondary">Hapus user secara permanen dari sistem.</Text>
+    <DetailSection title="Zona Bahaya">
+      <Text variant="bodySmall" color="textSecondary" marginBottom="sm">
+        Menghapus user ini akan menghilangkan semua akses dan keanggotaan daycare secara permanen.
+      </Text>
       <Button
-        label={loading ? 'Menghapus...' : 'Hapus User'}
+        label={loading ? 'Menghapus...' : 'Hapus User Secara Permanen'}
         variant="danger"
         disabled={loading}
         onPress={() => {
@@ -29,6 +31,6 @@ export function UserDangerSection({ userName, loading, onConfirmDelete }: UserDa
           });
         }}
       />
-    </ScreenSection>
+    </DetailSection>
   );
 }

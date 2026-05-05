@@ -17,7 +17,7 @@ export type UserDoc = HydratedDocument<User>;
 
 export type UserSubDoc = Pick<User, "_id" | "name" | "email" | "phone">;
 
-export type UserPersona =
+export type UserAccess =
   | "SUPER_ADMIN"
   | "PARENT"
   | "OWNER"
@@ -26,7 +26,7 @@ export type UserPersona =
 
 export interface UserFilter {
   search?: string;
-  personas?: UserPersona[];
+  accesses?: UserAccess[];
 }
 
 export interface UserQueryOptions extends UserFilter, PaginationOptions, SortOptions {}

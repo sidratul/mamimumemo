@@ -1,7 +1,7 @@
 import { HydratedDocument } from "mongoose";
 import { ObjectId } from "#shared/index.ts";
 import type { UserSubDoc } from "@/auth/auth.d.ts";
-import { DaycareMembershipPersona, DaycareMembershipStatus } from "./daycare_memberships.enum.ts";
+import { DaycareMembershipAccess, DaycareMembershipStatus } from "./daycare_memberships.enum.ts";
 
 export type DaycareMembershipDaycareSubDoc = {
   _id: ObjectId;
@@ -11,7 +11,7 @@ export type DaycareMembershipDaycareSubDoc = {
 export type DaycareMembershipDocShape = {
   user: UserSubDoc;
   daycare: DaycareMembershipDaycareSubDoc;
-  persona: DaycareMembershipPersona;
+  access: DaycareMembershipAccess;
   status: DaycareMembershipStatus;
   joinedAt: Date;
   endedAt?: Date;

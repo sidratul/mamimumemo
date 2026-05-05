@@ -4,12 +4,12 @@ import { apolloClient } from '../apollo';
 import { invalidateDaycareData } from '../daycare-admin';
 import { invalidateUserData } from '../users';
 
-export type DaycareMembershipPersona = 'OWNER' | 'ADMIN' | 'SITTER';
+export type DaycareMembershipAccess = 'OWNER' | 'ADMIN' | 'SITTER';
 export type DaycareMembershipStatus = 'ACTIVE' | 'INACTIVE';
 
 export type DaycareMembershipRecord = {
   id: string;
-  persona: DaycareMembershipPersona;
+  access: DaycareMembershipAccess;
   status: DaycareMembershipStatus;
   notes?: string;
   daycare: {
@@ -41,7 +41,7 @@ type DeactivateDaycareMembershipResponse = {
 type DaycareMembershipsResponse = {
   daycareMemberships: Array<{
     _id: string;
-    persona: DaycareMembershipPersona;
+    access: DaycareMembershipAccess;
     status: DaycareMembershipStatus;
     notes?: string | null;
     daycare: {
@@ -90,7 +90,7 @@ const DAYCARE_MEMBERSHIPS_QUERY = gql`
   query DaycareMemberships($daycareId: ObjectId!) {
     daycareMemberships(daycareId: $daycareId) {
       _id
-      persona
+      access
       status
       notes
       daycare {
@@ -111,7 +111,7 @@ const DAYCARE_MEMBERSHIPS_QUERY = gql`
 function mapMembership(node: DaycareMembershipsResponse['daycareMemberships'][number]): DaycareMembershipRecord {
   return {
     id: node._id,
-    persona: node.persona,
+    access: node.access,
     status: node.status,
     notes: node.notes ?? '',
     daycare: {
@@ -141,7 +141,7 @@ export async function getDaycareMemberships(daycareId: string) {
 export async function addExistingUserToDaycare(input: {
   daycareId: string;
   userId: string;
-  persona: DaycareMembershipPersona;
+  access: DaycareMembershipAccess;
   notes?: string;
 }) {
   const response = await apolloClient.mutate<AddUserToDaycareResponse>({

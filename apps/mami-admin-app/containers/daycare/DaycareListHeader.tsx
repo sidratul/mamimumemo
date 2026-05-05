@@ -1,5 +1,6 @@
-import { Button } from 'react-native-paper';
+import { Button } from '@mami/ui';
 import { ListFilterBar } from '@mami/ui';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { approvalStatusColorMap } from './shared/ApprovalStatusBadge';
 import { type ApprovalStatus } from '../../services/daycare-admin';
@@ -34,19 +35,16 @@ export function DaycareListHeader({
     <Box gap="lg" paddingTop="md" paddingBottom="sm">
       <Box paddingHorizontal="lg" gap="xs">
         <Box flexDirection="row" alignItems="center" justifyContent="space-between" gap="md">
-          <Text style={{ fontSize: 20, fontWeight: '700', color: '#24324B' }}>Daycare</Text>
+          <Text variant="title" fontSize={24}>Daycare</Text>
           <Button
-            mode="contained"
-            compact
-            icon="plus"
+            label="Tambah Daycare"
             onPress={onPressAdd}
-            contentStyle={{ height: 36, alignItems: 'center', justifyContent: 'center' }}
-            labelStyle={{ marginVertical: 0, lineHeight: 16 }}
-            style={{ borderRadius: 10 }}>
-            Tambah
-          </Button>
+            variant="primary"
+            icon={<MaterialIcons name="add" size={18} color="#FFFFFF" />}
+            style={{ paddingHorizontal: 16, height: 40, borderRadius: 12 }}
+          />
         </Box>
-        <Text color="textSecondary">Kelola data daycare terdaftar</Text>
+        <Text variant="subtitle">Kelola data daycare terdaftar</Text>
       </Box>
 
       <ListFilterBar

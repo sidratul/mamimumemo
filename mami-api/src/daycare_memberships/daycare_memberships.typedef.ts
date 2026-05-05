@@ -1,5 +1,5 @@
 export const typeDefs = `
-  enum DaycareMembershipPersona {
+  enum DaycareMembershipAccess {
     OWNER
     ADMIN
     SITTER
@@ -19,7 +19,7 @@ export const typeDefs = `
     _id: ObjectId!
     user: User!
     daycare: DaycareMembershipDaycare!
-    persona: DaycareMembershipPersona!
+    access: DaycareMembershipAccess!
     status: DaycareMembershipStatus!
     joinedAt: Date!
     endedAt: Date
@@ -37,7 +37,7 @@ export const typeDefs = `
 
   input AddUserToDaycareInput {
     daycareId: ObjectId!
-    persona: DaycareMembershipPersona!
+    access: DaycareMembershipAccess!
     userId: ObjectId
     userData: DaycareMembershipUserDataInput
     notes: String

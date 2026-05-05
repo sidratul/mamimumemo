@@ -26,15 +26,27 @@ function QuickAction({
       title={label}
       description={value}
       onPress={onPress}
+      contentContainerStyle={{
+        backgroundColor: '#FFFFFF',
+        borderRadius: 16,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.03,
+        shadowRadius: 10,
+        elevation: 1,
+        borderWidth: 1,
+        borderColor: '#F1F5F9',
+      }}
       icon={
         <Box
-          width={36}
-          height={36}
+          width={40}
+          height={40}
           borderRadius="md"
           alignItems="center"
           justifyContent="center"
           style={{ backgroundColor: iconBackground }}>
-          <MaterialIcons name={icon} size={18} color={iconColor} />
+          <MaterialIcons name={icon} size={20} color={iconColor} />
         </Box>
       }
     />
@@ -57,25 +69,29 @@ export function DashboardQuickActionsSection({
   onPressInReview,
 }: DashboardQuickActionsSectionProps) {
   return (
-    <Box gap="sm">
-      <Text variant="cardValue">Quick Action</Text>
-      <Box flexDirection="row" gap="sm" flexWrap="wrap">
-        <QuickAction
-          icon="schedule"
-          label="Perlu Review"
-          value={loading ? 'Memuat...' : `${submitted} daycare`}
-          onPress={onPressSubmitted}
-          iconColor="#4D96FF"
-          iconBackground="#E7F0FF"
-        />
-        <QuickAction
-          icon="fact-check"
-          label="Sedang Direview"
-          value={loading ? 'Memuat...' : `${inReview} daycare`}
-          onPress={onPressInReview}
-          iconColor="#F5A623"
-          iconBackground="#FFF1DB"
-        />
+    <Box gap="md" marginTop="sm">
+      <Text variant="cardTitle">Aksi Cepat</Text>
+      <Box flexDirection="row" gap="md" flexWrap="wrap">
+        <Box flex={1} minWidth={150}>
+          <QuickAction
+            icon="schedule"
+            label="Perlu Review"
+            value={loading ? 'Memuat...' : `${submitted} daycare`}
+            onPress={onPressSubmitted}
+            iconColor="#6366F1"
+            iconBackground="#EEF2FF"
+          />
+        </Box>
+        <Box flex={1} minWidth={150}>
+          <QuickAction
+            icon="fact-check"
+            label="Sedang Direview"
+            value={loading ? 'Memuat...' : `${inReview} daycare`}
+            onPress={onPressInReview}
+            iconColor="#F59E0B"
+            iconBackground="#FFFBEB"
+          />
+        </Box>
       </Box>
     </Box>
   );

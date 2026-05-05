@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { userSubDocumentSchema } from "@/auth/auth.schema.ts";
 import {
-  DAYCARE_MEMBERSHIP_PERSONAS,
+  DAYCARE_MEMBERSHIP_ACCESSES,
   DAYCARE_MEMBERSHIP_STATUSES,
   DaycareMembershipStatus,
 } from "./daycare_memberships.enum.ts";
@@ -21,9 +21,9 @@ const daycareMembershipDaycareSchema = new mongoose.Schema({
 const daycareMembershipSchema = new mongoose.Schema({
   user: { type: userSubDocumentSchema, required: true },
   daycare: { type: daycareMembershipDaycareSchema, required: true },
-  persona: {
+  access: {
     type: String,
-    enum: DAYCARE_MEMBERSHIP_PERSONAS,
+    enum: DAYCARE_MEMBERSHIP_ACCESSES,
     required: true,
   },
   status: {
@@ -43,6 +43,6 @@ const daycareMembershipSchema = new mongoose.Schema({
 
 daycareMembershipSchema.index({ "user._id": 1, status: 1 });
 daycareMembershipSchema.index({ "daycare._id": 1, status: 1 });
-daycareMembershipSchema.index({ "user._id": 1, "daycare._id": 1, persona: 1, status: 1 });
+daycareMembershipSchema.index({ "user._id": 1, "daycare._id": 1, access: 1, status: 1 });
 
 export default mongoose.model("DaycareMembership", daycareMembershipSchema);

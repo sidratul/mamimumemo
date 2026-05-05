@@ -1,5 +1,4 @@
 import { type ReactNode } from 'react';
-import { View } from 'react-native';
 
 import { Box, Text } from '../../theme/theme';
 
@@ -11,17 +10,23 @@ type DaycareDetailSectionProps = {
 
 export function DaycareDetailSection({ title, action, children }: DaycareDetailSectionProps) {
   return (
-    <View style={{ gap: 14 }}>
+    <Box gap="md" marginBottom="sm">
       <Box
         flexDirection="row"
         alignItems="center"
         justifyContent="space-between"
         gap="md"
-        style={{ paddingBottom: 10, borderBottomWidth: 1, borderBottomColor: '#F1D6E4' }}>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>{title}</Text>
+        paddingBottom="sm"
+        borderBottomWidth={1}
+        borderBottomColor="border">
+        <Text style={{ fontSize: 16, fontWeight: '800', color: '#0F172A', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+          {title}
+        </Text>
         {action}
       </Box>
-      {children}
-    </View>
+      <Box paddingHorizontal="xs">
+        {children}
+      </Box>
+    </Box>
   );
 }

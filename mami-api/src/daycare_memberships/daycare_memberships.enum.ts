@@ -1,13 +1,13 @@
-export enum DaycareMembershipPersona {
+export enum DaycareMembershipAccess {
   OWNER = "OWNER",
   ADMIN = "ADMIN",
   SITTER = "SITTER",
 }
 
-export const DAYCARE_MEMBERSHIP_PERSONAS = [
-  DaycareMembershipPersona.OWNER,
-  DaycareMembershipPersona.ADMIN,
-  DaycareMembershipPersona.SITTER,
+export const DAYCARE_MEMBERSHIP_ACCESSES = [
+  DaycareMembershipAccess.OWNER,
+  DaycareMembershipAccess.ADMIN,
+  DaycareMembershipAccess.SITTER,
 ] as const;
 
 export enum DaycareMembershipStatus {

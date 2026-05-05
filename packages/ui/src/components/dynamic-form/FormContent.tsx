@@ -43,30 +43,41 @@ export function FormContent<T extends Record<string, unknown>>() {
 
 const styles = StyleSheet.create({
   container: {
-    gap: 12,
+    gap: 16,
   },
   fieldBlock: {
     gap: 12,
   },
   sectionTitle: {
-    color: '#24324B',
-    fontSize: 18,
-    fontWeight: '700',
-    marginTop: 4,
+    color: '#0F172A',
+    fontSize: 14,
+    fontWeight: '800',
+    marginTop: 8,
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
   },
   button: {
-    backgroundColor: '#C75B39',
-    borderRadius: 10,
+    backgroundColor: '#4F46E5',
+    borderRadius: 12,
     alignItems: 'center',
     paddingVertical: 16,
     paddingHorizontal: 16,
+    marginTop: 8,
+    shadowColor: '#4F46E5',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 4,
   },
   buttonDisabled: {
-    opacity: 0.6,
+    opacity: 0.5,
+    backgroundColor: '#94A3B8',
+    shadowOpacity: 0,
+    elevation: 0,
   },
   buttonText: {
     color: '#FFFFFF',
     fontWeight: '700',
-    fontSize: 15,
+    fontSize: 16,
   },
 });

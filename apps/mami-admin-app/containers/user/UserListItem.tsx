@@ -1,6 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
-import { Surface } from 'react-native-paper';
 
 import { Box, Text } from '../../theme/theme';
 import { type AdminUser, type UserPersona } from '../../services/users';
@@ -14,11 +13,11 @@ const personaLabelMap: Record<UserPersona, string> = {
 };
 
 const personaColorMap: Record<UserPersona, { text: string; background: string }> = {
-  SUPER_ADMIN: { text: '#4D96FF', background: '#E7F0FF' },
-  PARENT: { text: '#8B6DFF', background: '#F0EAFF' },
-  OWNER: { text: '#34B27B', background: '#E7F7EF' },
-  DAYCARE_ADMIN: { text: '#F5A623', background: '#FFF1DB' },
-  DAYCARE_SITTER: { text: '#FF6FB5', background: '#FFE8F3' },
+  SUPER_ADMIN: { text: '#4F46E5', background: '#EEF2FF' }, // Indigo
+  PARENT: { text: '#8B5CF6', background: '#F5F3FF' }, // Violet
+  OWNER: { text: '#10B981', background: '#ECFDF5' }, // Emerald
+  DAYCARE_ADMIN: { text: '#F59E0B', background: '#FFFBEB' }, // Amber
+  DAYCARE_SITTER: { text: '#EC4899', background: '#FDF2F8' }, // Pink
 };
 
 type UserListItemProps = {
@@ -28,59 +27,54 @@ type UserListItemProps = {
 
 export function UserListItem({ user, onPress }: UserListItemProps) {
   return (
-    <Surface
-      elevation={0}
+    <Box
+      backgroundColor="surface"
+      borderRadius="lg"
       style={{
-        borderRadius: 14,
-        backgroundColor: '#FFFFFF',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+        elevation: 1,
         borderWidth: 1,
-        borderColor: '#E8ECF4',
+        borderColor: '#F1F5F9',
       }}>
-      <Pressable onPress={onPress}>
-        <Box flexDirection="row" alignItems="flex-start" padding="md" gap="md">
+      <Pressable onPress={onPress} android_ripple={{ color: '#F1F5F9' }}>
+        <Box flexDirection="row" alignItems="center" padding="md" gap="md">
           <Box
-            width={56}
-            height={56}
+            width={52}
+            height={52}
             borderRadius="md"
             alignItems="center"
             justifyContent="center"
-            style={{ backgroundColor: '#EEF3FF' }}>
-            <MaterialCommunityIcons name="account-outline" size={26} color="#4D96FF" />
+            backgroundColor="background"
+            style={{ borderWidth: 1, borderColor: '#F1F5F9' }}>
+            <MaterialCommunityIcons name="account-circle-outline" size={28} color="#64748B" />
           </Box>
 
-          <Box flex={1} gap="sm">
-            <Text style={{ fontSize: 16, fontWeight: '700', color: '#24324B' }} numberOfLines={2}>
+          <Box flex={1} gap="xs">
+            <Text variant="defaults" fontWeight="800" color="textPrimary" numberOfLines={1}>
               {user.name}
             </Text>
 
-            <Box gap="xs">
-              <Box flexDirection="row" alignItems="center" gap="xs">
-                <MaterialCommunityIcons name="email-outline" size={14} color="#7A869A" />
-                <Text color="textSecondary" numberOfLines={1} style={{ fontSize: 13 }}>
-                  {user.email}
-                </Text>
-              </Box>
-              {user.phone ? (
-                <Box flexDirection="row" alignItems="center" gap="xs">
-                  <MaterialCommunityIcons name="phone-outline" size={14} color="#7A869A" />
-                  <Text color="textSecondary" numberOfLines={1} style={{ fontSize: 13 }}>
-                    {user.phone}
-                  </Text>
-                </Box>
-              ) : null}
+            <Box flexDirection="row" alignItems="center" gap="xs">
+              <MaterialCommunityIcons name="email-outline" size={14} color="#94A3B8" />
+              <Text variant="bodySmall" color="textSecondary" numberOfLines={1}>
+                {user.email}
+              </Text>
             </Box>
 
-            <Box flexDirection="row" flexWrap="wrap" gap="xs">
+            <Box flexDirection="row" flexWrap="wrap" gap="xs" marginTop="xs">
               {user.personas.length > 0 ? user.personas.map((persona) => (
                 <Box
                   key={persona}
                   paddingHorizontal="sm"
                   paddingVertical="xs"
                   style={{
-                    borderRadius: 9,
+                    borderRadius: 8,
                     backgroundColor: personaColorMap[persona].background,
                   }}>
-                  <Text style={{ fontSize: 12, fontWeight: '600', color: personaColorMap[persona].text }}>
+                  <Text style={{ fontSize: 11, fontWeight: '800', color: personaColorMap[persona].text, textTransform: 'uppercase', letterSpacing: 0.3 }}>
                     {personaLabelMap[persona]}
                   </Text>
                 </Box>
@@ -89,18 +83,20 @@ export function UserListItem({ user, onPress }: UserListItemProps) {
                   paddingHorizontal="sm"
                   paddingVertical="xs"
                   style={{
-                    borderRadius: 9,
-                    backgroundColor: '#EEF3FF',
+                    borderRadius: 8,
+                    backgroundColor: '#F1F5F9',
                   }}>
-                  <Text style={{ fontSize: 12, fontWeight: '600', color: '#4D96FF' }}>
-                    Akun
+                  <Text style={{ fontSize: 11, fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>
+                    AKUN
                   </Text>
                 </Box>
               )}
             </Box>
           </Box>
+          
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#CBD5E1" />
         </Box>
       </Pressable>
-    </Surface>
+    </Box>
   );
 }

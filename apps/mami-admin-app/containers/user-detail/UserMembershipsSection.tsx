@@ -1,15 +1,16 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
-import { Button } from 'react-native-paper';
-import { ScreenSection } from '@mami/ui';
+import { Button } from '@mami/ui';
+import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
+import { DetailSection } from './DetailSection';
 import { type UserDaycareMembership } from '../../services/users';
 import { Box, Text } from '../../theme/theme';
 
 const personaLabelMap: Record<UserDaycareMembership['persona'], string> = {
   OWNER: 'Owner',
   ADMIN: 'Admin Daycare',
-  SITTER: 'Karyawan Daycare',
+  SITTER: 'Karyawan',
 };
 
 const statusLabelMap: Record<UserDaycareMembership['status'], string> = {
@@ -31,46 +32,74 @@ export function UserMembershipsSection({
   busyMembershipId,
 }: UserMembershipsSectionProps) {
   return (
-    <ScreenSection>
-      <Box flexDirection="row" justifyContent="space-between" alignItems="center" gap="md">
-        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Membership Daycare</Text>
+    <DetailSection 
+      title="Membership Daycare"
+      action={
         <Button
-          mode="contained"
-          compact
-          icon="plus"
+          label="Tambah"
           onPress={onAddPress}
-          contentStyle={{ height: 32, alignItems: 'center', justifyContent: 'center' }}
-          labelStyle={{ marginVertical: 0, lineHeight: 14 }}
-          style={{ borderRadius: 10 }}>
-          Tambah
-        </Button>
-      </Box>
-
+          variant="primary"
+          icon={<MaterialIcons name="add" size={16} color="#FFFFFF" />}
+          style={{ height: 32, paddingHorizontal: 12, borderRadius: 8 }}
+        />
+      }
+    >
       {memberships.length === 0 ? (
-        <Text color="textSecondary">User ini belum terhubung ke daycare mana pun.</Text>
+        <Text variant="bodySmall" color="textSecondary" paddingVertical="sm">
+          User ini belum terhubung ke daycare mana pun.
+        </Text>
       ) : (
-        <Box gap="sm">
+        <Box gap="md">
           {memberships.map((membership) => (
             <Box
               key={membership.id}
               padding="md"
-              gap="xs"
+              gap="sm"
               style={{
                 borderWidth: 1,
-                borderColor: '#E8ECF4',
-                borderRadius: 10,
-                backgroundColor: '#F7F9FC',
+                borderColor: '#F1F5F9',
+                borderRadius: 12,
+                backgroundColor: '#FFFFFF',
+                shadowColor: '#000',
+                shadowOffset: { width: 0, height: 1 },
+                shadowOpacity: 0.03,
+                shadowRadius: 5,
+                elevation: 1,
               }}>
-              <Text style={{ fontWeight: '700', color: '#24324B' }}>{membership.daycare.name}</Text>
-              <Text color="textSecondary">
-                {personaLabelMap[membership.persona]} · {statusLabelMap[membership.status]}
-              </Text>
-              {membership.notes ? <Text color="textSecondary">{membership.notes}</Text> : null}
+              <Box flexDirection="row" justifyContent="space-between" alignItems="center">
+                <Text fontWeight="800" color="textPrimary">{membership.daycare.name}</Text>
+                <Box 
+                  paddingHorizontal="sm" 
+                  paddingVertical="xs" 
+                  borderRadius="sm" 
+                  backgroundColor="background"
+                >
+                  <Text variant="bodySmall" fontWeight="700" color="primary" fontSize={11}>
+                    {statusLabelMap[membership.status].toUpperCase()}
+                  </Text>
+                </Box>
+              </Box>
+              
+              <Box gap="xs">
+                <Box flexDirection="row" alignItems="center" gap="xs">
+                  <MaterialCommunityIcons name="account-tie-outline" size={14} color="#94A3B8" />
+                  <Text variant="bodySmall" color="textSecondary">
+                    Role: <Text variant="bodySmall" fontWeight="700" color="textPrimary">{personaLabelMap[membership.persona]}</Text>
+                  </Text>
+                </Box>
+                {membership.notes ? (
+                  <Box flexDirection="row" alignItems="center" gap="xs">
+                    <MaterialCommunityIcons name="note-text-outline" size={14} color="#94A3B8" />
+                    <Text variant="bodySmall" color="textSecondary" numberOfLines={1}>{membership.notes}</Text>
+                  </Box>
+                ) : null}
+              </Box>
+
               {membership.status === 'ACTIVE' ? (
-                <Pressable onPress={() => onDeactivateMembership(membership.id)}>
-                  <Box flexDirection="row" alignItems="center" gap="xs" marginTop="xs">
-                    <MaterialCommunityIcons name="close-circle-outline" size={16} color="#FF4D4D" />
-                    <Text color="danger">
+                <Pressable onPress={() => onDeactivateMembership(membership.id)} style={{ alignSelf: 'flex-start' }}>
+                  <Box flexDirection="row" alignItems="center" gap="xs" marginTop="xs" paddingVertical="xs">
+                    <MaterialCommunityIcons name="close-circle-outline" size={14} color="#EF4444" />
+                    <Text variant="bodySmall" fontWeight="700" color="danger">
                       {busyMembershipId === membership.id ? 'Memproses...' : 'Nonaktifkan membership'}
                     </Text>
                   </Box>
@@ -80,6 +109,6 @@ export function UserMembershipsSection({
           ))}
         </Box>
       )}
-    </ScreenSection>
+    </DetailSection>
   );
 }

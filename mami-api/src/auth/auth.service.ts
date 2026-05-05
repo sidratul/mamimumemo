@@ -9,18 +9,18 @@ import { MESSAGES } from "#shared/enums/constant.ts";
 import { UserRole } from "#shared/enums/enum.ts";
 import UsersService from "@/users/users.service.ts";
 import DaycareMembershipsService from "@/daycare_memberships/daycare_memberships.service.ts";
-import { DaycareMembershipPersona } from "@/daycare_memberships/daycare_memberships.enum.ts";
+import { DaycareMembershipAccess } from "@/daycare_memberships/daycare_memberships.enum.ts";
 
 const usersService = new UsersService();
 const daycareMembershipsService = new DaycareMembershipsService();
 
-function mapMembershipPersonaToUserRole(persona: DaycareMembershipPersona): UserRole {
-  switch (persona) {
-    case DaycareMembershipPersona.OWNER:
+function mapMembershipAccessToUserRole(access: DaycareMembershipAccess): UserRole {
+  switch (access) {
+    case DaycareMembershipAccess.OWNER:
       return UserRole.DAYCARE_OWNER;
-    case DaycareMembershipPersona.ADMIN:
+    case DaycareMembershipAccess.ADMIN:
       return UserRole.DAYCARE_ADMIN;
-    case DaycareMembershipPersona.SITTER:
+    case DaycareMembershipAccess.SITTER:
       return UserRole.DAYCARE_SITTER;
   }
 }
@@ -35,7 +35,7 @@ export class AuthService {
     let daycareMembership:
       | {
         _id: string;
-        persona: string;
+        access: string;
         daycare: {
           _id: string;
           name: string;
@@ -49,7 +49,7 @@ export class AuthService {
     if (membershipOrNull) {
       daycareMembership = {
         _id: membershipOrNull._id.toString(),
-        persona: membershipOrNull.persona,
+        access: membershipOrNull.access,
         daycare: {
           _id: membershipOrNull.daycare._id.toString(),
           name: membershipOrNull.daycare.name,
@@ -60,7 +60,7 @@ export class AuthService {
     const effectiveRole = user.role === UserRole.SUPER_ADMIN
       ? user.role
       : daycareMembership
-      ? mapMembershipPersonaToUserRole(daycareMembership.persona as DaycareMembershipPersona)
+      ? mapMembershipAccessToUserRole(daycareMembership.access as DaycareMembershipAccess)
       : user.role;
 
     return {

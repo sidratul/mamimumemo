@@ -1,8 +1,8 @@
 import { useState } from 'react';
-import { Surface } from 'react-native-paper';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
 import { formatDateId } from '@mami/core';
+import { Pressable } from 'react-native';
 
 import { AdminDaycare } from '../../services/daycare-admin';
 import { Box, Text } from '../../theme/theme';
@@ -18,70 +18,74 @@ export function DaycareListItem({ daycare, onPress }: DaycareListItemProps) {
   const statusDateLabel = daycare.statusChangedAt
     ? formatDateId(daycare.statusChangedAt)
     : 'Belum diperbarui';
-  const defaultLogo = require('../../assets/images/logo.png');
-  const imageSource = daycare.logoUrl && !hasImageError ? { uri: daycare.logoUrl } : defaultLogo;
+  const imageSource = daycare.logoUrl && !hasImageError ? { uri: daycare.logoUrl } : null;
 
   return (
-    <Surface
-      elevation={0}
+    <Box
+      backgroundColor="surface"
+      borderRadius="lg"
       style={{
-        borderRadius: 14,
-        backgroundColor: '#FFFFFF',
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.05,
+        shadowRadius: 10,
+        elevation: 1,
         borderWidth: 1,
-        borderColor: '#E8ECF4',
+        borderColor: '#F1F5F9',
       }}>
-      <Box flexDirection="row" alignItems="flex-start" padding="md" gap="md" onTouchEnd={onPress}>
-        <Box
-          width={56}
-          height={56}
-          borderRadius="md"
-          alignItems="center"
-          justifyContent="center"
-          style={{ backgroundColor: '#EEF3FF', overflow: 'hidden' }}>
-          <Image
-            source={imageSource}
-            style={{ width: 56, height: 56 }}
-            contentFit="cover"
-            onError={() => setHasImageError(true)}
-          />
-        </Box>
+      <Pressable onPress={onPress} android_ripple={{ color: '#F1F5F9' }}>
+        <Box flexDirection="row" alignItems="center" padding="md" gap="md">
+          <Box
+            width={52}
+            height={52}
+            borderRadius="md"
+            alignItems="center"
+            justifyContent="center"
+            backgroundColor="background"
+            style={{ overflow: 'hidden', borderWidth: 1, borderColor: '#F1F5F9' }}>
+            {imageSource ? (
+              <Image
+                source={imageSource}
+                style={{ width: 52, height: 52 }}
+                contentFit="cover"
+                onError={() => setHasImageError(true)}
+              />
+            ) : (
+              <MaterialCommunityIcons name="office-building" size={26} color="#CBD5E1" />
+            )}
+          </Box>
 
-        <Box flex={1} gap="sm">
-          <Text style={{ fontSize: 16, fontWeight: '700', color: '#24324B' }} numberOfLines={2}>
-            {daycare.name}
-          </Text>
+          <Box flex={1} gap="xs">
+            <Text variant="defaults" fontWeight="800" color="textPrimary" numberOfLines={1}>
+              {daycare.name}
+            </Text>
 
-          <Box flexDirection="row" gap="md" alignItems="flex-start">
-            <Box flex={1} gap="xs">
+            <Box gap="xxs">
               <Box flexDirection="row" alignItems="center" gap="xs">
-                <MaterialCommunityIcons name="account-outline" size={14} color="#7A869A" />
-                <Text color="textSecondary" numberOfLines={1} style={{ fontSize: 13 }}>
+                <MaterialCommunityIcons name="account-outline" size={14} color="#94A3B8" />
+                <Text variant="bodySmall" color="textSecondary" numberOfLines={1}>
                   {daycare.owner.name}
                 </Text>
               </Box>
               <Box flexDirection="row" alignItems="center" gap="xs">
-                <MaterialCommunityIcons name="email-outline" size={14} color="#7A869A" />
-                <Text color="textSecondary" numberOfLines={1} style={{ fontSize: 13 }}>
-                  {daycare.owner.email}
-                </Text>
-              </Box>
-              <Box flexDirection="row" alignItems="center" gap="xs">
-                <MaterialCommunityIcons name="map-marker-outline" size={14} color="#7A869A" />
-                <Text color="textSecondary" numberOfLines={1} style={{ fontSize: 13 }}>
-                  {daycare.address || daycare.city || '-'}
+                <MaterialCommunityIcons name="map-marker-outline" size={14} color="#94A3B8" />
+                <Text variant="bodySmall" color="textSecondary" numberOfLines={1}>
+                  {daycare.city || '-'}
                 </Text>
               </Box>
             </Box>
-
-            <Box alignItems="center" gap="xs" style={{ minWidth: 88 }}>
+            
+            <Box flexDirection="row" alignItems="center" justifyContent="space-between" marginTop="xs">
               <ApprovalStatusBadge status={daycare.approvalStatus} />
-              <Text color="textSecondary" style={{ fontSize: 12, textAlign: 'center' }}>
+              <Text variant="bodySmall" color="textSecondary" style={{ fontSize: 11 }}>
                 {statusDateLabel}
               </Text>
             </Box>
           </Box>
+          
+          <MaterialCommunityIcons name="chevron-right" size={20} color="#CBD5E1" />
         </Box>
-      </Box>
-    </Surface>
+      </Pressable>
+    </Box>
   );
 }

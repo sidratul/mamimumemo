@@ -7,8 +7,8 @@ export const paperTheme: MD3Theme = {
   colors: {
     ...MD3LightTheme.colors,
     primary: theme.colors.primary,
-    secondary: '#FF6FB5',
-    tertiary: '#FFD93D',
+    secondary: '#6366F1',
+    tertiary: '#F59E0B',
     background: theme.colors.background,
     surface: theme.colors.surface,
     error: theme.colors.danger,
@@ -16,7 +16,7 @@ export const paperTheme: MD3Theme = {
     onSurface: theme.colors.textPrimary,
     onBackground: theme.colors.textPrimary,
     outline: theme.colors.border,
-    surfaceVariant: '#EEF3FA',
+    surfaceVariant: '#F1F5F9',
   },
-  roundness: 10,
+  roundness: 12,
 };

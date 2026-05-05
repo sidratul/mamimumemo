@@ -1,8 +1,8 @@
 import { z } from "zod";
 import { Types } from "mongoose";
-import { DaycareMembershipPersona } from "./daycare_memberships.enum.ts";
+import { DaycareMembershipAccess } from "./daycare_memberships.enum.ts";
 
-const membershipPersonaEnum = z.nativeEnum(DaycareMembershipPersona);
+const membershipAccessEnum = z.nativeEnum(DaycareMembershipAccess);
 const objectIdSchema = z.instanceof(Types.ObjectId);
 
 export const daycareMembershipUserDataInput = z.object({
@@ -14,7 +14,7 @@ export const daycareMembershipUserDataInput = z.object({
 
 export const addUserToDaycareInput = z.object({
   daycareId: objectIdSchema,
-  persona: membershipPersonaEnum,
+  access: membershipAccessEnum,
   userId: objectIdSchema.optional(),
   userData: daycareMembershipUserDataInput.optional(),
   notes: z.string().optional(),

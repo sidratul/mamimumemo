@@ -13,19 +13,19 @@ import { DaycareRepository } from "@/daycare/daycare.repository.ts";
 import { addUserToDaycareInput } from "./daycare_memberships.validation.ts";
 import { DaycareMembershipsRepository } from "./daycare_memberships.repository.ts";
 import { DaycareMembershipDocShape } from "./daycare_memberships.d.ts";
-import { DaycareMembershipPersona, DaycareMembershipStatus } from "./daycare_memberships.enum.ts";
+import { DaycareMembershipAccess, DaycareMembershipStatus } from "./daycare_memberships.enum.ts";
 
 const usersService = new UsersService();
 const daycareRepository = new DaycareRepository();
 const repository = new DaycareMembershipsRepository();
 
-function mapPersonaToUserRole(persona: DaycareMembershipPersona): UserRole {
-  switch (persona) {
-    case DaycareMembershipPersona.OWNER:
+function mapAccessToUserRole(access: DaycareMembershipAccess): UserRole {
+  switch (access) {
+    case DaycareMembershipAccess.OWNER:
       return UserRole.DAYCARE_OWNER;
-    case DaycareMembershipPersona.ADMIN:
+    case DaycareMembershipAccess.ADMIN:
       return UserRole.DAYCARE_ADMIN;
-    case DaycareMembershipPersona.SITTER:
+    case DaycareMembershipAccess.SITTER:
       return UserRole.DAYCARE_SITTER;
   }
 }
@@ -71,7 +71,7 @@ export class DaycareMembershipsService {
         _id: input.daycare._id,
         name: input.daycare.name,
       },
-      persona: DaycareMembershipPersona.OWNER,
+      access: DaycareMembershipAccess.OWNER,
       status: DaycareMembershipStatus.ACTIVE,
       joinedAt: new Date(),
       notes: "",
@@ -102,7 +102,7 @@ export class DaycareMembershipsService {
           _id: daycare._id,
           name: daycare.name,
         },
-        persona: input.persona,
+        access: input.access,
         notes: input.notes,
       });
     }
@@ -119,7 +119,7 @@ export class DaycareMembershipsService {
         email: userData.email,
         password: userData.password,
         phone: userData.phone,
-        role: mapPersonaToUserRole(input.persona),
+        role: mapAccessToUserRole(input.access),
       }, { session });
 
       return await this.createMembershipForUser({
@@ -133,7 +133,7 @@ export class DaycareMembershipsService {
           _id: daycare._id,
           name: daycare.name,
         },
-        persona: input.persona,
+        access: input.access,
         notes: input.notes,
       }, { session });
     });
@@ -169,7 +169,7 @@ export class DaycareMembershipsService {
     input: {
       user: { _id: ObjectId; name: string; email: string; phone?: string };
       daycare: { _id: ObjectId; name: string };
-      persona: DaycareMembershipPersona;
+      access: DaycareMembershipAccess;
       notes?: string;
     },
     options?: { session?: ClientSession },
@@ -190,7 +190,7 @@ export class DaycareMembershipsService {
         _id: input.daycare._id,
         name: input.daycare.name,
       },
-      persona: input.persona,
+      access: input.access,
       status: DaycareMembershipStatus.ACTIVE,
       joinedAt: new Date(),
       notes: input.notes || "",

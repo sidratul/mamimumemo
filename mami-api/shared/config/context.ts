@@ -9,7 +9,7 @@ export type AuthenticatedUser = AuthDoc & {
     name: string;
   };
   daycareMembershipId?: ObjectId;
-  daycarePersona?: string;
+  daycareAccess?: string;
 };
 
 /**

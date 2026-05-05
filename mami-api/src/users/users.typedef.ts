@@ -6,29 +6,29 @@ export const typeDefs = `
     DAYCARE_SITTER
     PARENT
   }
+enum UserAccess {
+  SUPER_ADMIN
+  PARENT
+  OWNER
+  DAYCARE_ADMIN
+  DAYCARE_SITTER
+}
 
-  enum UserPersona {
-    SUPER_ADMIN
-    PARENT
-    OWNER
-    DAYCARE_ADMIN
-    DAYCARE_SITTER
-  }
-
-  type User {
-    _id: ObjectId!
-    name: String!
-    email: String!
-    phone: String
-    role: UserRole
-    personas: [UserPersona!]!
-    createdAt: Date
-    updatedAt: Date
-  }
-
-  input CreateUserInput {
-    name: String!
-    email: String!
+type User {
+  _id: ObjectId!
+  name: String!
+  email: String!
+  phone: String
+  role: UserRole
+  accesses: [UserAccess!]!
+  createdAt: Date
+  updatedAt: Date
+}
+...
+input UserFilterInput {
+  search: String
+  accesses: [UserAccess!]
+}
     password: String!
     phone: String
     role: UserRole
