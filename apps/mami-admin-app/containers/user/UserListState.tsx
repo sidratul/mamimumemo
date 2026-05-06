@@ -29,7 +29,7 @@ export function UserListState(props: UserListStateProps) {
     return (
       <Box paddingHorizontal="lg" paddingVertical="xxl" alignItems="center" gap="sm">
         <MaterialCommunityIcons name="alert-circle-outline" size={48} color="#EF4444" />
-        <Text variant="defaults" fontWeight="800" color="danger">
+        <Text variant="subtitle" fontWeight="800" color="danger">
           Gagal Memuat Data
         </Text>
         <Text variant="bodySmall" color="textSecondary" textAlign="center">{props.message}</Text>

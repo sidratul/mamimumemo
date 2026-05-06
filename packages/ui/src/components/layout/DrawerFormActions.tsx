@@ -19,12 +19,8 @@ export function DrawerFormActions({
 }: DrawerFormActionsProps) {
   return (
     <>
-      <Button mode="outlined" style={{ flex: 1 }} disabled={loading} onPress={onCancel}>
-        {cancelLabel}
-      </Button>
-      <Button mode="contained" style={{ flex: 1 }} loading={loading} disabled={loading || submitDisabled} onPress={onSubmit}>
-        {submitLabel}
-      </Button>
+      <Button mode="outlined" style={{ flex: 1 }} disabled={loading} onPress={onCancel}>{cancelLabel}</Button>
+      <Button mode="contained" style={{ flex: 1 }} loading={loading} disabled={loading || submitDisabled} onPress={onSubmit}>{submitLabel}</Button>
     </>
   );
 }

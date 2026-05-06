@@ -9,7 +9,7 @@ type DaycareStatusFormProps = {
   currentStatus: string;
   value: string;
   note: string;
-  options: Array<{ label: string; value: string }>;
+  options: { label: string; value: string }[];
   loading: boolean;
   error?: string;
   onCancel: () => void;
@@ -96,9 +96,7 @@ export function DaycareStatusForm({
         {fieldErrors.note ? <Text color="danger">{fieldErrors.note}</Text> : null}
       </Box>
 
-      <Box flexDirection="row" gap="sm">
-        <DrawerFormActions onCancel={onCancel} onSubmit={handleSubmit} loading={loading} submitDisabled={options.length === 0} />
-      </Box>
+      <Box flexDirection="row" gap="sm"><DrawerFormActions onCancel={onCancel} onSubmit={handleSubmit} loading={loading} submitDisabled={options.length === 0} /></Box>
 
       {error ? <Text color="danger">{error}</Text> : null}
     </Box>

@@ -1,8 +1,8 @@
-import { DynamicForm, PasswordField, TextAreaField, TextField, TextMuted, type FormFieldProps } from '@mami/ui';
+import { DynamicForm, PasswordField, TextAreaField, TextField, type FormFieldProps } from '@mami/ui';
 import { adminDaycareCreateSchema } from '@mami/core';
-import { View } from 'react-native';
 
 import { DaycareCreateLogoField } from './DaycareCreateLogoField';
+import { Box, Text } from '../../theme/theme';
 
 export type DaycareCreateFormData = {
   ownerName: string;
@@ -33,62 +33,62 @@ export function DaycareCreateFormSection({
 }: DaycareCreateFormSectionProps) {
   const fields: FormFieldProps<DaycareCreateFormData> = {
     ownerName: {
-      section: 'Data Owner',
-      label: 'Nama owner',
+      section: 'Data Pemilik (Owner)',
+      label: 'Nama Lengkap',
       required: true,
       input: TextField,
-      props: { placeholder: 'Nama owner' },
+      props: { placeholder: 'Contoh: Ahmad Subardjo' },
     },
     ownerEmail: {
-      label: 'Email owner',
+      label: 'Email Aktif',
       required: true,
       input: TextField,
-      props: { placeholder: 'Email owner', keyboardType: 'email-address' },
+      props: { placeholder: 'owner@email.com', keyboardType: 'email-address' },
     },
     ownerPhone: {
-      label: 'Nomor telepon owner',
+      label: 'Nomor Telepon',
       input: TextField,
-      props: { placeholder: 'Nomor telepon owner', keyboardType: 'phone-pad' },
+      props: { placeholder: '0812xxxx', keyboardType: 'phone-pad' },
     },
     ownerPassword: {
-      label: 'Password owner',
+      label: 'Password Akun',
       required: true,
       input: PasswordField,
-      props: { placeholder: 'Password owner' },
+      props: { placeholder: 'Min. 6 karakter' },
     },
     daycareName: {
-      section: 'Data Daycare',
-      label: 'Nama daycare',
+      section: 'Informasi Daycare',
+      label: 'Nama Daycare',
       required: true,
       input: TextField,
-      props: { placeholder: 'Nama daycare' },
+      props: { placeholder: 'Contoh: Daycare Mentari Pagi' },
     },
     logoUrl: {
-      label: 'Logo daycare',
-      section: 'Data Daycare',
+      label: 'Logo Unit',
+      section: 'Informasi Daycare',
       input: (props) => <DaycareCreateLogoField {...props} uploading={uploadingLogo} onPickLogo={onPickLogo} />,
     },
     city: {
-      label: 'Kota',
+      label: 'Kota/Kabupaten',
       required: true,
       input: TextField,
-      props: { placeholder: 'Kota' },
+      props: { placeholder: 'Contoh: Jakarta Selatan' },
     },
     address: {
-      label: 'Alamat lengkap',
+      label: 'Alamat Lengkap',
       required: true,
       input: TextAreaField,
-      props: { placeholder: 'Alamat lengkap', numberOfLines: 3 },
+      props: { placeholder: 'Jl. Melati No. 123...', numberOfLines: 3 },
     },
     description: {
-      label: 'Deskripsi daycare',
+      label: 'Deskripsi Singkat',
       input: TextAreaField,
-      props: { placeholder: 'Deskripsi daycare', numberOfLines: 4 },
+      props: { placeholder: 'Ceritakan sedikit tentang daycare ini...', numberOfLines: 4 },
     },
   };
 
   return (
-    <View style={{ gap: 12 }}>
+    <Box gap="lg">
       <DynamicForm<DaycareCreateFormData>
         fields={fields}
         defaultValue={{
@@ -103,12 +103,16 @@ export function DaycareCreateFormSection({
           description: '',
         }}
         schema={adminDaycareCreateSchema}
-        submitLabel="Daftarkan Daycare"
+        submitLabel="Daftarkan Daycare Sekarang"
         loading={loading}
-        inputsContainerStyle={{ gap: 12 }}
+        inputsContainerStyle={{ gap: 20 }}
         onSubmit={onSubmit}
       />
-      {error ? <TextMuted>{error}</TextMuted> : null}
-    </View>
+      {error ? (
+        <Box padding="md" backgroundColor="danger" borderRadius="md" style={{ opacity: 0.1 }}>
+          <Text color="danger" fontWeight="700">{error}</Text>
+        </Box>
+      ) : null}
+    </Box>
   );
 }

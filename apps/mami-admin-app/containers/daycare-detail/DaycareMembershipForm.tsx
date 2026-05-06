@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { DrawerFormActions, SelectInput, type SelectOption } from '@mami/ui';
 
 import { TextAreaField } from '../../components/input';
-import { type DaycareMembershipAccess } from '../../services/daycare-memberships/store';
+import { type DaycareMembershipAccess } from '../../services/membership';
 import { Box, Text } from '../../theme/theme';
 
 type DaycareMembershipFormProps = {

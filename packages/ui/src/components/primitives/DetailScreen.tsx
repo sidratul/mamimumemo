@@ -1,8 +1,9 @@
-import type { ReactNode } from 'react';
+import { type ReactNode } from 'react';
 import { ScrollView, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useRouter } from 'expo-router';
 
-import { PageHeader, type PageHeaderProps } from './PageHeader';
+import { PageHeader } from './PageHeader';
 
 type DetailScreenProps = {
   title: string;
@@ -13,6 +14,7 @@ type DetailScreenProps = {
   contentContainerStyle?: ViewStyle;
   headerBackgroundColor?: string;
   headerBorderBottomColor?: string;
+  style?: ViewStyle;
 };
 
 export function DetailScreen({
@@ -24,7 +26,20 @@ export function DetailScreen({
   contentContainerStyle,
   headerBackgroundColor = '#FFFFFF',
   headerBorderBottomColor = '#E8ECF4',
+  style,
 }: DetailScreenProps) {
+  const router = useRouter();
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('../' as any);
+    }
+  };
+
   const content = scrollable ? (
     <ScrollView
       contentContainerStyle={[
@@ -56,10 +71,10 @@ export function DetailScreen({
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor }} edges={['left', 'right', 'bottom']}>
+    <SafeAreaView style={[{ flex: 1, backgroundColor }, style]} edges={['left', 'right', 'bottom']}>
       <PageHeader
         title={title}
-        onBack={onBack}
+        onBack={handleBack}
         backgroundColor={headerBackgroundColor}
         borderBottomColor={headerBorderBottomColor}
       />

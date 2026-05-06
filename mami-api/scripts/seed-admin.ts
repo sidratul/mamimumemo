@@ -43,6 +43,10 @@ async function seedAdmin() {
     console.log("Connected to MongoDB");
 
     const hashedPassword = await bcrypt.hash(ADMIN_USER.password, 10);
+    console.log("-----------------------------------------");
+    console.log("HASH PASSWORD UNTUK ATLAS (admin123):");
+    console.log(hashedPassword);
+    console.log("-----------------------------------------");
 
     const adminUser = await User.findOneAndUpdate(
       { email: ADMIN_USER.email },

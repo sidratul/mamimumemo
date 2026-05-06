@@ -26,12 +26,12 @@ export function DaycareCreateLogoField({
           style={{
             width: 72,
             height: 72,
-            borderRadius: 12,
-            backgroundColor: '#EEF3FB',
+            borderRadius: 16,
+            backgroundColor: '#F1F5F9',
             borderWidth: 1,
-            borderColor: '#D7DDEA',
+            borderColor: '#E2E8F0',
           }}>
-          <Text style={{ fontSize: 12, fontWeight: '600', color: '#6F7E95' }}>Logo</Text>
+          <Text style={{ fontSize: 12, fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>Logo</Text>
         </Box>
       )}
       <Button

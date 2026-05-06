@@ -13,6 +13,7 @@ export const theme = createTheme({
   },
   spacing: {
     none: 0,
+    xxs: 2,
     xs: 4,
     sm: 8,
     md: 12,
@@ -41,6 +42,7 @@ export const theme = createTheme({
       fontSize: 32,
       fontWeight: '800',
       letterSpacing: -0.5,
+      lineHeight: 40, // Ditambah agar tidak terpotong vertikal
     },
     subtitle: {
       color: 'textSecondary',
@@ -53,20 +55,24 @@ export const theme = createTheme({
       fontWeight: '600',
       textTransform: 'uppercase',
       letterSpacing: 0.5,
+      lineHeight: 20,
     },
     cardValue: {
       color: 'textPrimary',
       fontSize: 28,
       fontWeight: '800',
+      lineHeight: 34,
     },
     buttonLabel: {
       color: 'surface',
       fontSize: 16,
       fontWeight: '700',
+      lineHeight: 24,
     },
     bodySmall: {
       color: 'textSecondary',
       fontSize: 13,
+      lineHeight: 18,
     },
   },
 });

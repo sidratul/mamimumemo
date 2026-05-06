@@ -1,6 +1,6 @@
 import { Chip } from 'react-native-paper';
 
-import { ApprovalStatus } from '../../../services/daycare-admin';
+import { ApprovalStatus } from '../../../shared/daycare/types';
 
 export const approvalStatusLabelMap: Record<ApprovalStatus, string> = {
   DRAFT: 'Draft',

@@ -3,8 +3,9 @@ import { ListFilterBar } from '@mami/ui';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { approvalStatusColorMap } from './shared/ApprovalStatusBadge';
-import { type ApprovalStatus } from '../../services/daycare-admin';
 import { Box, Text } from '../../theme/theme';
+import { ApprovalStatus } from '../../shared/daycare/types';
+import { getAvailableApprovalStatusOptions } from '../../shared/daycare/logic';
 
 type DaycareListHeaderProps = {
   status: ApprovalStatus | 'ALL';
@@ -35,7 +36,7 @@ export function DaycareListHeader({
     <Box gap="lg" paddingTop="md" paddingBottom="sm">
       <Box paddingHorizontal="lg" gap="xs">
         <Box flexDirection="row" alignItems="center" justifyContent="space-between" gap="md">
-          <Text variant="title" fontSize={24}>Daycare</Text>
+          <Text variant="title" fontSize={24} flex={1}>Daycare</Text>
           <Button
             label="Tambah Daycare"
             onPress={onPressAdd}

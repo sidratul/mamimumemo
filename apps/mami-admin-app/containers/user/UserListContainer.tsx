@@ -6,7 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Box } from '../../theme/theme';
 import { usePaginatedResource } from '../../hooks/use-paginated-resource';
-import { getUserCount, getUserDataVersion, listUsers, type AdminUser, type UserAccess } from '../../services/users';
+import { getUserDataVersion, listUsers } from '../../services/user';
+import { UserRecord, UserAccess } from '../../shared/user/types';
 import { UserListFooter } from './UserListFooter';
 import { UserListHeader } from './UserListHeader';
 import { UserListItem } from './UserListItem';
@@ -19,18 +20,16 @@ export function UserListContainer() {
   const [access, setAccess] = useState<UserAccess | 'ALL'>('ALL');
   const [search, setSearch] = useState('');
   const [seenDataVersion, setSeenDataVersion] = useState(() => getUserDataVersion());
-  const { items, total, loading, refreshing, loadingMore, error, refresh, loadMore } = usePaginatedResource<AdminUser>({
+  
+  const { items, total, loading, refreshing, loadingMore, error, refresh, loadMore } = usePaginatedResource<UserRecord>({
     pageSize: PAGE_SIZE,
     deps: [access, search],
     loadPage: async (page, pageSize) => {
-      const [nextItems, nextTotal] = await Promise.all([
-        listUsers({ access, search, page, limit: pageSize }),
-        getUserCount({ access, search }),
-      ]);
-
+      const res = await listUsers({ access, search, page, limit: pageSize });
+      if (res.error) throw res.error;
       return {
-        items: nextItems,
-        total: nextTotal,
+        items: res.items,
+        total: res.total,
       };
     },
   });
@@ -64,10 +63,10 @@ export function UserListContainer() {
     <SafeAreaView style={{ flex: 1, backgroundColor: '#F8FAFC' }} edges={['top', 'left', 'right']}>
       <FlatList
         data={loading || error ? [] : items}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item._id}
         renderItem={({ item }) => (
           <Box paddingHorizontal="lg">
-            <UserListItem user={item} onPress={() => router.push({ pathname: '/(app)/users/[id]', params: { id: item.id } } as never)} />
+            <UserListItem user={item} onPress={() => router.push({ pathname: '/(app)/users/[id]', params: { id: item._id } } as never)} />
           </Box>
         )}
         ListHeaderComponent={header}

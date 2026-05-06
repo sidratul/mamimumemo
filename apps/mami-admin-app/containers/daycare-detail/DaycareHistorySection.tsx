@@ -3,7 +3,7 @@ import { formatDateTimeId } from '@mami/core';
 
 import { DaycareDetailSection } from './DaycareDetailSection';
 import { ApprovalStatusBadge } from '../daycare/shared/ApprovalStatusBadge';
-import { type DaycareApprovalHistory } from '../../services/daycare-admin';
+import { type DaycareApprovalHistory } from '../../shared/daycare/types';
 import { Box, Text } from '../../theme/theme';
 
 type DaycareHistorySectionProps = {
@@ -13,42 +13,46 @@ type DaycareHistorySectionProps = {
 
 export function DaycareHistorySection({ history, getInitials }: DaycareHistorySectionProps) {
   return (
-    <DaycareDetailSection title="Riwayat">
-      {history.length === 0 ? (
-        <Text color="textSecondary">Belum ada riwayat approval.</Text>
-      ) : (
-        <Box>
-          {history.map((item, index) => (
-            <Box key={`${item.changedAt}-${index}`}>
-              {index > 0 ? <Divider /> : null}
-              <Box flexDirection="row" alignItems="flex-start" justifyContent="space-between" paddingVertical="md" gap="sm">
-                <Box flexDirection="row" gap="sm" flex={1}>
-                  <Avatar.Text
-                    size={38}
-                    label={getInitials(item.changedBy)}
-                    style={{ backgroundColor: '#EEF3FF' }}
-                    labelStyle={{ color: '#4D96FF', fontSize: 13, fontWeight: '700' }}
-                  />
-                  <Box flex={1} gap="xs">
-                    <Text style={{ fontSize: 14, fontWeight: '700', color: '#24324B' }}>{item.changedBy}</Text>
-                    <Box alignItems="flex-start">
-                      <ApprovalStatusBadge status={item.status} />
-                    </Box>
-                    {item.note ? (
-                      <Text color="textSecondary" style={{ lineHeight: 20 }}>
-                        {item.note}
-                      </Text>
-                    ) : null}
+    <DaycareDetailSection title="Riwayat Perubahan">
+      <Box gap="md">
+        {history.length > 0 ? (
+          history.map((item, index) => (
+            <Box key={index} gap="md">
+              <Box flexDirection="row" gap="md" alignItems="flex-start">
+                <Avatar.Text 
+                  size={40} 
+                  label={getInitials(item.changedBy?.name || 'System')} 
+                  style={{ backgroundColor: '#EEF2FF' }}
+                  labelStyle={{ color: '#4F46E5', fontWeight: '800' }}
+                />
+                <Box flex={1} gap="xs">
+                  <Box flexDirection="row" justifyContent="space-between" alignItems="center">
+                    <Text variant="subtitle" fontWeight="800" fontSize={14} color="textPrimary">
+                      {item.changedBy?.name || 'System'}
+                    </Text>
+                    <Text variant="bodySmall" color="textSecondary" style={{ fontSize: 11 }}>
+                      {formatDateTimeId(item.changedAt)}
+                    </Text>
                   </Box>
+                  <Box flexDirection="row" alignItems="center" gap="sm">
+                    <ApprovalStatusBadge status={item.status} />
+                  </Box>
+                  {item.note ? (
+                    <Box backgroundColor="background" padding="sm" borderRadius="sm" marginTop="xs">
+                      <Text variant="bodySmall" color="textSecondary">{item.note}</Text>
+                    </Box>
+                  ) : null}
                 </Box>
-                <Text color="textSecondary" style={{ fontSize: 12 }}>
-                  {formatDateTimeId(item.changedAt)}
-                </Text>
               </Box>
+              {index < history.length - 1 ? <Divider style={{ backgroundColor: '#F1F5F9' }} /> : null}
             </Box>
-          ))}
-        </Box>
-      )}
+          ))
+        ) : (
+          <Box padding="md" alignItems="center">
+            <Text variant="bodySmall" color="textSecondary">Belum ada riwayat perubahan.</Text>
+          </Box>
+        )}
+      </Box>
     </DaycareDetailSection>
   );
 }

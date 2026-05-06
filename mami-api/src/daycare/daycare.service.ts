@@ -104,6 +104,9 @@ export class DaycareService {
           role: UserRole.DAYCARE_OWNER,
         }, { session });
 
+        const registrant = context.user || owner;
+        const isSystemAdmin = context.user?.role === UserRole.SUPER_ADMIN;
+
         const daycare = await repository.create({
           name: input.daycare.name,
           logoUrl: input.daycare.logoUrl?.trim() || "",
@@ -121,14 +124,16 @@ export class DaycareService {
           submittedAt: new Date(),
           approval: {
             status: DaycareApprovalStatus.SUBMITTED,
-            note: "Registrasi daycare berhasil dikirim. Tim kami akan menghubungi owner.",
+            note: isSystemAdmin 
+              ? `Didaftarkan oleh sistem admin: ${registrant.name}`
+              : "Registrasi daycare berhasil dikirim. Tim kami akan menghubungi owner.",
             history: [
               {
                 status: DaycareApprovalStatus.SUBMITTED,
-                note: "Registrasi daycare berhasil dikirim.",
+                note: isSystemAdmin ? "Pendaftaran dilakukan melalui panel admin." : "Registrasi daycare berhasil dikirim.",
                 changedBy: {
-                  userId: owner._id,
-                  name: owner.name,
+                  userId: registrant._id,
+                  name: registrant.name,
                 },
                 changedAt: new Date(),
               },

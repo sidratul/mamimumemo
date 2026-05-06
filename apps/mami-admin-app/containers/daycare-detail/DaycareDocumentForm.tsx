@@ -66,8 +66,8 @@ export function DaycareDocumentForm({
             <IconButton
               icon="upload"
               size={20}
-              containerColor="#EEF3FF"
-              iconColor="#4D96FF"
+              containerColor="#EEF2FF"
+              iconColor="#4F46E5"
               loading={loading}
               disabled={loading}
               onPress={() => onUpload(index)}
@@ -76,9 +76,7 @@ export function DaycareDocumentForm({
         </Box>
       ))}
 
-      <Box flexDirection="row" gap="sm">
-        <DrawerFormActions onCancel={onCancel} onSubmit={onSubmit} loading={loading} />
-      </Box>
+      <Box flexDirection="row" gap="sm"><DrawerFormActions onCancel={onCancel} onSubmit={onSubmit} loading={loading} /></Box>
 
       {error ? <Text color="danger">{error}</Text> : null}
     </Box>

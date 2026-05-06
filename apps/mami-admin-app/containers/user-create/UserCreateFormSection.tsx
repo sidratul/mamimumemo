@@ -2,15 +2,14 @@ import {
   DynamicForm,
   PasswordField,
   TextField,
-  TextMuted,
   type FormFieldProps,
   type InputComponentProps,
 } from '@mami/ui';
 import { adminUserCreateSchema } from '@mami/core';
-import { View } from 'react-native';
 
 import { RoleSelect } from '../../components/input';
-import { type UserRole } from '../../services/users';
+import { type UserRole } from '../../shared/user/types';
+import { Box, Text } from '../../theme/theme';
 
 type RoleOption = {
   label: string;
@@ -61,35 +60,35 @@ export function UserCreateFormSection({
       label: 'Nama lengkap',
       required: true,
       input: TextField,
-      props: { placeholder: 'Nama lengkap' },
+      props: { placeholder: 'Contoh: Budi Santoso' },
     },
     email: {
       label: 'Email',
       required: true,
       input: TextField,
-      props: { placeholder: 'Email', keyboardType: 'email-address' },
+      props: { placeholder: 'user@email.com', keyboardType: 'email-address' },
     },
     phone: {
       label: 'Nomor telepon',
       required: true,
       input: TextField,
-      props: { placeholder: 'Nomor telepon', keyboardType: 'phone-pad' },
+      props: { placeholder: '0812xxxx', keyboardType: 'phone-pad' },
     },
     role: {
-      label: 'Role',
+      label: 'Akses Sistem',
       required: true,
       input: (props: InputComponentProps<UserRole>) => UserRoleField(roleOptions, props),
     },
     password: {
-      label: 'Password',
+      label: 'Password Sementara',
       required: true,
       input: PasswordField,
-      props: { placeholder: 'Password' },
+      props: { placeholder: 'Min. 6 karakter' },
     },
   };
 
   return (
-    <View style={{ gap: 12 }}>
+    <Box gap="lg">
       <DynamicForm<UserCreateFormData>
         fields={fields}
         defaultValue={{
@@ -100,12 +99,21 @@ export function UserCreateFormSection({
           password: '',
         }}
         schema={adminUserCreateSchema}
-        submitLabel="Simpan User"
+        submitLabel="Daftarkan Pengguna"
         loading={loading}
         onSubmit={onSubmit}
       />
-      <TextMuted>User yang dibuat manual dari admin app hanya untuk Super Admin dan Daycare Admin.</TextMuted>
-      {error ? <TextMuted>{error}</TextMuted> : null}
-    </View>
+      
+      <Box paddingHorizontal="xs" gap="sm">
+        <Text variant="bodySmall" color="textSecondary" style={{ fontStyle: 'italic' }}>
+          User yang dibuat manual dari panel admin akan memiliki akses otoritas (Super Admin atau Admin Daycare). Untuk Parent/Sitter, tambahkan melalui detail Daycare.
+        </Text>
+        {error ? (
+          <Box backgroundColor="danger" padding="sm" borderRadius="sm" style={{ opacity: 0.1 }}>
+            <Text color="danger" fontWeight="700">{error}</Text>
+          </Box>
+        ) : null}
+      </Box>
+    </Box>
   );
 }

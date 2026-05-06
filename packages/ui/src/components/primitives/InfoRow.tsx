@@ -39,7 +39,7 @@ export function InfoRow({
 }
 
 type InfoGroupProps = {
-  items: Array<{ label: string; value?: string | null }>;
+  items: { label: string; value?: string | null }[];
   stacked?: boolean;
 };
 

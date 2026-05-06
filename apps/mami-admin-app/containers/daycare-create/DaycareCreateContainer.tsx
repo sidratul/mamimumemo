@@ -4,7 +4,7 @@ import { ScrollView } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppPageHeader } from '../../components/common/AppPageHeader';
-import { registerDaycare } from '../../services/daycare-admin';
+import { registerDaycare } from '../../services/daycare';
 import { pickAndUploadDaycareLogo } from '../../services/uploads';
 import { Box } from '../../theme/theme';
 import { DaycareCreateFormData, DaycareCreateFormSection } from './DaycareCreateFormSection';
@@ -20,7 +20,7 @@ export function DaycareCreateContainer() {
     try {
       setLoading(true);
       setError('');
-      await registerDaycare({
+      const res = await registerDaycare({
         owner: {
           name: values.ownerName.trim(),
           email: values.ownerEmail.trim(),
@@ -35,6 +35,7 @@ export function DaycareCreateContainer() {
           city: values.city.trim(),
         },
       });
+      if (res.errors) throw new Error(res.errors[0].message);
       router.replace('/(app)/(tabs)/daycares');
     } catch (nextError) {
       console.error('[UI:DaycareCreate] submit failed', nextError);
@@ -45,7 +46,7 @@ export function DaycareCreateContainer() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#FFFFFF' }} edges={['left', 'right', 'bottom']}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#F8FAFC' }} edges={['left', 'right', 'bottom']}>
       <AppPageHeader
         title="Buat Daycare"
         onBack={() => router.back()}

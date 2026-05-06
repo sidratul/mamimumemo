@@ -2,7 +2,7 @@ import { Button } from '@mami/ui';
 import { ListFilterBar } from '@mami/ui';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
-import { type UserAccess } from '../../services/users';
+import { type UserAccess } from '../../shared/user/types';
 import { Box, Text } from '../../theme/theme';
 
 type UserListHeaderProps = {
@@ -13,7 +13,7 @@ type UserListHeaderProps = {
   onPressAdd: () => void;
 };
 
-const accessOptions: Array<{ label: string; value: UserAccess | 'ALL' }> = [
+const accessOptions: { label: string; value: UserAccess | 'ALL' }[] = [
   { label: 'Semua', value: 'ALL' },
   { label: 'Super Admin', value: 'SUPER_ADMIN' },
   { label: 'Parent', value: 'PARENT' },
@@ -33,7 +33,7 @@ export function UserListHeader({
     <Box gap="lg" paddingTop="md" paddingBottom="sm">
       <Box paddingHorizontal="lg" gap="xs">
         <Box flexDirection="row" alignItems="center" justifyContent="space-between" gap="md">
-          <Text variant="title" fontSize={24}>Pengguna</Text>
+          <Text variant="title" fontSize={24} flex={1}>Pengguna</Text>
           <Button
             label="Tambah User"
             onPress={onPressAdd}

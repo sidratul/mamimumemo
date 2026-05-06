@@ -1,9 +1,9 @@
-import { useState } from 'react';
 import { DrawerFormActions, SelectInput, type SelectOption } from '@mami/ui';
+import { useState } from 'react';
 
 import { TextAreaField } from '../../components/input';
+import { type DaycareMembershipAccess } from '../../services/membership';
 import { Box, Text } from '../../theme/theme';
-import { type DaycareMembershipAccess } from '../../services/daycare-memberships/store';
 
 type UserMembershipFormProps = {
   loading: boolean;
@@ -14,15 +14,15 @@ type UserMembershipFormProps = {
   daycareOptions: SelectOption[];
   onCancel: () => void;
   onChangeDaycareId: (value: string) => void;
-  onChangeAkses: (value: DaycareMembershipAccess) => void;
+  onChangeAccess: (value: DaycareMembershipAccess) => void;
   onChangeNotes: (value: string) => void;
   onSubmit: () => void;
 };
 
-const accessOptions: SelectOption[] = [
-  { label: 'Owner', value: 'OWNER' },
+const accessOptions: Array<{ label: string; value: DaycareMembershipAccess }> = [
   { label: 'Admin Daycare', value: 'ADMIN' },
-  { label: 'Karyawan Daycare', value: 'SITTER' },
+  { label: 'Karyawan (Sitter)', value: 'SITTER' },
+  { label: 'Pemilik (Owner)', value: 'OWNER' },
 ];
 
 export function UserMembershipForm({
@@ -34,33 +34,18 @@ export function UserMembershipForm({
   daycareOptions,
   onCancel,
   onChangeDaycareId,
-  onChangeAkses,
+  onChangeAccess,
   onChangeNotes,
   onSubmit,
 }: UserMembershipFormProps) {
-  const [localError, setLocalError] = useState('');
-
-  function handleSubmit() {
-    if (!daycareId) {
-      setLocalError('Pilih daycare terlebih dahulu.');
-      return;
-    }
-
-    setLocalError('');
-    onSubmit();
-  }
-
   return (
-    <Box gap="md">
+    <Box gap="lg">
       <Box gap="xs">
-        <Text style={{ fontSize: 12, fontWeight: '700', color: '#24324B' }}>Daycare</Text>
+        <Text style={{ fontSize: 12, fontWeight: '700', color: '#24324B' }}>Pilih Daycare</Text>
         <SelectInput
           value={daycareId}
-          placeholder="Pilih daycare"
-          onChange={(value) => {
-            setLocalError('');
-            onChangeDaycareId(value);
-          }}
+          placeholder="Cari daycare..."
+          onChange={onChangeDaycareId}
           disabled={loading}
           options={daycareOptions}
           title="Pilih Daycare"
@@ -68,11 +53,11 @@ export function UserMembershipForm({
       </Box>
 
       <Box gap="xs">
-        <Text style={{ fontSize: 12, fontWeight: '700', color: '#24324B' }}>Akses</Text>
+        <Text style={{ fontSize: 12, fontWeight: '700', color: '#24324B' }}>Pilih Akses</Text>
         <SelectInput
           value={access}
-          placeholder="Pilih access"
-          onChange={(value) => onChangeAkses(value as DaycareMembershipAccess)}
+          placeholder="Pilih akses"
+          onChange={(value) => onChangeAccess(value as DaycareMembershipAccess)}
           disabled={loading}
           options={accessOptions}
           title="Pilih Akses"
@@ -83,20 +68,19 @@ export function UserMembershipForm({
         <Text style={{ fontSize: 12, fontWeight: '700', color: '#24324B' }}>Catatan</Text>
         <TextAreaField
           value={notes}
-          placeholder="Catatan tambahan untuk membership ini"
+          placeholder="Catatan tambahan (opsional)"
           onChange={onChangeNotes}
           disabled={loading}
-          numberOfLines={4}
-          useBottomSheetInput
         />
       </Box>
 
-      <Box flexDirection="row" gap="sm">
-        <DrawerFormActions onCancel={onCancel} onSubmit={handleSubmit} loading={loading} />
-      </Box>
+      {error ? (
+        <Text color="danger" variant="bodySmall">
+          {error}
+        </Text>
+      ) : null}
 
-      {localError ? <Text color="danger">{localError}</Text> : null}
-      {error ? <Text color="danger">{error}</Text> : null}
+      <Box flexDirection="row" gap="sm"><DrawerFormActions submitLabel="Tambahkan Membership" onCancel={onCancel} onSubmit={onSubmit} loading={loading} /></Box>
     </Box>
   );
 }

@@ -2,7 +2,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Pressable } from 'react-native';
 
 import { Box, Text } from '../../theme/theme';
-import { type AdminUser, type UserAccess } from '../../services/users';
+import { UserRecord, UserAccess } from '../../shared/user/types';
 
 const accessLabelMap: Record<UserAccess, string> = {
   SUPER_ADMIN: 'Superuser',
@@ -21,7 +21,7 @@ const accessColorMap: Record<UserAccess, { text: string; background: string }> =
 };
 
 type UserListItemProps = {
-  user: AdminUser;
+  user: UserRecord;
   onPress: () => void;
 };
 
@@ -53,7 +53,7 @@ export function UserListItem({ user, onPress }: UserListItemProps) {
           </Box>
 
           <Box flex={1} gap="xs">
-            <Text variant="defaults" fontWeight="800" color="textPrimary" numberOfLines={1}>
+            <Text variant="subtitle" fontWeight="800" fontSize={16} color="textPrimary" numberOfLines={1}>
               {user.name}
             </Text>
 
@@ -84,9 +84,9 @@ export function UserListItem({ user, onPress }: UserListItemProps) {
                   paddingVertical="xs"
                   style={{
                     borderRadius: 8,
-                    backgroundColor: '#F1F5F9',
+                    backgroundColor: 'background',
                   }}>
-                  <Text style={{ fontSize: 11, fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>
+                  <Text style={{ fontSize: 11, fontWeight: '800', color: 'textSecondary', textTransform: 'uppercase' }}>
                     AKUN
                   </Text>
                 </Box>

@@ -4,20 +4,21 @@ import { Image } from 'expo-image';
 import { formatDateId } from '@mami/core';
 import { Pressable } from 'react-native';
 
-import { AdminDaycare } from '../../services/daycare-admin';
+import { DaycareRecord } from '../../shared/daycare/types';
 import { Box, Text } from '../../theme/theme';
 import { ApprovalStatusBadge } from './shared/ApprovalStatusBadge';
 
 type DaycareListItemProps = {
-  daycare: AdminDaycare;
+  daycare: DaycareRecord;
   onPress: () => void;
 };
 
 export function DaycareListItem({ daycare, onPress }: DaycareListItemProps) {
   const [hasImageError, setHasImageError] = useState(false);
-  const statusDateLabel = daycare.statusChangedAt
-    ? formatDateId(daycare.statusChangedAt)
-    : 'Belum diperbarui';
+  const statusDateLabel = daycare.approval?.history?.[0]?.changedAt
+    ? formatDateId(daycare.approval.history[0].changedAt)
+    : daycare.submittedAt ? formatDateId(daycare.submittedAt) : 'Belum diperbarui';
+  
   const imageSource = daycare.logoUrl && !hasImageError ? { uri: daycare.logoUrl } : null;
 
   return (
@@ -56,7 +57,7 @@ export function DaycareListItem({ daycare, onPress }: DaycareListItemProps) {
           </Box>
 
           <Box flex={1} gap="xs">
-            <Text variant="defaults" fontWeight="800" color="textPrimary" numberOfLines={1}>
+            <Text variant="subtitle" fontWeight="800" fontSize={16} color="textPrimary" numberOfLines={1}>
               {daycare.name}
             </Text>
 
@@ -76,7 +77,7 @@ export function DaycareListItem({ daycare, onPress }: DaycareListItemProps) {
             </Box>
             
             <Box flexDirection="row" alignItems="center" justifyContent="space-between" marginTop="xs">
-              <ApprovalStatusBadge status={daycare.approvalStatus} />
+              <ApprovalStatusBadge status={daycare.approval?.status || 'DRAFT'} />
               <Text variant="bodySmall" color="textSecondary" style={{ fontSize: 11 }}>
                 {statusDateLabel}
               </Text>

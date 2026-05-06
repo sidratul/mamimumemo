@@ -5,11 +5,11 @@ import { DaycareDetailSection } from './DaycareDetailSection';
 import { Box, Text } from '../../theme/theme';
 
 type DaycareDocumentsSectionProps = {
-  legalDocuments: Array<{
+  legalDocuments: {
     type: string;
     url: string;
     verified: boolean;
-  }>;
+  }[];
   getDocumentName: (value: string) => string;
   onOpenDocument: (url: string) => void;
   onPressUpdate: () => void;

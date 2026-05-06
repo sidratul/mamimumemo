@@ -4,8 +4,9 @@ import { ScrollView } from 'react-native';
 import { useCallback, useMemo, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { listDaycares, type AdminDaycare } from '../../services/daycare-admin';
-import { Box, Text, useAppTheme } from '../../theme/theme';
+import { listDaycares } from '../../services/daycare';
+import { DaycareRecord } from '../../shared/daycare/types';
+import { Box, useAppTheme } from '../../theme/theme';
 import { DashboardChartSection } from './DashboardChartSection';
 import { DashboardHeaderSection } from './DashboardHeaderSection';
 import { DashboardQuickActionsSection } from './DashboardQuickActionsSection';
@@ -15,14 +16,14 @@ import { toPercentWidth } from './dashboard.utils';
 export function DashboardContainer() {
   const router = useRouter();
   const theme = useAppTheme();
-  const [items, setItems] = useState<AdminDaycare[]>([]);
+  const [items, setItems] = useState<DaycareRecord[]>([]);
   const [loading, setLoading] = useState(true);
 
   const metrics = useMemo(() => {
-    const submitted = items.filter((item) => item.approvalStatus === 'SUBMITTED').length;
-    const inReview = items.filter((item) => item.approvalStatus === 'IN_REVIEW').length;
-    const approved = items.filter((item) => item.approvalStatus === 'APPROVED').length;
-    const revision = items.filter((item) => item.approvalStatus === 'NEEDS_REVISION').length;
+    const submitted = items.filter((item) => item.approval?.status === 'SUBMITTED').length;
+    const inReview = items.filter((item) => item.approval?.status === 'IN_REVIEW').length;
+    const approved = items.filter((item) => item.approval?.status === 'APPROVED').length;
+    const revision = items.filter((item) => item.approval?.status === 'NEEDS_REVISION').length;
     const total = Math.max(items.length, 1);
 
     return {
@@ -40,8 +41,8 @@ export function DashboardContainer() {
   const loadDashboard = useCallback(async () => {
     try {
       setLoading(true);
-      const data = await listDaycares();
-      setItems(data);
+      const res = await listDaycares();
+      setItems(res.items);
     } finally {
       setLoading(false);
     }

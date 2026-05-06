@@ -4,10 +4,10 @@ import { Button } from '@mami/ui';
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 
 import { DetailSection } from './DetailSection';
-import { type UserDaycareMembership } from '../../services/users';
+import { type UserDaycareMembership } from '../../shared/user/types';
 import { Box, Text } from '../../theme/theme';
 
-const personaLabelMap: Record<UserDaycareMembership['persona'], string> = {
+const accessLabelMap: Record<UserDaycareMembership['access'], string> = {
   OWNER: 'Owner',
   ADMIN: 'Admin Daycare',
   SITTER: 'Karyawan',
@@ -52,7 +52,7 @@ export function UserMembershipsSection({
         <Box gap="md">
           {memberships.map((membership) => (
             <Box
-              key={membership.id}
+              key={membership._id}
               padding="md"
               gap="sm"
               style={{
@@ -84,7 +84,7 @@ export function UserMembershipsSection({
                 <Box flexDirection="row" alignItems="center" gap="xs">
                   <MaterialCommunityIcons name="account-tie-outline" size={14} color="#94A3B8" />
                   <Text variant="bodySmall" color="textSecondary">
-                    Role: <Text variant="bodySmall" fontWeight="700" color="textPrimary">{personaLabelMap[membership.persona]}</Text>
+                    Role: <Text variant="bodySmall" fontWeight="700" color="textPrimary">{accessLabelMap[membership.access]}</Text>
                   </Text>
                 </Box>
                 {membership.notes ? (
@@ -96,11 +96,11 @@ export function UserMembershipsSection({
               </Box>
 
               {membership.status === 'ACTIVE' ? (
-                <Pressable onPress={() => onDeactivateMembership(membership.id)} style={{ alignSelf: 'flex-start' }}>
+                <Pressable onPress={() => onDeactivateMembership(membership._id)} style={{ alignSelf: 'flex-start' }}>
                   <Box flexDirection="row" alignItems="center" gap="xs" marginTop="xs" paddingVertical="xs">
                     <MaterialCommunityIcons name="close-circle-outline" size={14} color="#EF4444" />
                     <Text variant="bodySmall" fontWeight="700" color="danger">
-                      {busyMembershipId === membership.id ? 'Memproses...' : 'Nonaktifkan membership'}
+                      {busyMembershipId === membership._id ? 'Memproses...' : 'Nonaktifkan membership'}
                     </Text>
                   </Box>
                 </Pressable>

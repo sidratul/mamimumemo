@@ -5,7 +5,7 @@ import {
   getStoredSession,
   setSessionToken,
   subscribeSession,
-} from '../services/storage/session';
+} from '../shared/storage';
 
 type SessionContextValue = {
   isLoading: boolean;

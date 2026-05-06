@@ -2,23 +2,23 @@ import { useEffect, useMemo, useState } from 'react';
 import { Linking } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ActivityIndicator } from 'react-native-paper';
-import { BottomDrawer, DetailScreen, SegmentTabs } from '@mami/ui';
+import { BottomDrawer, DetailScreen, SegmentTabs, type SelectOption } from '@mami/ui';
 import { formatDateTimeId } from '@mami/core';
 
 import {
-  getAvailableApprovalStatusOptions,
-  getApprovalStatusLabel,
-  getApprovalStatusHelperText,
   getDaycareById,
   updateDaycareApprovalStatus,
   updateDaycareDocuments,
-  type AdminDaycare,
-  type ApprovalStatus,
-} from '../../services/daycare-admin';
+} from '../../services/daycare';
 import {
   getDaycareMemberships,
-  type DaycareMembershipRecord,
-} from '../../services/daycare-memberships/store';
+} from '../../services/membership';
+import {
+  getApprovalStatusLabel,
+  getApprovalStatusHelperText,
+  getAvailableApprovalStatusOptions,
+} from '../../shared/daycare/logic';
+import { DaycareRecord, ApprovalStatus } from '../../shared/daycare/types';
 import { pickAndUploadDaycareDocument } from '../../services/uploads';
 import { Box, Text } from '../../theme/theme';
 import { DaycareDocumentForm } from './DaycareDocumentForm';
@@ -43,8 +43,8 @@ type DocumentDraft = {
 
 export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
   const router = useRouter();
-  const [daycare, setDaycare] = useState<AdminDaycare | null>(null);
-  const [memberships, setMemberships] = useState<DaycareMembershipRecord[]>([]);
+  const [daycare, setDaycare] = useState<DaycareRecord | null>(null);
+  const [memberships, setMemberships] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -63,12 +63,13 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
       try {
         setLoading(true);
         setError('');
-        const [data, daycareMemberships] = await Promise.all([
+        const [daycareRes, membershipsRes] = await Promise.all([
           getDaycareById(id),
           getDaycareMemberships(id),
         ]);
-        setDaycare(data);
-        setMemberships(daycareMemberships);
+        if (daycareRes.error) throw daycareRes.error;
+        setDaycare(daycareRes.data || null);
+        setMemberships(membershipsRes.items ?? []);
       } catch (nextError) {
         setDaycare(null);
         setError(nextError instanceof Error ? nextError.message : 'Gagal mengambil detail daycare.');
@@ -81,30 +82,30 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
   }, [id]);
 
   const nextStatusOptions = useMemo(
-    () => (daycare ? getAvailableApprovalStatusOptions(daycare.approvalStatus) : []),
+    () => (daycare?.approval?.status ? getAvailableApprovalStatusOptions(daycare.approval.status) : []),
     [daycare]
   );
 
   const statusSelectionOptions = useMemo(() => {
-    if (!daycare) {
+    if (!daycare?.approval?.status) {
       return [];
     }
 
     const currentStatusOption = {
-      label: `${getApprovalStatusLabel(daycare.approvalStatus)} (saat ini)`,
-      value: daycare.approvalStatus,
+      label: `${getApprovalStatusLabel(daycare.approval.status)} (saat ini)`,
+      value: daycare.approval.status,
     };
 
     return [
       currentStatusOption,
-      ...nextStatusOptions.filter((option) => option.value !== daycare.approvalStatus),
+      ...nextStatusOptions.filter((option) => option.value !== daycare.approval?.status),
     ];
   }, [daycare, nextStatusOptions]);
 
   useEffect(() => {
-    setNextStatus(daycare?.approvalStatus ?? '');
-    setReviewNote(daycare?.approvalNote ?? '');
-  }, [daycare?.approvalNote, daycare?.approvalStatus]);
+    setNextStatus(daycare?.approval?.status ?? '');
+    setReviewNote(daycare?.approval?.note ?? '');
+  }, [daycare?.approval]);
 
   useEffect(() => {
     setDocumentDrafts(
@@ -119,14 +120,14 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
   }, [daycare?.legalDocuments]);
 
   const submittedLabel = daycare?.submittedAt ? formatDateTimeId(daycare.submittedAt) : 'Belum diajukan';
-  const latestHistory = daycare?.history?.slice(0, 3) ?? [];
+  const latestHistory = daycare?.approval?.history?.slice(0, 3) ?? [];
 
   if (loading) {
     return (
       <DetailScreen title="Detail Daycare" onBack={() => router.back()} scrollable={false}>
-        <Box paddingHorizontal="md" paddingTop="xxl" alignItems="center" gap="sm">
-          <ActivityIndicator color="#4D96FF" />
-          <Text color="textSecondary">Memuat detail daycare...</Text>
+        <Box paddingHorizontal="md" paddingTop="xxl" alignItems="center" gap="md">
+          <ActivityIndicator color="#4F46E5" />
+          <Text variant="bodySmall" color="textSecondary">Memuat detail daycare...</Text>
         </Box>
       </DetailScreen>
     );
@@ -136,10 +137,10 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
     return (
       <DetailScreen title="Detail Daycare" onBack={() => router.back()} scrollable={false}>
         <Box paddingHorizontal="md" paddingTop="xxl" gap="sm">
-          <Text color="danger" style={{ fontWeight: '700' }}>
+          <Text color="danger" fontWeight="800">
             Detail daycare tidak tersedia
           </Text>
-          <Text color="textSecondary">{error || 'Daycare tidak ditemukan.'}</Text>
+          <Text variant="bodySmall" color="textSecondary">{error || 'Daycare tidak ditemukan.'}</Text>
         </Box>
       </DetailScreen>
     );
@@ -151,7 +152,7 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
       onBack={() => router.back()}
       scrollable={false}
       contentContainerStyle={{ flex: 1, paddingTop: 20, gap: 16, paddingBottom: 0 }}>
-      <DaycareHeroSection name={daycare.name} address={daycare.address || daycare.city} logoUrl={daycare.logoUrl} />
+      <DaycareHeroSection name={daycare.name} address={daycare.address || daycare.city} logoUrl={daycare.logoUrl ?? undefined} />
       <SegmentTabs
         initialKey="overview"
         contentContainerStyle={{ paddingBottom: 40 }}
@@ -163,7 +164,7 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
               <>
                 <DaycareOwnerSection owner={daycare.owner} getInitials={getInitials} />
                 <DaycareStatusSection
-                  status={daycare.approvalStatus}
+                  status={daycare.approval?.status || 'DRAFT'}
                   submittedLabel={submittedLabel}
                   helperText={nextStatus ? getApprovalStatusHelperText(nextStatus as ApprovalStatus) : ''}
                   onPressUpdate={() => setStatusSheetVisible(true)}
@@ -178,10 +179,10 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
             content: (
               <DaycareMembershipsSection
                 owner={{
-                  id: daycare.owner.id,
+                  _id: daycare.owner._id,
                   name: daycare.owner.name,
                   email: daycare.owner.email,
-                  phone: daycare.owner.phone,
+                  phone: daycare.owner.phone ?? undefined,
                 }}
                 memberships={memberships}
               />
@@ -192,7 +193,7 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
             label: 'Dokumen',
             content: (
               <DaycareDocumentsSection
-                legalDocuments={daycare.legalDocuments}
+                legalDocuments={daycare.legalDocuments || []}
                 getDocumentName={getDocumentName}
                 onOpenDocument={(url) => void Linking.openURL(url)}
                 onPressUpdate={() => setDocumentsSheetVisible(true)}
@@ -208,94 +209,95 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
       />
 
       <BottomDrawer visible={statusSheetVisible} onDismiss={() => setStatusSheetVisible(false)}>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Update Status</Text>
-          <DaycareStatusForm
-            currentStatus={daycare.approvalStatus}
-            value={nextStatus}
-            note={reviewNote}
-            options={statusSelectionOptions}
-            loading={submitLoading}
-            error={submitError}
-            onCancel={() => setStatusSheetVisible(false)}
-            onChangeStatus={setNextStatus}
-            onChangeNote={setReviewNote}
-            onSubmit={() => {
-              void (async () => {
-                try {
-                  setSubmitLoading(true);
-                  setSubmitError('');
-                  const updated = await updateDaycareApprovalStatus(id, nextStatus as ApprovalStatus, reviewNote);
-                  setDaycare(updated);
-                  setStatusSheetVisible(false);
-                } catch (nextError) {
-                  setSubmitError(nextError instanceof Error ? nextError.message : 'Gagal memperbarui status daycare.');
-                } finally {
-                  setSubmitLoading(false);
-                }
-              })();
-            }}
-          />
+        <Text style={{ fontSize: 18, fontWeight: '800', color: '#0F172A', marginBottom: 16 }}>Update Status</Text>
+        <DaycareStatusForm
+          currentStatus={daycare.approval?.status || 'DRAFT'}
+          value={nextStatus}
+          note={reviewNote}
+          options={statusSelectionOptions}
+          loading={submitLoading}
+          error={submitError}
+          onCancel={() => setStatusSheetVisible(false)}
+          onChangeStatus={setNextStatus}
+          onChangeNote={setReviewNote}
+          onSubmit={() => {
+            void (async () => {
+              try {
+                setSubmitLoading(true);
+                setSubmitError('');
+                const res = await updateDaycareApprovalStatus(id, nextStatus as ApprovalStatus, reviewNote);
+                if (res.error) throw res.error;
+                setDaycare(res.data || null);
+                setStatusSheetVisible(false);
+              } catch (nextError) {
+                setSubmitError(nextError instanceof Error ? nextError.message : 'Gagal memperbarui status daycare.');
+              } finally {
+                setSubmitLoading(false);
+              }
+            })();
+          }}
+        />
       </BottomDrawer>
 
       <BottomDrawer visible={documentsSheetVisible} onDismiss={() => setDocumentsSheetVisible(false)}>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Update Dokumen</Text>
-          <DaycareDocumentForm
-            documents={documentDrafts}
-            loading={documentsLoading}
-            error={documentsError}
-            getDocumentName={getDocumentName}
-            onCancel={() => setDocumentsSheetVisible(false)}
-            onChangeType={(index, value) =>
-              setDocumentDrafts((current) =>
-                current.map((item, itemIndex) => (itemIndex === index ? { ...item, type: value } : item))
-              )
-            }
-            onUpload={(index) => {
-              void (async () => {
-                try {
-                  setDocumentsLoading(true);
-                  setDocumentsError('');
-                  const uploaded = await pickAndUploadDaycareDocument();
-                  if (uploaded?.path) {
-                    setDocumentDrafts((current) =>
-                      current.map((item, itemIndex) =>
-                        itemIndex === index ? { ...item, url: uploaded.path } : item
-                      )
-                    );
-                  }
-                } catch (nextError) {
-                  setDocumentsError(nextError instanceof Error ? nextError.message : 'Gagal upload dokumen.');
-                } finally {
-                  setDocumentsLoading(false);
+        <Text style={{ fontSize: 18, fontWeight: '800', color: '#0F172A', marginBottom: 16 }}>Update Dokumen</Text>
+        <DaycareDocumentForm
+          documents={documentDrafts}
+          loading={documentsLoading}
+          error={documentsError}
+          getDocumentName={getDocumentName}
+          onCancel={() => setDocumentsSheetVisible(false)}
+          onChangeType={(index, value) =>
+            setDocumentDrafts((current) =>
+              current.map((item, itemIndex) => (itemIndex === index ? { ...item, type: value } : item))
+            )
+          }
+          onUpload={(index) => {
+            void (async () => {
+              try {
+                setDocumentsLoading(true);
+                setDocumentsError('');
+                const uploaded = await pickAndUploadDaycareDocument();
+                if (uploaded?.path) {
+                  setDocumentDrafts((current) =>
+                    current.map((item, itemIndex) =>
+                      itemIndex === index ? { ...item, url: uploaded.path } : item
+                    )
+                  );
                 }
-              })();
-            }}
-            onSubmit={() => {
-              void (async () => {
-                try {
-                  setDocumentsLoading(true);
-                  setDocumentsError('');
-                  const sanitizedDocuments = documentDrafts
-                    .map((document) => ({
-                      type: document.type.trim(),
-                      url: document.url.trim(),
-                      verified: Boolean(document.verified),
-                    }))
-                    .filter((document) => document.type && document.url);
+              } catch (nextError) {
+                setDocumentsError(nextError instanceof Error ? nextError.message : 'Gagal upload dokumen.');
+              } finally {
+                setDocumentsLoading(false);
+              }
+            })();
+          }}
+          onSubmit={() => {
+            void (async () => {
+              try {
+                setDocumentsLoading(true);
+                setDocumentsError('');
+                const sanitizedDocuments = documentDrafts
+                  .map((document) => ({
+                    type: document.type.trim(),
+                    url: document.url.trim(),
+                    verified: Boolean(document.verified),
+                  }))
+                  .filter((document) => document.type && document.url);
 
-                  const updated = await updateDaycareDocuments(id, sanitizedDocuments);
-                  setDaycare(updated);
-                  setDocumentsSheetVisible(false);
-                } catch (nextError) {
-                  setDocumentsError(nextError instanceof Error ? nextError.message : 'Gagal memperbarui dokumen daycare.');
-                } finally {
-                  setDocumentsLoading(false);
-                }
-              })();
-            }}
-          />
+                const res = await updateDaycareDocuments(id, sanitizedDocuments);
+                if (res.error) throw res.error;
+                setDaycare(res.data || null);
+                setDocumentsSheetVisible(false);
+              } catch (nextError) {
+                setDocumentsError(nextError instanceof Error ? nextError.message : 'Gagal memperbarui dokumen daycare.');
+              } finally {
+                setDocumentsLoading(false);
+              }
+            })();
+          }}
+        />
       </BottomDrawer>
-
     </DetailScreen>
   );
 }

@@ -2,18 +2,21 @@ import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'expo-router';
 import { BottomDrawer, DetailScreen, SegmentTabs, type SelectOption } from '@mami/ui';
 
-import { listDaycares } from '../../services/daycare-admin';
-import { addExistingUserToDaycare, deactivateDaycareMembership, type DaycareMembershipPersona } from '../../services/daycare-memberships/store';
+import { listDaycares } from '../../services/daycare';
+import { addExistingUserToDaycare, deactivateDaycareMembership } from '../../services/membership';
 import {
   deleteUser,
   getUserById,
   getUserDaycareMemberships,
   updateUser,
   updateUserPassword,
-  type AdminUser,
-  type UserDaycareMembership,
-  type UserRole,
-} from '../../services/users';
+} from '../../services/user';
+import {
+  UserRecord,
+  UserDaycareMembership,
+  UserRole,
+} from '../../shared/user/types';
+import { DaycareMembershipAccess } from '../../services/membership';
 import { Box, Text } from '../../theme/theme';
 import { UserDangerSection } from './UserDangerSection';
 import { UserDetailState } from './UserDetailState';
@@ -29,7 +32,7 @@ type UserDetailContainerProps = {
 
 export function UserDetailContainer({ id }: UserDetailContainerProps) {
   const router = useRouter();
-  const [user, setUser] = useState<AdminUser | null>(null);
+  const [user, setUser] = useState<UserRecord | null>(null);
   const [memberships, setMemberships] = useState<UserDaycareMembership[]>([]);
   const [daycareOptions, setDaycareOptions] = useState<SelectOption[]>([]);
   const [loading, setLoading] = useState(true);
@@ -49,13 +52,13 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
   const [membershipLoading, setMembershipLoading] = useState(false);
   const [membershipError, setMembershipError] = useState('');
   const [selectedDaycareId, setSelectedDaycareId] = useState('');
-  const [selectedMembershipPersona, setSelectedMembershipPersona] = useState<DaycareMembershipPersona>('ADMIN');
+  const [selectedMembershipAccess, setSelectedMembershipAccess] = useState<DaycareMembershipAccess>('ADMIN');
   const [membershipNotes, setMembershipNotes] = useState('');
   const [busyMembershipId, setBusyMembershipId] = useState('');
   const canManageRole = role === 'SUPER_ADMIN' || role === 'DAYCARE_ADMIN';
 
   const activeMembershipDaycareIds = useMemo(
-    () => new Set(memberships.filter((membership) => membership.status === 'ACTIVE').map((membership) => membership.daycare.id)),
+    () => new Set(memberships.filter((membership) => membership.status === 'ACTIVE').map((membership) => membership.daycare._id)),
     [memberships]
   );
 
@@ -64,18 +67,22 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
       try {
         setLoading(true);
         setError('');
-        const [data, userMemberships, daycares] = await Promise.all([
+        const [userRes, userMembershipsRes, daycaresRes] = await Promise.all([
           getUserById(id),
           getUserDaycareMemberships(id),
           listDaycares({ limit: 100 }),
         ]);
-        setUser(data);
-        setMemberships(userMemberships);
-        setDaycareOptions(daycares.map((daycare) => ({ label: daycare.name, value: daycare.id })));
-        setName(data.name);
-        setEmail(data.email);
-        setPhone(data.phone);
-        setRole(data.role);
+        if (userRes.error) throw userRes.error;
+        const data = userRes.data;
+        if (data) {
+          setUser(data);
+          setName(data.name);
+          setEmail(data.email);
+          setPhone(data.phone ?? '');
+          setRole(data.role ?? 'PARENT');
+        }
+        setMemberships(userMembershipsRes.items ?? []);
+        setDaycareOptions((daycaresRes.items ?? []).map((daycare: any) => ({ label: daycare.name, value: daycare._id })));
       } catch (nextError) {
         setError(nextError instanceof Error ? nextError.message : 'Gagal mengambil detail user.');
       } finally {
@@ -90,18 +97,16 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
     try {
       setSavingProfile(true);
       setSubmitError('');
-      await updateUser(id, {
+      const res = await updateUser(id, {
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
         ...(canManageRole ? { role } : {}),
       });
-      const [refreshed, refreshedMemberships] = await Promise.all([
-        getUserById(id),
-        getUserDaycareMemberships(id),
-      ]);
-      setUser(refreshed);
-      setMemberships(refreshedMemberships);
+      if (res.errors) throw new Error(res.errors[0].message);
+
+      const userRes = await getUserById(id);
+      if (userRes.data) setUser(userRes.data);
     } catch (nextError) {
       setSubmitError(nextError instanceof Error ? nextError.message : 'Gagal memperbarui user.');
     } finally {
@@ -113,7 +118,8 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
     try {
       setSavingPassword(true);
       setPasswordError('');
-      await updateUserPassword(id, { newPassword });
+      const res = await updateUserPassword(id, { newPassword });
+      if (res.errors) throw new Error(res.errors[0].message);
       setNewPassword('');
     } catch (nextError) {
       setPasswordError(nextError instanceof Error ? nextError.message : 'Gagal memperbarui password.');
@@ -125,7 +131,8 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
   async function handleDelete() {
     try {
       setDeleting(true);
-      await deleteUser(id);
+      const res = await deleteUser(id);
+      if (res.errors) throw new Error(res.errors[0].message);
       router.replace('/(app)/(tabs)/users' as never);
     } catch (nextError) {
       setSubmitError(nextError instanceof Error ? nextError.message : 'Gagal menghapus user.');
@@ -142,18 +149,19 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
     try {
       setMembershipLoading(true);
       setMembershipError('');
-      await addExistingUserToDaycare({
+      const res = await addExistingUserToDaycare({
         daycareId: selectedDaycareId,
-        userId: user.id,
-        persona: selectedMembershipPersona,
+        userId: user._id,
+        access: selectedMembershipAccess,
         notes: membershipNotes.trim() || undefined,
       });
-
-      const refreshedMemberships = await getUserDaycareMemberships(id);
-      setMemberships(refreshedMemberships);
+      if (res.errors) throw new Error(res.errors[0].message);
+      
+      const refreshedMembershipsRes = await getUserDaycareMemberships(id);
+      setMemberships(refreshedMembershipsRes.items ?? []);
       setMembershipDrawerVisible(false);
       setSelectedDaycareId('');
-      setSelectedMembershipPersona('ADMIN');
+      setSelectedMembershipAccess('ADMIN');
       setMembershipNotes('');
     } catch (nextError) {
       setMembershipError(nextError instanceof Error ? nextError.message : 'Gagal menambahkan membership daycare.');
@@ -165,9 +173,10 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
   async function handleDeactivateMembership(membershipId: string) {
     try {
       setBusyMembershipId(membershipId);
-      await deactivateDaycareMembership(membershipId);
-      const refreshedMemberships = await getUserDaycareMemberships(id);
-      setMemberships(refreshedMemberships);
+      const res = await deactivateDaycareMembership(membershipId);
+      if (res.errors) throw new Error(res.errors[0].message);
+      const refreshedMembershipsRes = await getUserDaycareMemberships(id);
+      setMemberships(refreshedMembershipsRes.items ?? []);
     } catch (nextError) {
       setSubmitError(nextError instanceof Error ? nextError.message : 'Gagal menonaktifkan membership.');
     } finally {
@@ -197,10 +206,8 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
       onBack={() => router.back()} 
       scrollable={false}
       contentContainerStyle={{ flex: 1, paddingTop: 20, gap: 24, paddingBottom: 0 }}
-      style={{ backgroundColor: '#F8FAFC' }}
     >
       <UserSummarySection user={user} />
-      
       <SegmentTabs
         initialKey="profile"
         contentContainerStyle={{ paddingBottom: 40 }}
@@ -239,7 +246,7 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
                   setMembershipError('');
                   const firstAvailableDaycare = daycareOptions.find((option) => !activeMembershipDaycareIds.has(option.value));
                   setSelectedDaycareId(firstAvailableDaycare?.value ?? '');
-                  setSelectedMembershipPersona('ADMIN');
+                  setSelectedMembershipAccess('ADMIN');
                   setMembershipNotes('');
                   setMembershipDrawerVisible(true);
                 }}
@@ -269,12 +276,12 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
           loading={membershipLoading}
           error={membershipError}
           daycareId={selectedDaycareId}
-          persona={selectedMembershipPersona}
+          access={selectedMembershipAccess}
           notes={membershipNotes}
           daycareOptions={daycareOptions.filter((option) => !activeMembershipDaycareIds.has(option.value))}
           onCancel={() => setMembershipDrawerVisible(false)}
           onChangeDaycareId={setSelectedDaycareId}
-          onChangePersona={setSelectedMembershipPersona}
+          onChangeAccess={setSelectedMembershipAccess}
           onChangeNotes={setMembershipNotes}
           onSubmit={() => void handleAddMembership()}
         />

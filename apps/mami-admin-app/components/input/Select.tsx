@@ -1,31 +1,26 @@
-import {
-  SelectInput as SharedSelectInput,
-  type InputComponentProps,
-  type SelectOption as SharedSelectOption,
-} from '@mami/ui';
+import { SelectInput as BaseSelectInput, type SelectOption } from '@mami/ui';
+import { View } from 'react-native';
 
-import { useSharedInputProps } from './shared';
-
-export type SelectOption = SharedSelectOption;
-
-type SelectProps = InputComponentProps<string> & {
-  options?: SelectOption[];
+type SelectProps = {
+  value?: string;
+  placeholder?: string;
+  onChange: (value: string) => void;
   disabled?: boolean;
+  options: SelectOption[];
+  title?: string;
 };
 
-export function Select({ value, placeholder, onChange, options = [], disabled }: SelectProps) {
-  const inputProps = useSharedInputProps();
-
+export function Select(props: SelectProps) {
   return (
-    <SharedSelectInput
-      value={value}
-      placeholder={placeholder}
-      onChange={onChange}
-      disabled={disabled}
-      options={options}
-      textColor={inputProps.textColor}
-      backgroundColor={inputProps.backgroundColor}
-      borderRadius={inputProps.borderRadius}
-    />
+    <View style={{ flex: 1 }}>
+      <BaseSelectInput
+        value={props.value}
+        placeholder={props.placeholder}
+        onChange={props.onChange}
+        disabled={props.disabled}
+        options={props.options}
+        title={props.title}
+      />
+    </View>
   );
 }

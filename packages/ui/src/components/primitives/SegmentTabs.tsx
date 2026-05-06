@@ -37,8 +37,8 @@ export function SegmentTabs({
           if (nextItem) {
             onChange?.(nextItem.key);
           }
-        }}>
-        <Tabs
+        }}
+      ><Tabs
           mode="scrollable"
           disableSwipe
           uppercase={false}
@@ -52,14 +52,14 @@ export function SegmentTabs({
           tabHeaderStyle={{
             minHeight: 48,
             borderBottomWidth: 1,
-            borderBottomColor: '#F4E3EC',
+            borderBottomColor: '#F1F5F9',
           }}
           tabLabelStyle={{
             fontSize: 14,
             fontWeight: '700',
             color: brandColors.textPrimary,
-          }}>
-          {items.map((item) => (
+          }}
+        >{items.map((item) => (
             <TabScreen key={item.key} label={item.label}>
               <ScrollView
                 showsVerticalScrollIndicator={false}
@@ -74,9 +74,7 @@ export function SegmentTabs({
                 {item.content}
               </ScrollView>
             </TabScreen>
-          ))}
-        </Tabs>
-      </TabsProvider>
+          ))}</Tabs></TabsProvider>
     </View>
   );
 }

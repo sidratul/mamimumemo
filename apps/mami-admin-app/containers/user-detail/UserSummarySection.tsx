@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { type AdminUser, type UserAccess } from '../../services/users';
+import { UserRecord, UserAccess } from '../../shared/user/types';
 import { Box, Text } from '../../theme/theme';
 
 const accessLabelMap: Record<UserAccess, string> = {
@@ -19,7 +19,7 @@ const accessColorMap: Record<UserAccess, { text: string; background: string }> =
 };
 
 type UserSummarySectionProps = {
-  user: AdminUser;
+  user: UserRecord;
 };
 
 export function UserSummarySection({ user }: UserSummarySectionProps) {
@@ -39,7 +39,7 @@ export function UserSummarySection({ user }: UserSummarySectionProps) {
       <Box flex={1} gap="xs">
         <Text variant="subtitle" fontWeight="800" fontSize={20} color="textPrimary">{user.name}</Text>
         <Box flexDirection="row" flexWrap="wrap" gap="xs">
-          {user.accesses.length > 0 ? user.accesses.map((access) => (
+          {user.accesses && user.accesses.length > 0 ? user.accesses.map((access: UserAccess) => (
             <Box
               key={access}
               paddingHorizontal="sm"
@@ -58,9 +58,9 @@ export function UserSummarySection({ user }: UserSummarySectionProps) {
               paddingVertical="xs"
               style={{
                 borderRadius: 8,
-                backgroundColor: '#F1F5F9',
+                backgroundColor: 'border',
               }}>
-              <Text style={{ fontSize: 11, fontWeight: '800', color: '#64748B', textTransform: 'uppercase' }}>
+              <Text style={{ fontSize: 11, fontWeight: '800', color: 'textSecondary', textTransform: 'uppercase' }}>
                 AKSES UTAMA
               </Text>
             </Box>

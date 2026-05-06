@@ -2,21 +2,21 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { View } from 'react-native';
 
 import { DaycareDetailSection } from './DaycareDetailSection';
-import { type DaycareMembershipRecord } from '../../services/daycare-memberships/store';
+import { type DaycareMembershipRecord } from '../../services/membership';
 import { Box, Text } from '../../theme/theme';
 
-const personaLabelMap: Record<DaycareMembershipRecord['persona'], string> = {
+const accessLabelMap: Record<DaycareMembershipRecord['access'], string> = {
   OWNER: 'Owner',
   ADMIN: 'Admin Daycare',
-  SITTER: 'Karyawan Daycare',
+  SITTER: 'Karyawan',
 };
 
 type DaycareMembershipsSectionProps = {
   owner: {
-    id: string;
+    _id: string;
     name: string;
     email: string;
-    phone?: string;
+    phone?: string | null;
   };
   memberships: DaycareMembershipRecord[];
 };
@@ -28,50 +28,81 @@ export function DaycareMembershipsSection({
   const staffMemberships = memberships.filter(
     (membership) =>
       membership.status === 'ACTIVE' &&
-      membership.user.role !== 'SUPER_ADMIN' &&
-      membership.user.id !== owner.id &&
-      membership.persona !== 'OWNER'
+      membership.user._id !== owner._id &&
+      membership.access !== 'OWNER'
   );
 
   return (
     <DaycareDetailSection title="Owner & Staff">
-      <Box gap="sm">
+      <Box gap="md">
+        {/* Owner Card */}
         <Box
-          paddingBottom="md"
+          padding="md"
           gap="xs"
-          style={{ borderBottomWidth: 1, borderBottomColor: '#F1D6E4' }}>
-          <Text style={{ fontWeight: '700', color: '#24324B' }}>{owner.name}</Text>
-          <Text color="textSecondary">{owner.email}</Text>
-          <Text color="textSecondary">Owner</Text>
-          {owner.phone ? (
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-              <MaterialCommunityIcons name="phone-outline" size={14} color="#7A869A" />
-              <Text color="textSecondary">{owner.phone}</Text>
-            </View>
-          ) : null}
-        </Box>
-
-        {staffMemberships.length === 0 ? (
-          <Text color="textSecondary">Belum ada staff daycare lain yang aktif.</Text>
-        ) : (
-          staffMemberships.map((membership) => (
-            <Box
-              key={membership.id}
-              paddingBottom="md"
-              gap="xs"
-              style={{ borderBottomWidth: 1, borderBottomColor: '#F1D6E4' }}>
-              <Text style={{ fontWeight: '700', color: '#24324B' }}>{membership.user.name}</Text>
-              <Text color="textSecondary">{membership.user.email}</Text>
-              <Text color="textSecondary">{personaLabelMap[membership.persona]}</Text>
-              {membership.user.phone ? (
-                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-                  <MaterialCommunityIcons name="phone-outline" size={14} color="#7A869A" />
-                  <Text color="textSecondary">{membership.user.phone}</Text>
+          style={{ 
+            borderRadius: 16, 
+            backgroundColor: '#FFFFFF',
+            borderWidth: 1,
+            borderColor: '#F1F5F9',
+            borderLeftWidth: 4,
+            borderLeftColor: '#4F46E5' 
+          }}>
+          <Text variant="subtitle" fontWeight="800" color="textPrimary">{owner.name}</Text>
+          <Box gap="xxs">
+            <Text variant="bodySmall" color="textSecondary">{owner.email}</Text>
+            <Box flexDirection="row" alignItems="center" gap="xs">
+              <Box paddingHorizontal="sm" paddingVertical="xxs" borderRadius="sm" backgroundColor="background">
+                <Text variant="bodySmall" fontWeight="800" color="primary" fontSize={10}>OWNER</Text>
+              </Box>
+              {owner.phone ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <MaterialCommunityIcons name="phone-outline" size={12} color="#64748B" />
+                  <Text variant="bodySmall" color="textSecondary">{owner.phone}</Text>
                 </View>
               ) : null}
-              {membership.notes ? <Text color="textSecondary">{membership.notes}</Text> : null}
+            </Box>
+          </Box>
+        </Box>
+
+        {/* Staff List */}
+        {staffMemberships.length > 0 ? (
+          staffMemberships.map((membership) => (
+            <Box
+              key={membership._id}
+              padding="md"
+              gap="xs"
+              style={{ 
+                borderRadius: 16, 
+                backgroundColor: '#FFFFFF',
+                borderWidth: 1,
+                borderColor: '#F1F5F9'
+              }}>
+              <Text variant="subtitle" fontWeight="800" color="textPrimary">{membership.user.name}</Text>
+              <Box gap="xxs">
+                <Text variant="bodySmall" color="textSecondary">{membership.user.email}</Text>
+                <Box flexDirection="row" alignItems="center" gap="xs">
+                  <Box paddingHorizontal="sm" paddingVertical="xxs" borderRadius="sm" backgroundColor="border">
+                    <Text variant="bodySmall" fontWeight="800" color="textSecondary" fontSize={10}>
+                      {accessLabelMap[membership.access].toUpperCase()}
+                    </Text>
+                  </Box>
+                  {membership.user.phone ? (
+                    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                      <MaterialCommunityIcons name="phone-outline" size={12} color="#64748B" />
+                      <Text variant="bodySmall" color="textSecondary">{membership.user.phone}</Text>
+                    </View>
+                  ) : null}
+                </Box>
+                {membership.notes ? (
+                   <Text variant="bodySmall" color="textSecondary" style={{ fontStyle: 'italic' }} marginTop="xs">"{membership.notes}"</Text>
+                ) : null}
+              </Box>
             </Box>
           ))
+        ) : (
+          <Box padding="md" alignItems="center">
+            <Text variant="bodySmall" color="textSecondary">Belum ada staff tambahan.</Text>
+          </Box>
         )}
       </Box>
     </DaycareDetailSection>

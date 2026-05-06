@@ -1,30 +1,24 @@
-import { DaycareStatusInput, type InputComponentProps } from '@mami/ui';
+import { type SelectOption } from '@mami/ui';
+import { Select } from './Select';
 
-import { type SelectOption } from './Select';
-
-type ApprovalStatusSelectProps = InputComponentProps<string> & {
+type ApprovalStatusSelectProps = {
+  value?: string;
+  placeholder?: string;
+  onChange: (value: string) => void;
   disabled?: boolean;
-  options?: SelectOption[];
+  options: SelectOption[];
+  title?: string;
 };
 
-const APPROVAL_STATUS_OPTIONS = [
-  { label: 'Draft', value: 'DRAFT' },
-  { label: 'Submitted', value: 'SUBMITTED' },
-  { label: 'In Review', value: 'IN_REVIEW' },
-  { label: 'Needs Revision', value: 'NEEDS_REVISION' },
-  { label: 'Approved', value: 'APPROVED' },
-  { label: 'Rejected', value: 'REJECTED' },
-  { label: 'Suspended', value: 'SUSPENDED' },
-];
-
-export function ApprovalStatusSelect({ value, placeholder, onChange, disabled, options }: ApprovalStatusSelectProps) {
+export function ApprovalStatusSelect({ value, placeholder, onChange, disabled, options, title }: ApprovalStatusSelectProps) {
   return (
-    <DaycareStatusInput
+    <Select
       value={value}
-      placeholder={placeholder ?? 'Pilih status approval'}
+      placeholder={placeholder ?? 'Pilih status'}
       onChange={onChange}
       disabled={disabled}
-      options={options ?? APPROVAL_STATUS_OPTIONS}
+      options={options}
+      title={title ?? 'Update Status Approval'}
     />
   );
 }

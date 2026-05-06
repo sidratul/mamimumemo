@@ -3,7 +3,8 @@ import { Button } from '@mami/ui';
 import { DetailSection } from './DetailSection';
 import { RoleSelect, TextField } from '../../components/input';
 import { ADMIN_MANAGED_ROLE_OPTIONS } from '../../components/input/RoleSelect';
-import { getUserRoleLabel, type UserRole } from '../../services/users';
+import { getUserRoleLabel } from '../../shared/user/logic';
+import { type UserRole } from '../../shared/user/types';
 import { Box, Text } from '../../theme/theme';
 
 type UserProfileSectionProps = {
