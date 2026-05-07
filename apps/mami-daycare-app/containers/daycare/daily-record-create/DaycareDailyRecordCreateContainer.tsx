@@ -144,8 +144,6 @@ export function DaycareDailyRecordCreateContainer() {
             options={templateOptions}
             onChange={setTemplateId}
             disabled={screenLoading || !date}
-            backgroundColor="#FFFFFF"
-            borderRadius={14}
           />
 
           {screenLoading ? <Text color="textSecondary">Memuat template...</Text> : null}

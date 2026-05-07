@@ -1,5 +1,14 @@
 import type { ReactNode } from 'react';
-import { Image, KeyboardAvoidingView, Platform, ScrollView, View, type ImageSourcePropType, Dimensions } from 'react-native';
+import {
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  View,
+  Text as RNText,
+  type ImageSourcePropType,
+  Dimensions,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
@@ -49,12 +58,13 @@ export function AuthScreen({
 
       <KeyboardAvoidingView
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView
           bounces={true}
           keyboardShouldPersistTaps="handled"
+          keyboardDismissMode="interactive"
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ flexGrow: 1 }}>
+          contentContainerStyle={{ flexGrow: 1, minHeight: SCREEN_HEIGHT }}>
           
           {/* Top Branding Area */}
           <View style={{ paddingVertical: 40, alignItems: 'center', gap: 16 }}>
@@ -87,19 +97,19 @@ export function AuthScreen({
             <View style={{ alignItems: 'center', gap: 4, paddingHorizontal: 24 }}>
               {heroTitle.toLowerCase() === 'mamimumemo' ? (
                 <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text style={{ fontSize: 40, fontWeight: '900', color: '#FF6B6B', letterSpacing: -2 }}>ma</Text>
-                  <Text style={{ fontSize: 40, fontWeight: '900', color: '#4D96FF', letterSpacing: -2 }}>mi</Text>
-                  <Text style={{ fontSize: 40, fontWeight: '900', color: '#FFD93D', letterSpacing: -2 }}>mu</Text>
-                  <Text style={{ fontSize: 40, fontWeight: '900', color: '#6BCB77', letterSpacing: -2 }}>me</Text>
-                  <Text style={{ fontSize: 40, fontWeight: '900', color: '#4F46E5', letterSpacing: -2 }}>mo</Text>
+                  <RNText style={{ fontSize: 40, fontWeight: '900', color: '#FF6B6B', letterSpacing: -2 }}>ma</RNText>
+                  <RNText style={{ fontSize: 40, fontWeight: '900', color: '#4D96FF', letterSpacing: -2 }}>mi</RNText>
+                  <RNText style={{ fontSize: 40, fontWeight: '900', color: '#FFD93D', letterSpacing: -2 }}>mu</RNText>
+                  <RNText style={{ fontSize: 40, fontWeight: '900', color: '#6BCB77', letterSpacing: -2 }}>me</RNText>
+                  <RNText style={{ fontSize: 40, fontWeight: '900', color: '#4F46E5', letterSpacing: -2 }}>mo</RNText>
                 </View>
               ) : (
-                <Text style={{ fontSize: 38, fontWeight: '900', color: '#4F46E5', letterSpacing: -1.5, textAlign: 'center' }}>{heroTitle}</Text>
+                <RNText style={{ fontSize: 38, fontWeight: '900', color: '#4F46E5', letterSpacing: -1.5, textAlign: 'center' }}>{heroTitle}</RNText>
               )}
               {heroSubtitle ? (
-                <Text style={{ fontSize: 15, color: '#64748B', textAlign: 'center', lineHeight: 22, maxWidth: 280, fontWeight: '500' }}>
+                <RNText style={{ fontSize: 15, color: '#64748B', textAlign: 'center', lineHeight: 22, maxWidth: 280, fontWeight: '500' }}>
                   {heroSubtitle}
-                </Text>
+                </RNText>
               ) : null}
             </View>
           </View>
@@ -123,9 +133,9 @@ export function AuthScreen({
               marginTop: 'auto', // Push to bottom
             }}>
             <View style={{ gap: 4 }}>
-              <Text style={{ fontSize: 28, fontWeight: '800', color: '#0F172A', letterSpacing: -0.5 }}>{cardTitle}</Text>
+              <RNText style={{ fontSize: 28, fontWeight: '800', color: '#0F172A', letterSpacing: -0.5 }}>{cardTitle}</RNText>
               {cardSubtitle ? (
-                <Text style={{ fontSize: 16, color: '#64748B', fontWeight: '500' }}>{cardSubtitle}</Text>
+                <RNText style={{ fontSize: 16, color: '#64748B', fontWeight: '500' }}>{cardSubtitle}</RNText>
               ) : null}
             </View>
             
@@ -142,7 +152,7 @@ export function AuthScreen({
             <View style={{ alignItems: 'center', marginTop: 12 }}>
                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
                  <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#CBD5E1' }} />
-                 <Text style={{ fontSize: 12, color: '#94A3B8', fontWeight: '800', letterSpacing: 1.5 }}>MAMIMUMEMO &bull; 2026</Text>
+                 <RNText style={{ fontSize: 12, color: '#94A3B8', fontWeight: '800', letterSpacing: 1.5 }}>MAMIMUMEMO • 2026</RNText>
                  <View style={{ width: 4, height: 4, borderRadius: 2, backgroundColor: '#CBD5E1' }} />
                </View>
             </View>
@@ -151,9 +161,4 @@ export function AuthScreen({
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
-}
-
-function Text({ style, children, ...props }: any) {
-    const { Text: RNText } = require('react-native');
-    return <RNText style={style} {...props}>{children}</RNText>;
 }

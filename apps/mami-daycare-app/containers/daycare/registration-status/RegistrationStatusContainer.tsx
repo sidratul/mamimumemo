@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { Redirect, router } from 'expo-router';
 import { Button } from 'react-native-paper';
 import { ScreenHeader, ScreenSection, useConfirm } from '@mami/ui';
 import { formatDateTimeId } from '@mami/core';
 
 import { useSession } from '../../../providers/session-provider';
-import { getMyDaycareRegistration, type DaycareRegistrationStatus } from '../../../services/registration';
+import type { DaycareRegistrationStatus } from '../../../services/registration';
 import { Box, Text } from '../../../theme/theme';
 
 const badgeColors: Record<DaycareRegistrationStatus['approvalStatus'], { bg: string; text: string }> = {
@@ -31,30 +31,22 @@ const statusLabels: Record<DaycareRegistrationStatus['approvalStatus'], string> 
 export function RegistrationStatusContainer() {
   const { isLoading, session, signOut } = useSession();
   const { showConfirm } = useConfirm();
-  const [status, setStatus] = useState<DaycareRegistrationStatus | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    async function run() {
-      if (!session) {
-        return;
+  const loading = false;
+  const error = '';
+  const status: DaycareRegistrationStatus | null = session
+    ? {
+        id: session.daycareId || 'unknown-daycare',
+        name: session.ownerName ? `Daycare ${session.ownerName}` : 'Daycare',
+        city: '-',
+        isActive: true,
+        approvalStatus: session.daycareId ? 'APPROVED' : 'SUBMITTED',
+        approvalNote: session.daycareId
+          ? 'Data registration sedang disederhanakan. Operasional tetap bisa dibuka langsung.'
+          : 'ID daycare belum tersedia dari backend. Halaman status ini sementara memakai placeholder.',
+        submittedAt: '',
+        approvedAt: '',
       }
-
-      try {
-        setLoading(true);
-        setError('');
-        const result = await getMyDaycareRegistration(session.token);
-        setStatus(result);
-      } catch (nextError) {
-        setError(nextError instanceof Error ? nextError.message : 'Gagal memuat status registrasi daycare.');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    void run();
-  }, [session]);
+    : null;
 
   const submittedLabel = useMemo(() => {
     if (!status?.submittedAt) {

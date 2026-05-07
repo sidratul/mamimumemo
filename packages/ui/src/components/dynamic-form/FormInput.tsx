@@ -16,6 +16,7 @@ export function FormInput<T extends Record<string, any>>({ fieldKey }: FormInput
     <FieldShell 
       label={field.label} 
       required={field.required} 
+      helperText={field.helperText}
       error={formik.touched[fieldKey as keyof T] ? error : undefined}
     >
       {field.input({

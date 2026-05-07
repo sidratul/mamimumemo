@@ -1,10 +1,9 @@
 import { useState } from 'react';
-import { router } from 'expo-router';
 import { DynamicForm, PasswordField, TextField, useToast, type FormFieldProps } from '@mami/ui';
 import { loginSchema } from '@mami/core';
 
 import { useSession } from '../../../providers/session-provider';
-import { signInDaycareOwner } from '../../../services/registration';
+import { signInDaycareOwner } from '../../../services/registration/registration';
 import { Box } from '../../../theme/theme';
 
 type LoginData = {
@@ -19,15 +18,13 @@ const initialValues: LoginData = {
 
 const fields: FormFieldProps<LoginData> = {
   email: {
-    label: 'Email',
+    label: 'Email Pengelola',
     required: true,
     input: TextField,
     props: {
-      placeholder: 'owner@daycare.id',
+      placeholder: 'owner@email.com',
       keyboardType: 'email-address',
       autoCapitalize: 'none',
-      borderRadius: 14,
-      backgroundColor: '#FFFFFF',
     },
   },
   password: {
@@ -36,8 +33,6 @@ const fields: FormFieldProps<LoginData> = {
     input: PasswordField,
     props: {
       placeholder: 'Masukkan password',
-      borderRadius: 14,
-      backgroundColor: '#FFFFFF',
     },
   },
 };
@@ -50,16 +45,27 @@ export function LoginForm() {
   async function onSubmit(values: LoginData) {
     try {
       setIsSubmitting(true);
-      const result = await signInDaycareOwner(values);
-      await saveSession({
-        token: result.token,
-        refreshToken: result.refreshToken,
-        daycareId: result.daycareId,
-        ownerEmail: result.ownerEmail,
-        ownerName: result.ownerName,
+
+      console.log('[DaycareLogin] submit', {
+        email: values.email.trim().toLowerCase(),
       });
-      router.replace('/(daycare)');
+
+      const loginResult = await signInDaycareOwner(values);
+
+      await saveSession({
+        token: loginResult.token,
+        refreshToken: loginResult.refreshToken,
+        daycareId: loginResult.daycareId ?? '',
+        ownerEmail: loginResult.ownerEmail,
+        ownerName: loginResult.ownerName,
+      });
+
+      showToast({
+        message: 'Selamat datang kembali!',
+        tone: 'success',
+      });
     } catch (error) {
+      console.warn('[DaycareLogin] failed', error instanceof Error ? error.message : error);
       showToast({
         message: error instanceof Error ? error.message : 'Gagal masuk. Silakan coba lagi.',
         tone: 'danger',
@@ -75,7 +81,7 @@ export function LoginForm() {
         fields={fields}
         defaultValue={initialValues}
         schema={loginSchema}
-        submitLabel="Masuk"
+        submitLabel="Masuk ke Dashboard"
         loading={isSubmitting}
         onSubmit={onSubmit}
       />

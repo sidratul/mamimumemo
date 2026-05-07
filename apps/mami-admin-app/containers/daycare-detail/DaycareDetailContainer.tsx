@@ -155,6 +155,7 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
       <DaycareHeroSection name={daycare.name} address={daycare.address || daycare.city} logoUrl={daycare.logoUrl ?? undefined} />
       <SegmentTabs
         initialKey="overview"
+        variant="underline"
         contentContainerStyle={{ paddingBottom: 40 }}
         items={[
           {

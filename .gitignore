@@ -6,3 +6,5 @@ node_modules
 /expo-skeleton
 /dynamic-form
 .env
+.gemini
+.codex

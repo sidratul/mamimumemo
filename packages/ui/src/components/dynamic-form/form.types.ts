@@ -17,6 +17,7 @@ export type InputComponent<V> = (props: InputComponentProps<V> & Record<string, 
 export interface FormField<TForm, TValue, TProps = unknown> {
   label?: string;
   required?: boolean;
+  helperText?: string;
   section?: string;
   input: InputComponent<TValue>;
   props?: (Partial<InputComponentProps<TValue>> & TProps & Record<string, unknown>) | undefined;

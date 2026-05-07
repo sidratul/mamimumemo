@@ -1,26 +1,38 @@
 import { Pressable } from 'react-native';
-import { router } from 'expo-router';
+import { Redirect, router } from 'expo-router';
 import { AuthScreen } from '@mami/ui';
 
 import { Box, Text } from '../../../theme/theme';
+import { useSession } from '../../../providers/session-provider';
 import { LoginForm } from './LoginForm';
 
 export function LoginContainer() {
+  const { isLoading, session } = useSession();
+
+  if (isLoading) {
+    return null;
+  }
+
+  if (session) {
+    return <Redirect href="/(daycare)/(tabs)" />;
+  }
+
   return (
     <AuthScreen
-      heroTitle="Mami"
-      heroSubtitle="Lanjutkan ke dashboard daycare dan operasional harian."
-      heroLogoSource={require('../../../../mami-admin-app/assets/images/logo-admin.png')}
-      cardTitle="Login"
-      cardSubtitle="Masuk ke akun daycare.">
-      <Box gap="md">
+      heroTitle="mamimumemo"
+      heroSubtitle="Setiap cerita kecil si buah hati, jadi Memo ceria buat Mamimu."
+      heroLogoSource={require('../../../assets/images/daycare_logo_clean.png')}
+      cardTitle="Halo, Pengelola!"
+      cardSubtitle="Masuk untuk memantau keceriaan hari ini.">
+      <Box gap="xl">
         <LoginForm />
-      </Box>
-      <Box flexDirection="row" justifyContent="center" alignItems="center" gap="xs">
-        <Text color="textSecondary">Belum punya akun?</Text>
-        <Pressable onPress={() => router.push('/(auth)/register')}>
-          <Text color="primary" style={{ fontWeight: '700' }}>Daftar</Text>
-        </Pressable>
+        
+        <Box flexDirection="row" justifyContent="center" alignItems="center" gap="xs">
+          <Text variant="bodySmall" color="textSecondary">Belum punya akun?</Text>
+          <Pressable onPress={() => router.push('/(auth)/register')}>
+            <Text variant="bodySmall" color="primary" style={{ fontWeight: '800' }}>Daftar Sekarang</Text>
+          </Pressable>
+        </Box>
       </Box>
     </AuthScreen>
   );

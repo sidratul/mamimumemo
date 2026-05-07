@@ -206,8 +206,6 @@ export function DaycareTemplateContainer() {
             options={targetTypeOptions}
             title="Target Template"
             onChange={(value) => setTargetType(value as ScheduleTemplateTargetType)}
-            backgroundColor="#FFFFFF"
-            borderRadius={14}
           />
 
           {targetType === 'DAY_OF_WEEK' ? (

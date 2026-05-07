@@ -9,5 +9,6 @@ export default function IndexRoute() {
     return null;
   }
 
-  return <Redirect href={session ? '/(daycare)' : '/(auth)/login'} />;
+  // Always go to tabs if logged in, regardless of daycare status
+  return <Redirect href={session ? '/(daycare)/(tabs)' : '/(auth)/login'} />;
 }

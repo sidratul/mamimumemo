@@ -13,7 +13,7 @@ export type DaycareParent = {
     notes?: string | null;
     deskripsi?: string | null;
   };
-  childrenIds: Array<{ id: string }>;
+  childrenIds: string[];
   active: boolean;
 };
 
@@ -96,9 +96,7 @@ const DAYCARE_ROSTER_QUERY = `
         deskripsi
         notes
       }
-      childrenIds {
-        id
-      }
+      childrenIds
     }
     daycareChildren(daycareId: $daycareId, active: true) {
       id
@@ -141,9 +139,7 @@ const CREATE_PARENT_MUTATION = `
         deskripsi
         notes
       }
-      childrenIds {
-        id
-      }
+      childrenIds
     }
   }
 `;
@@ -182,9 +178,7 @@ const UPDATE_PARENT_MUTATION = `
         deskripsi
         notes
       }
-      childrenIds {
-        id
-      }
+      childrenIds
     }
   }
 `;

@@ -1,4 +1,5 @@
 import { PasswordInput, NumberInput as SharedNumberInput, TextAreaInput as SharedTextAreaInput, TextInput as SharedTextInput } from '../inputs';
+import { MultiSelect as PrimitiveMultiSelect, type PrimitiveMultiSelectOption } from '../primitives';
 import type { InputComponentProps } from './form.types';
 
 type BaseProps = {
@@ -122,6 +123,32 @@ export function TextAreaField({
       backgroundColor={backgroundColor}
       borderRadius={borderRadius}
       useBottomSheetInput={useBottomSheetInput}
+    />
+  );
+}
+
+type MultiSelectFieldProps = InputComponentProps<string[]> &
+  BaseProps & {
+    title?: string;
+    options: PrimitiveMultiSelectOption[];
+  };
+
+export function MultiSelectField({
+  value,
+  placeholder,
+  onChange,
+  disabled,
+  options,
+  title,
+}: MultiSelectFieldProps) {
+  return (
+    <PrimitiveMultiSelect
+      values={value ?? []}
+      placeholder={placeholder}
+      options={options}
+      onChange={onChange}
+      disabled={disabled}
+      title={title}
     />
   );
 }

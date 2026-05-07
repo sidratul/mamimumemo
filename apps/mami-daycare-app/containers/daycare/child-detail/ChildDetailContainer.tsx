@@ -6,7 +6,6 @@ import { useSession } from '../../../providers/session-provider';
 import {
   getChildDailyRecords,
   getDaycareRoster,
-  getMyDaycareRegistration,
   getTodayDailyCare,
   type DailyCareChildRecord,
   type DaycareChild,
@@ -73,13 +72,11 @@ export function ChildDetailContainer({ id }: ChildDetailContainerProps) {
         setLoading(true);
         setError('');
 
-        const registration = await getMyDaycareRegistration(session.token);
-        if (!registration || registration.approvalStatus !== 'APPROVED') {
-          setError('Daycare belum aktif.');
+        if (!session.daycareId) {
+          setError('daycareId belum tersedia di session.');
           return;
         }
 
-        const daycareId = session.daycareId || registration.id;
         const startDate = new Date();
         startDate.setDate(startDate.getDate() - (historyWindow - 1));
         startDate.setHours(0, 0, 0, 0);
@@ -87,8 +84,8 @@ export function ChildDetailContainer({ id }: ChildDetailContainerProps) {
         endDate.setHours(23, 59, 59, 999);
 
         const [roster, dailyCare] = await Promise.all([
-          getDaycareRoster(session.token, daycareId),
-          getTodayDailyCare(session.token, daycareId),
+          getDaycareRoster(session.token, session.daycareId),
+          getTodayDailyCare(session.token, session.daycareId),
         ]);
 
         const selectedChild = roster.children.find((item) => item.id === id) ?? null;

@@ -11,7 +11,6 @@ import {
   checkOutChildForToday,
   type DailyCareRecord,
   getDaycareRoster,
-  getMyDaycareRegistration,
   getTodayDailyCare,
   getViewerProfile,
   logQuickDailyActivity,
@@ -205,21 +204,20 @@ export function DailyCareContainer() {
       return;
     }
 
-    const registration = await getMyDaycareRegistration(activeToken);
-    if (!registration || registration.approvalStatus !== 'APPROVED') {
+    if (!activeDaycareId) {
       setGate('pending');
       setChildren([]);
       setTodayRecord(null);
       setRecordChildren([]);
+      setViewer(null);
       return;
     }
 
     setGate('approved');
-    const daycareId = activeDaycareId || registration.id;
     const [viewerProfile, roster, today] = await Promise.all([
       getViewerProfile(activeToken),
-      getDaycareRoster(activeToken, daycareId),
-      getTodayDailyCare(activeToken, daycareId),
+      getDaycareRoster(activeToken, activeDaycareId),
+      getTodayDailyCare(activeToken, activeDaycareId),
     ]);
 
     setViewer(viewerProfile);
@@ -267,7 +265,16 @@ export function DailyCareContainer() {
   const activeSession = session;
 
   if (!loading && gate === 'pending') {
-    return <Redirect href="/(daycare)/registration-status" />;
+    return (
+      <ScrollView style={{ flex: 1, backgroundColor: '#FFF8F4' }} contentContainerStyle={{ padding: 16, gap: 14 }}>
+        <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="sm">
+          <Text style={{ fontSize: 20, fontWeight: '700' }}>Daily care belum siap</Text>
+          <Text color="textSecondary">
+            Session belum memiliki `daycareId`, jadi data harian belum bisa dimuat. Login tetap dibiarkan lanjut.
+          </Text>
+        </Box>
+      </ScrollView>
+    );
   }
 
   const recordMap = new Map(recordChildren.map((child) => [child.childId, child]));
@@ -280,8 +287,11 @@ export function DailyCareContainer() {
     try {
       setBusyChildId(childId);
       setErrorMessage('');
-      const daycareId = activeSession.daycareId || (await getMyDaycareRegistration(activeSession.token))?.id || '';
-      const record = await checkInChildForToday(activeSession.token, daycareId, childId, viewer);
+      if (!activeSession.daycareId) {
+        throw new Error('daycareId belum tersedia di session.');
+      }
+
+      const record = await checkInChildForToday(activeSession.token, activeSession.daycareId, childId, viewer);
       setTodayRecord(record);
       setRecordChildren(record.children);
       setSuccessMessage('Check-in berhasil dicatat.');
@@ -300,8 +310,11 @@ export function DailyCareContainer() {
     try {
       setBusyChildId(childId);
       setErrorMessage('');
-      const daycareId = activeSession.daycareId || (await getMyDaycareRegistration(activeSession.token))?.id || '';
-      const record = await checkOutChildForToday(activeSession.token, daycareId, childId, viewer);
+      if (!activeSession.daycareId) {
+        throw new Error('daycareId belum tersedia di session.');
+      }
+
+      const record = await checkOutChildForToday(activeSession.token, activeSession.daycareId, childId, viewer);
       setTodayRecord(record);
       setRecordChildren(record.children);
       setSuccessMessage('Check-out berhasil dicatat.');
@@ -324,9 +337,12 @@ export function DailyCareContainer() {
       setIsSubmitting(true);
       setErrorMessage('');
       setForm((current) => ({ ...current, ...values }));
-      const daycareId = activeSession.daycareId || (await getMyDaycareRegistration(activeSession.token))?.id || '';
+      if (!activeSession.daycareId) {
+        throw new Error('daycareId belum tersedia di session.');
+      }
+
       const record = await logQuickDailyActivity(activeSession.token, {
-        daycareId,
+        daycareId: activeSession.daycareId,
         childId: form.childId,
         category: form.category,
         activityName: values.activityName,

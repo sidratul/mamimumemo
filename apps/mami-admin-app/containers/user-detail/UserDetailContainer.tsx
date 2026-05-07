@@ -210,6 +210,7 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
       <UserSummarySection user={user} />
       <SegmentTabs
         initialKey="profile"
+        variant="underline"
         contentContainerStyle={{ paddingBottom: 40 }}
         items={[
           {
