@@ -52,6 +52,14 @@ type ProfileQueryResponse = {
   };
 };
 
+type MyDaycareQueryResponse = {
+  myDaycare: {
+    _id: string;
+    id: string;
+    name: string;
+  } | null;
+};
+
 type CreateDaycareDraftMutationResponse = {
   createDaycareDraft: {
     id: string;
@@ -91,6 +99,16 @@ const PROFILE_QUERY = `
       name
       email
       role
+    }
+  }
+`;
+
+const MY_DAYCARE_QUERY = `
+  query MyDaycare {
+    myDaycare {
+      _id
+      id
+      name
     }
   }
 `;
@@ -208,11 +226,14 @@ export async function signInDaycareOwner(input: { email: string; password: strin
     throw new Error('Akun ini bukan akun owner daycare.');
   }
 
+  const daycareResult = await graphqlRequest<MyDaycareQueryResponse>(MY_DAYCARE_QUERY, undefined, token);
+  const daycareId = daycareResult.myDaycare?.id || daycareResult.myDaycare?._id || '';
+
   return {
     token,
     refreshToken,
     ownerEmail: profileResult.profile.email,
     ownerName: profileResult.profile.name,
-    daycareId: '',
+    daycareId,
   } satisfies DaycareLoginResult;
 }
