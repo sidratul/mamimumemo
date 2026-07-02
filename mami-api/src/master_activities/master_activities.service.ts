@@ -5,8 +5,10 @@ import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
 import { UserRole } from "#shared/enums/enum.ts";
+import { ActivityCategoriesService } from "@/activity_categories/activity_categories.service.ts";
 
 const masterActivitiesRepository = new MasterActivitiesRepository();
+const activityCategoriesService = new ActivityCategoriesService();
 
 export class MasterActivitiesService {
   async getMasterActivities(
@@ -22,7 +24,7 @@ export class MasterActivitiesService {
 
     const filters: any = {};
     if (active !== undefined) filters.active = active;
-    if (category) filters.category = category;
+    if (category) filters.category = category.toLowerCase();
 
     return await masterActivitiesRepository.findByDaycareId(daycareId, filters);
   }
@@ -42,7 +44,7 @@ export class MasterActivitiesService {
   }
 
   async getDefaultFieldConfig(category: string) {
-    return masterActivitiesRepository.getDefaultFieldConfig(category);
+    return activityCategoriesService.getDefaultFieldConfig(category);
   }
 
   async createMasterActivity(
@@ -60,12 +62,12 @@ export class MasterActivitiesService {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }
 
-    // Get default field config for category if not provided
-    const defaultConfig = await masterActivitiesRepository.getDefaultFieldConfig(input.category);
+    const parsed = createMasterActivityInput.parse(input);
+    const defaultConfig = await activityCategoriesService.getDefaultFieldConfig(parsed.category);
     
     const activityData = {
-      ...input,
-      fieldConfig: input.fieldConfig || defaultConfig,
+      ...parsed,
+      fieldConfig: parsed.fieldConfig || defaultConfig,
       createdBy: {
         userId: context.user.id,
         name: context.user.name,
@@ -97,7 +99,11 @@ export class MasterActivitiesService {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }
 
-    return await masterActivitiesRepository.update(id, input);
+    const parsed = updateMasterActivityInput.parse(input);
+    if (parsed.category) {
+      await activityCategoriesService.getDefaultFieldConfig(parsed.category);
+    }
+    return await masterActivitiesRepository.update(id, parsed);
   }
 
   async deactivateMasterActivity(id: string, context: AppContext) {

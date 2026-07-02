@@ -8,7 +8,7 @@ export type ParentProfile = {
   id: string;
   name: string;
   email: string;
-  role: 'PARENT';
+  access: 'PARENT';
 };
 
 export type ParentStoredSession = {
@@ -40,7 +40,17 @@ export async function getStoredProfile() {
   }
 
   try {
-    return JSON.parse(raw) as ParentProfile;
+    const profile = JSON.parse(raw) as ParentProfile & { role?: string };
+    if (!profile.access && profile.role === 'PARENT') {
+      const migratedProfile: ParentProfile = {
+        id: profile.id,
+        name: profile.name,
+        email: profile.email,
+        access: 'PARENT',
+      };
+      return migratedProfile;
+    }
+    return profile;
   } catch {
     await deletePersistedItem(PROFILE_KEY);
     return null;

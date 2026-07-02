@@ -3,7 +3,7 @@ export const typeDefs = `
     id: ObjectId!
     daycareId: ObjectId!
     name: String!
-    category: ActivityCategory!
+    category: String!
     defaultDuration: Int!
     icon: String
     color: String
@@ -53,7 +53,7 @@ export const typeDefs = `
   input CreateMasterActivityInput {
     daycareId: ObjectId!
     name: String!
-    category: ActivityCategory!
+    category: String!
     defaultDuration: Int
     icon: String
     color: String
@@ -62,7 +62,7 @@ export const typeDefs = `
 
   input UpdateMasterActivityInput {
     name: String
-    category: ActivityCategory
+    category: String
     defaultDuration: Int
     icon: String
     color: String
@@ -72,13 +72,13 @@ export const typeDefs = `
 
   extend type Query {
     "Get master activities for a daycare"
-    masterActivities(daycareId: ObjectId!, active: Boolean, category: ActivityCategory): [MasterActivity!]!
+    masterActivities(daycareId: ObjectId!, active: Boolean, category: String): [MasterActivity!]!
     
     "Get master activity by ID"
     masterActivity(id: ObjectId!): MasterActivity
     
     "Get default field config for category"
-    defaultFieldConfig(category: ActivityCategory!): FieldConfig!
+    defaultFieldConfig(category: String!): FieldConfig!
   }
 
   extend type Mutation {

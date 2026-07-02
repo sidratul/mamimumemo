@@ -6,15 +6,7 @@ const templateActivitySchema = new mongoose.Schema({
   startTime: { type: String, required: true }, // Format: "HH:mm"
   endTime: { type: String, required: true }, // Format: "HH:mm"
   duration: { type: Number }, // menit, auto-calculated
-  category: { 
-    type: String, 
-    enum: [
-      "meal", "nap", "toileting", "care", "play",
-      "learning", "creative", "physical", "outdoor",
-      "routine", "social", "development"
-    ],
-    required: true 
-  },
+  category: { type: String, required: true },
   defaultSitterRole: { 
     type: String, 
     enum: ["any", "senior_sitter", "junior_sitter"],

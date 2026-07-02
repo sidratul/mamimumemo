@@ -4,7 +4,7 @@ export const adminUserCreateSchema = z.object({
   name: z.string().min(1, 'Nama wajib diisi'),
   email: z.string().min(1, 'Email wajib diisi').email('Format email tidak valid'),
   phone: z.string().min(1, 'Nomor telepon wajib diisi'),
-  role: z.enum(['SUPER_ADMIN', 'DAYCARE_ADMIN']),
+  systemRole: z.enum(['NONE', 'SUPER_ADMIN']),
   password: z.string().min(1, 'Password wajib diisi'),
 });
 

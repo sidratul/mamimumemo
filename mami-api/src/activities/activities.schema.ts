@@ -5,15 +5,7 @@ const activitySchema = new mongoose.Schema({
   daycareId: { type: mongoose.Schema.Types.ObjectId, ref: "Daycare" }, // null jika di rumah
   masterActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "MasterActivity" },
   activityName: { type: String, required: true },
-  category: { 
-    type: String, 
-    enum: [
-      "meal", "nap", "toileting", "care", "play", 
-      "learning", "creative", "physical", "outdoor", 
-      "routine", "social", "development"
-    ],
-    required: true 
-  },
+  category: { type: String, required: true },
   date: { type: Date, required: true },
   startTime: { type: String, required: true }, // Format: "HH:mm"
   endTime: { type: String }, // Format: "HH:mm"

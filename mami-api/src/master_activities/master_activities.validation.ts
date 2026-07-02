@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { ActivityCategoryEnum } from "#shared/types/enums.ts";
+import { storedCategoryCodeSchema } from "@/activity_categories/activity_categories.validation.ts";
 
 export const fieldConfigInput = z.object({
   mealType: z.boolean().optional(),
@@ -19,7 +19,7 @@ export const fieldConfigInput = z.object({
 export const createMasterActivityInput = z.object({
   daycareId: z.string(),
   name: z.string().min(1, "Name is required"),
-  category: z.nativeEnum(ActivityCategoryEnum),
+  category: storedCategoryCodeSchema,
   defaultDuration: z.number().positive().optional(),
   icon: z.string().optional(),
   color: z.string().optional(),
@@ -28,7 +28,7 @@ export const createMasterActivityInput = z.object({
 
 export const updateMasterActivityInput = z.object({
   name: z.string().min(1).optional(),
-  category: z.nativeEnum(ActivityCategoryEnum).optional(),
+  category: storedCategoryCodeSchema.optional(),
   defaultDuration: z.number().positive().optional(),
   icon: z.string().optional(),
   color: z.string().optional(),

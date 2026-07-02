@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { USER_ROLES, UserRole } from "#shared/enums/enum.ts";
+import { SYSTEM_ROLES } from "#shared/enums/enum.ts";
 
 export const userSubDocumentSchema = new mongoose.Schema({
   _id: {
@@ -39,10 +39,10 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
-  role: {
+  systemRole: {
     type: String,
-    enum: USER_ROLES,
-    default: UserRole.PARENT,
+    enum: SYSTEM_ROLES,
+    default: null,
   },
 }, {
   timestamps: true,

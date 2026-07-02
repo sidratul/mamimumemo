@@ -15,19 +15,7 @@ export interface IMasterActivity {
   updatedAt: Date;
 }
 
-export type ActivityCategory =
-  | "meal"
-  | "nap"
-  | "toileting"
-  | "care"
-  | "play"
-  | "learning"
-  | "creative"
-  | "physical"
-  | "outdoor"
-  | "routine"
-  | "social"
-  | "development";
+export type ActivityCategory = string;
 
 export interface IFieldConfig {
   mealType: boolean;

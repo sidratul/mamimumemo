@@ -1,10 +1,10 @@
 import { z } from "zod";
 import {
-  ActivityCategoryEnum,
   DayOfWeekEnum,
   ScheduleTemplateTargetTypeEnum,
   SitterRoleEnum,
 } from "#shared/types/enums.ts";
+import { storedCategoryCodeSchema } from "@/activity_categories/activity_categories.validation.ts";
 
 export const templateActivityInput = z.object({
   masterActivityId: z.string().optional(),
@@ -12,7 +12,7 @@ export const templateActivityInput = z.object({
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
   duration: z.number().positive().optional(),
-  category: z.nativeEnum(ActivityCategoryEnum),
+  category: storedCategoryCodeSchema,
   defaultSitterRole: z.nativeEnum(SitterRoleEnum).optional(),
 });
 

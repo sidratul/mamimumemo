@@ -1,9 +1,5 @@
-export type UserRole =
-  | 'SUPER_ADMIN'
-  | 'DAYCARE_OWNER'
-  | 'DAYCARE_ADMIN'
-  | 'DAYCARE_SITTER'
-  | 'PARENT';
+export type SystemRole = 'SUPER_ADMIN';
+export type SystemRoleSelection = SystemRole | 'NONE';
 
 export type UserAccess =
   | 'SUPER_ADMIN'
@@ -30,7 +26,7 @@ export type UserRecord = {
   name: string;
   email: string;
   phone?: string | null;
-  role?: UserRole | null;
+  systemRole?: SystemRole | null;
   accesses: UserAccess[];
   createdAt?: string | null;
   updatedAt?: string | null;

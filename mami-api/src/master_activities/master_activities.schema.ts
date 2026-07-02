@@ -19,15 +19,7 @@ const fieldConfigSchema = new mongoose.Schema({
 const masterActivitySchema = new mongoose.Schema({
   daycareId: { type: mongoose.Schema.Types.ObjectId, ref: "Daycare", required: true },
   name: { type: String, required: true }, // Free text, contoh: "Makan Pagi Ceria"
-  category: { 
-    type: String, 
-    enum: [
-      "meal", "nap", "toileting", "care", "play",
-      "learning", "creative", "physical", "outdoor",
-      "routine", "social", "development"
-    ],
-    required: true 
-  },
+  category: { type: String, required: true },
   defaultDuration: { type: Number, default: 30 }, // menit
   icon: String,
   color: String,

@@ -13,7 +13,7 @@ Status: **Exposed di GraphQL schema**
 
 ## Queries
 
-- `childActivities(childId: ObjectId!, date: Date, category: ActivityCategory): [Activity!]!`
+- `childActivities(childId: ObjectId!, date: Date, category: String): [Activity!]!`
 - `activity(id: ObjectId!): Activity`
 - `activityTimeline(input: ActivityTimelineInput!): ActivityTimeline!`
 - `myActivities(date: Date): [Activity!]!`
@@ -43,7 +43,6 @@ Inputs:
 
 Enums:
 
-- `ActivityCategory`
 - `ActivitySource`
 - `EatenAmount`
 - `Intensity`

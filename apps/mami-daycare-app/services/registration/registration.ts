@@ -29,9 +29,9 @@ export type DaycareLoginResult = {
   daycareId: string;
 };
 
-type RegisterMutationResponse = {
-  register: {
-    id?: string;
+type RegisterDaycareMutationResponse = {
+  registerDaycare: {
+    id: string;
     message: string;
   };
 };
@@ -48,7 +48,7 @@ type ProfileQueryResponse = {
     _id: string;
     name: string;
     email: string;
-    role: string;
+    accesses: string[];
   };
 };
 
@@ -60,23 +60,9 @@ type MyDaycareQueryResponse = {
   } | null;
 };
 
-type CreateDaycareDraftMutationResponse = {
-  createDaycareDraft: {
-    id: string;
-    approvalStatus: string;
-  };
-};
-
-type SubmitDaycareRegistrationMutationResponse = {
-  submitDaycareRegistration: {
-    id: string;
-    approvalStatus: 'SUBMITTED';
-  };
-};
-
-const REGISTER_MUTATION = `
-  mutation Register($input: RegisterInput!) {
-    register(input: $input) {
+const REGISTER_DAYCARE_MUTATION = `
+  mutation RegisterDaycare($input: RegisterDaycareInput!) {
+    registerDaycare(input: $input) {
       id
       message
     }
@@ -98,7 +84,7 @@ const PROFILE_QUERY = `
       _id
       name
       email
-      role
+      accesses
     }
   }
 `;
@@ -113,40 +99,36 @@ const MY_DAYCARE_QUERY = `
   }
 `;
 
-const CREATE_DAYCARE_DRAFT_MUTATION = `
-  mutation CreateDaycareDraft($input: CreateDaycareDraftInput!) {
-    createDaycareDraft(input: $input) {
-      id
-      approvalStatus
-    }
-  }
-`;
-
-const SUBMIT_DAYCARE_REGISTRATION_MUTATION = `
-  mutation SubmitDaycareRegistration($id: ObjectId!) {
-    submitDaycareRegistration(id: $id) {
-      id
-      approvalStatus
-    }
-  }
-`;
-
 export async function submitDaycareRegistration(input: DaycareRegistrationInput): Promise<DaycareRegistrationResult> {
-  await graphqlRequest<RegisterMutationResponse, {
+  const registration = await graphqlRequest<RegisterDaycareMutationResponse, {
     input: {
-      name: string;
-      email: string;
-      password: string;
-      phone: string;
-      role: 'DAYCARE_OWNER';
+      owner: {
+        name: string;
+        email: string;
+        password: string;
+        phone: string;
+      };
+      daycare: {
+        name: string;
+        description: string;
+        address: string;
+        city: string;
+      };
     };
-  }>(REGISTER_MUTATION, {
+  }>(REGISTER_DAYCARE_MUTATION, {
     input: {
-      name: input.ownerName,
-      email: input.ownerEmail,
-      password: input.password,
-      phone: input.ownerPhone,
-      role: 'DAYCARE_OWNER',
+      owner: {
+        name: input.ownerName,
+        email: input.ownerEmail.trim().toLowerCase(),
+        password: input.password,
+        phone: input.ownerPhone,
+      },
+      daycare: {
+        name: input.daycareName,
+        description: input.description,
+        address: input.address,
+        city: input.city,
+      },
     },
   });
 
@@ -157,7 +139,7 @@ export async function submitDaycareRegistration(input: DaycareRegistrationInput)
     };
   }>(LOGIN_MUTATION, {
     input: {
-      email: input.ownerEmail,
+      email: input.ownerEmail.trim().toLowerCase(),
       password: input.password,
     },
   });
@@ -165,38 +147,10 @@ export async function submitDaycareRegistration(input: DaycareRegistrationInput)
   const token = loginResult.login.accessToken;
   const refreshToken = loginResult.login.refreshToken;
 
-  const draftResult = await graphqlRequest<CreateDaycareDraftMutationResponse, {
-    input: {
-      name: string;
-      description: string;
-      address: string;
-      city: string;
-    };
-  }>(
-    CREATE_DAYCARE_DRAFT_MUTATION,
-    {
-      input: {
-        name: input.daycareName,
-        description: input.description,
-        address: input.address,
-        city: input.city,
-      },
-    },
-    token
-  );
-
-  const daycareId = draftResult.createDaycareDraft.id;
-
-  const submitResult = await graphqlRequest<SubmitDaycareRegistrationMutationResponse, { id: string }>(
-    SUBMIT_DAYCARE_REGISTRATION_MUTATION,
-    { id: daycareId },
-    token
-  );
-
   return {
-    id: submitResult.submitDaycareRegistration.id,
-    status: submitResult.submitDaycareRegistration.approvalStatus,
-    message: 'Registrasi daycare berhasil dikirim dan menunggu review admin system.',
+    id: registration.registerDaycare.id,
+    status: 'SUBMITTED',
+    message: registration.registerDaycare.message,
     token,
     refreshToken,
     ownerEmail: input.ownerEmail,
@@ -222,7 +176,7 @@ export async function signInDaycareOwner(input: { email: string; password: strin
 
   const profileResult = await graphqlRequest<ProfileQueryResponse>(PROFILE_QUERY, undefined, token);
 
-  if (profileResult.profile.role !== 'DAYCARE_OWNER') {
+  if (!profileResult.profile.accesses.includes('OWNER')) {
     throw new Error('Akun ini bukan akun owner daycare.');
   }
 

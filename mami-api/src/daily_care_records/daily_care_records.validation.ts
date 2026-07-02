@@ -1,6 +1,5 @@
 import { z } from "zod";
 import {
-  ActivityCategoryEnum,
   MealTypeEnum,
   EatenAmountEnum,
   NapQualityEnum,
@@ -9,6 +8,7 @@ import {
   IntensityEnum,
   SitterRoleEnum,
 } from "#shared/types/enums.ts";
+import { storedCategoryCodeSchema } from "@/activity_categories/activity_categories.validation.ts";
 
 function normalizeEnumValue<TSchema extends z.ZodTypeAny>(schema: TSchema) {
   return z.preprocess((value) => {
@@ -43,7 +43,7 @@ export const checkOutInput = z.object({
 export const dailyActivityInput = z.object({
   masterActivityId: z.string().optional(),
   activityName: z.string().min(1, "Activity name is required"),
-  category: normalizeEnumValue(z.nativeEnum(ActivityCategoryEnum)),
+  category: storedCategoryCodeSchema,
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)").optional(),
   duration: z.number().positive().optional(),
@@ -66,7 +66,7 @@ export const dailyActivityInput = z.object({
 export const plannedDailyActivityInput = z.object({
   masterActivityId: z.string().optional(),
   activityName: z.string().min(1, "Activity name is required"),
-  category: normalizeEnumValue(z.nativeEnum(ActivityCategoryEnum)),
+  category: storedCategoryCodeSchema,
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)").optional(),
   duration: z.number().positive().optional(),

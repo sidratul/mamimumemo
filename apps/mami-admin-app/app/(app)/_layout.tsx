@@ -27,6 +27,7 @@ export default function AppLayout() {
       <Stack.Screen name="modules/index" />
       <Stack.Screen name="modules/role-access" />
       <Stack.Screen name="modules/audit-log" />
+      <Stack.Screen name="modules/activity-categories" />
     </Stack>
   );
 }

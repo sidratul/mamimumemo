@@ -8,7 +8,7 @@ import {
 import { adminUserCreateSchema } from '@mami/core';
 
 import { RoleSelect } from '../../components/input';
-import { type UserRole } from '../../shared/user/types';
+import { type SystemRoleSelection } from '../../shared/user/types';
 import { Box, Text } from '../../theme/theme';
 
 type RoleOption = {
@@ -20,7 +20,7 @@ type UserCreateFormData = {
   name: string;
   email: string;
   phone: string;
-  role: UserRole;
+  systemRole: SystemRoleSelection;
   password: string;
 };
 
@@ -31,19 +31,19 @@ type UserCreateFormSectionProps = {
   onSubmit: (values: UserCreateFormData) => void | Promise<void>;
 };
 
-const UserRoleField = (
+const SystemRoleField = (
   roleOptions: RoleOption[],
   props: {
-    value?: UserRole;
+    value?: SystemRoleSelection;
     placeholder?: string;
-    onChange: (value: UserRole) => void;
+    onChange: (value: SystemRoleSelection) => void;
     disabled?: boolean;
   }
 ) => (
   <RoleSelect
     value={props.value}
     placeholder={props.placeholder}
-    onChange={(value) => props.onChange(value as UserRole)}
+    onChange={(value) => props.onChange(value as SystemRoleSelection)}
     disabled={props.disabled}
     options={roleOptions}
   />
@@ -74,10 +74,10 @@ export function UserCreateFormSection({
       input: TextField,
       props: { placeholder: '0812xxxx', keyboardType: 'phone-pad' },
     },
-    role: {
+    systemRole: {
       label: 'Akses Sistem',
       required: true,
-      input: (props: InputComponentProps<UserRole>) => UserRoleField(roleOptions, props),
+      input: (props: InputComponentProps<SystemRoleSelection>) => SystemRoleField(roleOptions, props),
     },
     password: {
       label: 'Password Sementara',
@@ -95,7 +95,7 @@ export function UserCreateFormSection({
           name: '',
           email: '',
           phone: '',
-          role: 'DAYCARE_ADMIN',
+          systemRole: 'NONE',
           password: '',
         }}
         schema={adminUserCreateSchema}
@@ -106,7 +106,7 @@ export function UserCreateFormSection({
       
       <Box paddingHorizontal="xs" gap="sm">
         <Text variant="bodySmall" color="textSecondary" style={{ fontStyle: 'italic' }}>
-          User yang dibuat manual dari panel admin akan memiliki akses otoritas (Super Admin atau Admin Daycare). Untuk Parent/Sitter, tambahkan melalui detail Daycare.
+          Akses owner, admin daycare, dan sitter diberikan melalui membership daycare. Parent diberikan melalui data parent daycare.
         </Text>
         {error ? (
           <Box backgroundColor="danger" padding="sm" borderRadius="sm" style={{ opacity: 0.1 }}>

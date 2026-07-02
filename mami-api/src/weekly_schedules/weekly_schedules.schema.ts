@@ -5,15 +5,7 @@ const weeklyActivitySchema = new mongoose.Schema({
   activityName: { type: String, required: true },
   startTime: { type: String, required: true },
   endTime: { type: String, required: true },
-  category: { 
-    type: String, 
-    enum: [
-      "meal", "nap", "toileting", "care", "play",
-      "learning", "creative", "physical", "outdoor",
-      "routine", "social", "development"
-    ],
-    required: true 
-  },
+  category: { type: String, required: true },
   assignedSitters: [{
     userId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
     name: String,

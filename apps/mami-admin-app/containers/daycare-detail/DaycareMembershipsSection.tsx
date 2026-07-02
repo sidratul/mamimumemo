@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { View } from 'react-native';
+import { Button } from '@mami/ui';
 
 import { DaycareDetailSection } from './DaycareDetailSection';
 import { type DaycareMembershipRecord } from '../../services/membership';
@@ -19,11 +20,13 @@ type DaycareMembershipsSectionProps = {
     phone?: string | null;
   };
   memberships: DaycareMembershipRecord[];
+  onAddPress: () => void;
 };
 
 export function DaycareMembershipsSection({
   owner,
   memberships,
+  onAddPress,
 }: DaycareMembershipsSectionProps) {
   const staffMemberships = memberships.filter(
     (membership) =>
@@ -33,7 +36,10 @@ export function DaycareMembershipsSection({
   );
 
   return (
-    <DaycareDetailSection title="Owner & Staff">
+    <DaycareDetailSection
+      title="Owner & Staff"
+      action={<Button label="Tambah Staff" onPress={onAddPress} />}
+    >
       <Box gap="md">
         {/* Owner Card */}
         <Box

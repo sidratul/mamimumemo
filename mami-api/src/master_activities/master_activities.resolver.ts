@@ -5,6 +5,9 @@ import { AppContext } from "#shared/config/context.ts";
 const masterActivitiesService = new MasterActivitiesService();
 
 export const resolvers = {
+  MasterActivity: {
+    category: (activity: { category?: string }) => activity.category?.toUpperCase(),
+  },
   Query: {
     masterActivities: (
       _: unknown,

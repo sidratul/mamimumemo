@@ -6,9 +6,11 @@ import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
 import { UserRole } from "#shared/enums/enum.ts";
 import { ChildrenRepository } from "@/children/children.repository.ts";
+import { ActivityCategoriesService } from "@/activity_categories/activity_categories.service.ts";
 
 const activitiesRepository = new ActivitiesRepository();
 const childrenRepository = new ChildrenRepository();
+const activityCategoriesService = new ActivityCategoriesService();
 
 export class ActivitiesService {
   async getChildActivities(
@@ -30,7 +32,7 @@ export class ActivitiesService {
 
     const filters: any = {};
     if (date) filters.date = date;
-    if (category) filters.category = category;
+    if (category) filters.category = category.toLowerCase();
 
     return await activitiesRepository.findByChildId(childId, filters);
   }
@@ -125,14 +127,16 @@ export class ActivitiesService {
     if (!user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
+    const parsed = createActivityInput.parse(input);
+    await activityCategoriesService.getDefaultFieldConfig(parsed.category);
 
-    const hasAccess = await activitiesRepository.userHasAccess(input.childId, user.id);
+    const hasAccess = await activitiesRepository.userHasAccess(parsed.childId, user.id);
     if (!hasAccess) {
       throw new GraphQLError("You don't have permission to add activities for this child");
     }
 
     // Get child to determine relation
-    const child = await childrenRepository.findById(input.childId);
+    const child = await childrenRepository.findById(parsed.childId);
     if (!child) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -151,7 +155,7 @@ export class ActivitiesService {
       visibleTo: string[];
       duration?: number;
     } = {
-      ...input,
+      ...parsed,
       source: user.role === UserRole.DAYCARE_SITTER || user.role === UserRole.DAYCARE_ADMIN
         ? "daycare"
         : "parent",
@@ -161,15 +165,15 @@ export class ActivitiesService {
         relation: guardian?.relation || "parent",
         role: user.role,
       },
-      visibleTo: input.visibleTo || child.guardians
+      visibleTo: parsed.visibleTo || child.guardians
         .filter((g) => g.active)
         .map((g) => g.user.userId.toString()),
     };
 
     // Auto-calculate duration if startTime and endTime provided
-    if (input.startTime && input.endTime) {
-      const start = new Date(`2000-01-01 ${input.startTime}`);
-      const end = new Date(`2000-01-01 ${input.endTime}`);
+    if (parsed.startTime && parsed.endTime) {
+      const start = new Date(`2000-01-01 ${parsed.startTime}`);
+      const end = new Date(`2000-01-01 ${parsed.endTime}`);
       activityData.duration = Math.round((end.getTime() - start.getTime()) / 60000);
     }
 
@@ -193,7 +197,12 @@ export class ActivitiesService {
     }
 
     // Auto-calculate duration if startTime and endTime provided
-    const updateData: typeof updateActivityInput._type & { duration?: number } = { ...input };
+    const updateData: typeof updateActivityInput._type & { duration?: number } = {
+      ...updateActivityInput.parse(input),
+    };
+    if (updateData.category) {
+      await activityCategoriesService.getDefaultFieldConfig(updateData.category);
+    }
     if (updateData.startTime && updateData.endTime) {
       const start = new Date(`2000-01-01 ${updateData.startTime}`);
       const end = new Date(`2000-01-01 ${updateData.endTime}`);

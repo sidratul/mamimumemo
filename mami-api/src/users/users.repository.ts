@@ -1,16 +1,26 @@
-import { ClientSession, FilterQuery, ProjectionType, UpdateQuery } from "mongoose";
+import {
+  ClientSession,
+  FilterQuery,
+  ProjectionType,
+  UpdateQuery,
+} from "mongoose";
 import { ObjectId } from "#shared/index.ts";
 import UserModel from "./users.schema.ts";
-import { RoleType } from "#shared/enums/enum.ts";
 import { User, UserDoc, UserQueryOptions } from "./users.d.ts";
 
 class UsersRepository {
-  public async create(user: Partial<User>, options?: { session?: ClientSession }): Promise<UserDoc> {
+  public async create(
+    user: Partial<User>,
+    options?: { session?: ClientSession },
+  ): Promise<UserDoc> {
     const [createdUser] = await UserModel.create([user], options);
     return createdUser;
   }
 
-  public async find(filter: FilterQuery<User>, projection?: ProjectionType<User>): Promise<UserDoc | null> {
+  public async find(
+    filter: FilterQuery<User>,
+    projection?: ProjectionType<User>,
+  ): Promise<UserDoc | null> {
     let query = UserModel.findOne(filter);
     if (projection && Object.keys(projection).length > 0) {
       query = query.select(projection);
@@ -18,7 +28,10 @@ class UsersRepository {
     return await query;
   }
 
-  public async findById(id: ObjectId, projection?: ProjectionType<User>): Promise<UserDoc | null> {
+  public async findById(
+    id: ObjectId,
+    projection?: ProjectionType<User>,
+  ): Promise<UserDoc | null> {
     let query = UserModel.findById(id);
     if (projection && Object.keys(projection).length > 0) {
       query = query.select(projection);
@@ -26,7 +39,10 @@ class UsersRepository {
     return await query;
   }
 
-  public async update(id: ObjectId, updateData: UpdateQuery<User>): Promise<UserDoc | null> {
+  public async update(
+    id: ObjectId,
+    updateData: UpdateQuery<User>,
+  ): Promise<UserDoc | null> {
     return await UserModel.findByIdAndUpdate(id, updateData, { new: true });
   }
 

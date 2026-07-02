@@ -9,15 +9,19 @@ import UsersService from "@/users/users.service.ts";
 import DaycareMembershipsService from "@/daycare_memberships/daycare_memberships.service.ts";
 import UploadsService from "@/uploads/uploads.service.ts";
 import { DaycareApprovalStatus } from "./daycare.enum.ts";
-import { DaycareDocShape, DaycareFilter, DaycareQueryOptions } from "./daycare.d.ts";
+import {
+  DaycareDocShape,
+  DaycareFilter,
+  DaycareQueryOptions,
+} from "./daycare.d.ts";
 import { DaycareRepository } from "./daycare.repository.ts";
 import { ProjectionType } from "mongoose";
 import type { ClientSession } from "mongoose";
 import {
   purgeDaycareInput,
   registerDaycareInput,
-  updateDaycareDocumentsInput,
   updateDaycareApprovalInput,
+  updateDaycareDocumentsInput,
 } from "./daycare.validation.ts";
 
 const repository = new DaycareRepository();
@@ -37,7 +41,9 @@ const INACTIVE_STATUSES = [
   DaycareApprovalStatus.REJECTED,
 ];
 
-const ADMIN_TRANSITIONS: Partial<Record<DaycareApprovalStatus, DaycareApprovalStatus[]>> = {
+const ADMIN_TRANSITIONS: Partial<
+  Record<DaycareApprovalStatus, DaycareApprovalStatus[]>
+> = {
   [DaycareApprovalStatus.SUBMITTED]: [DaycareApprovalStatus.IN_REVIEW],
   [DaycareApprovalStatus.IN_REVIEW]: [
     DaycareApprovalStatus.SUBMITTED,
@@ -46,7 +52,10 @@ const ADMIN_TRANSITIONS: Partial<Record<DaycareApprovalStatus, DaycareApprovalSt
     DaycareApprovalStatus.REJECTED,
   ],
   [DaycareApprovalStatus.NEEDS_REVISION]: [DaycareApprovalStatus.IN_REVIEW],
-  [DaycareApprovalStatus.APPROVED]: [DaycareApprovalStatus.IN_REVIEW, DaycareApprovalStatus.SUSPENDED],
+  [DaycareApprovalStatus.APPROVED]: [
+    DaycareApprovalStatus.IN_REVIEW,
+    DaycareApprovalStatus.SUSPENDED,
+  ],
   [DaycareApprovalStatus.REJECTED]: [DaycareApprovalStatus.IN_REVIEW],
   [DaycareApprovalStatus.SUSPENDED]: [DaycareApprovalStatus.APPROVED],
 };
@@ -57,7 +66,9 @@ export class DaycareService {
     projection?: ProjectionType<DaycareDocShape>,
   ) {
     const daycares = await repository.list(options, projection);
-    return await Promise.all(daycares.map((daycare) => this.resolveDaycareDocumentUrls(daycare)));
+    return await Promise.all(
+      daycares.map((daycare) => this.resolveDaycareDocumentUrls(daycare)),
+    );
   }
 
   async countDaycares(
@@ -93,82 +104,93 @@ export class DaycareService {
     return await this.resolveDaycareDocumentUrls(daycare);
   }
 
-  async registerDaycare(input: typeof registerDaycareInput._type, context: AppContext) {
+  async registerDaycare(
+    input: typeof registerDaycareInput._type,
+    context: AppContext,
+  ) {
     try {
-      return await runInTransaction(context, async (session?: ClientSession) => {
-        const owner = await usersService.createUser({
-          name: input.owner.name,
-          email: input.owner.email,
-          password: input.owner.password,
-          phone: input.owner.phone,
-          role: UserRole.DAYCARE_OWNER,
-        }, { session });
+      return await runInTransaction(
+        context,
+        async (session?: ClientSession) => {
+          const owner = await usersService.createUser({
+            name: input.owner.name,
+            email: input.owner.email,
+            password: input.owner.password,
+            phone: input.owner.phone,
+          }, { session });
 
-        const registrant = context.user || owner;
-        const isSystemAdmin = context.user?.role === UserRole.SUPER_ADMIN;
+          const registrant = context.user || owner;
+          const isSystemAdmin = context.user?.role === UserRole.SUPER_ADMIN;
 
-        const daycare = await repository.create({
-          name: input.daycare.name,
-          logoUrl: input.daycare.logoUrl?.trim() || "",
-          description: input.daycare.description,
-          address: input.daycare.address,
-          city: input.daycare.city,
-          legalDocuments: this.mapLegalDocuments(input.daycare.legalDocuments),
-          owner: {
-            _id: owner._id,
-            name: owner.name,
-            email: owner.email,
-            phone: owner.phone || "",
-          },
-          isActive: false,
-          submittedAt: new Date(),
-          approval: {
-            status: DaycareApprovalStatus.SUBMITTED,
-            note: isSystemAdmin 
-              ? `Didaftarkan oleh sistem admin: ${registrant.name}`
-              : "Registrasi daycare berhasil dikirim. Tim kami akan menghubungi owner.",
-            history: [
-              {
-                status: DaycareApprovalStatus.SUBMITTED,
-                note: isSystemAdmin ? "Pendaftaran dilakukan melalui panel admin." : "Registrasi daycare berhasil dikirim.",
-                changedBy: {
-                  userId: registrant._id,
-                  name: registrant.name,
+          const daycare = await repository.create({
+            name: input.daycare.name,
+            logoUrl: input.daycare.logoUrl?.trim() || "",
+            description: input.daycare.description,
+            address: input.daycare.address,
+            city: input.daycare.city,
+            legalDocuments: this.mapLegalDocuments(
+              input.daycare.legalDocuments,
+            ),
+            owner: {
+              _id: owner._id,
+              name: owner.name,
+              email: owner.email,
+              phone: owner.phone || "",
+            },
+            isActive: false,
+            submittedAt: new Date(),
+            approval: {
+              status: DaycareApprovalStatus.SUBMITTED,
+              note: isSystemAdmin
+                ? `Didaftarkan oleh sistem admin: ${registrant.name}`
+                : "Registrasi daycare berhasil dikirim. Tim kami akan menghubungi owner.",
+              history: [
+                {
+                  status: DaycareApprovalStatus.SUBMITTED,
+                  note: isSystemAdmin
+                    ? "Pendaftaran dilakukan melalui panel admin."
+                    : "Registrasi daycare berhasil dikirim.",
+                  changedBy: {
+                    userId: registrant._id,
+                    name: registrant.name,
+                  },
+                  changedAt: new Date(),
                 },
-                changedAt: new Date(),
-              },
-            ],
-          },
-        }, { session });
+              ],
+            },
+          }, { session });
 
-        await daycareMembershipsService.createOwnerMembership({
-          user: {
-            _id: owner._id,
-            name: owner.name,
-            email: owner.email,
-            phone: owner.phone || "",
-          },
-          daycare: {
-            _id: daycare._id,
-            name: daycare.name,
-          },
-        }, { session });
+          await daycareMembershipsService.createOwnerMembership({
+            user: {
+              _id: owner._id,
+              name: owner.name,
+              email: owner.email,
+              phone: owner.phone || "",
+            },
+            daycare: {
+              _id: daycare._id,
+              name: daycare.name,
+            },
+          }, { session });
 
-        return {
-          id: daycare._id.toString(),
-          message: "Registrasi daycare berhasil dikirim.",
-        };
-      });
+          return {
+            id: daycare._id.toString(),
+            message: "Registrasi daycare berhasil dikirim.",
+          };
+        },
+      );
     } catch (error) {
       console.error("[DaycareService:registerDaycare] failed", {
         ownerEmail: input.owner.email,
         daycareName: input.daycare.name,
         city: input.daycare.city,
-        error: error instanceof Error ? {
-          name: error.name,
-          message: error.message,
-          stack: error.stack,
-        } : error,
+        error: error instanceof Error
+          ? {
+            name: error.name,
+            message: error.message,
+            stack: error.stack,
+          }
+          : error,
       });
 
       if (error instanceof GraphQLError) {
@@ -201,7 +223,10 @@ export class DaycareService {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
 
-    daycare.set("legalDocuments", await this.mapPrivateLegalDocuments(input.legalDocuments));
+    daycare.set(
+      "legalDocuments",
+      await this.mapPrivateLegalDocuments(input.legalDocuments),
+    );
 
     await daycare.save();
 
@@ -226,7 +251,9 @@ export class DaycareService {
     const allowedNextStatuses = ADMIN_TRANSITIONS[currentStatus] || [];
 
     if (!allowedNextStatuses.includes(nextStatus)) {
-      throw new GraphQLError(`Transisi status tidak valid: ${currentStatus} -> ${nextStatus}`);
+      throw new GraphQLError(
+        `Transisi status tidak valid: ${currentStatus} -> ${nextStatus}`,
+      );
     }
 
     if (REVIEW_REQUIRED_STATUSES.includes(nextStatus) && !input.note?.trim()) {
@@ -352,20 +379,28 @@ export class DaycareService {
     return await Promise.all(
       (documents ?? []).map(async (document) => ({
         type: document.type,
-        url: await uploadsService.finalizePrivatePath(document.url, "documents"),
+        url: await uploadsService.finalizePrivatePath(
+          document.url,
+          "documents",
+        ),
         verified: document.verified ?? false,
       })),
     );
   }
 
-  private async resolveDaycareDocumentUrls(daycare: DaycareDocShape & { _id?: ObjectId }) {
+  private async resolveDaycareDocumentUrls(
+    daycare: DaycareDocShape & { _id?: ObjectId },
+  ) {
     if (!daycare.legalDocuments?.length) {
       return daycare;
     }
 
     const legalDocuments = await Promise.all(
       daycare.legalDocuments.map(async (document) => {
-        const normalizedPath = uploadsService.normalizeStoragePath(document.url, "private");
+        const normalizedPath = uploadsService.normalizeStoragePath(
+          document.url,
+          "private",
+        );
         if (!normalizedPath || normalizedPath.startsWith("http")) {
           return document;
         }

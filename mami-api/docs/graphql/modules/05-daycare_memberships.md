@@ -10,8 +10,9 @@ Status: **Exposed di GraphQL schema**
 
 - Semua operasi butuh login.
 - `SUPER_ADMIN` dapat membaca/mengelola semua daycare membership.
-- `DAYCARE_OWNER` dan `DAYCARE_ADMIN` dapat membaca/menambah user pada daycare yang sama.
-- `deactivateDaycareMembership` hanya `SUPER_ADMIN`.
+- `DAYCARE_OWNER` dapat menambah/menonaktifkan `ADMIN` dan `SITTER` pada daycare yang sama.
+- `DAYCARE_ADMIN` hanya dapat menambah/menonaktifkan `SITTER` pada daycare yang sama.
+- Membership `OWNER` hanya dapat dikelola `SUPER_ADMIN`.
 
 ## Queries
 
@@ -46,4 +47,4 @@ Scalars:
 
 ## Notes
 
-- `AddUserToDaycareInput` wajib mengisi tepat salah satu dari `userId` atau `userData`.
+- `AddUserToDaycareInput` wajib mengisi tepat salah satu dari `userId`, `userEmail`, atau `userData`.

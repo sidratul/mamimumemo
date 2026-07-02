@@ -1,8 +1,10 @@
 import mongoose, { ClientSession } from "mongoose";
 import { AuthDoc } from "@/auth/auth.d.ts";
 import { ObjectId } from "#shared/types/objectid.type.ts";
+import { RoleType } from "#shared/enums/enum.ts";
 
 export type AuthenticatedUser = AuthDoc & {
+  role?: RoleType;
   daycareId?: ObjectId;
   daycare?: {
     _id: ObjectId;

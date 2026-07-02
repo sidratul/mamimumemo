@@ -19,7 +19,11 @@ export const resolvers = {
   Query: {
     users: (
       _: unknown,
-      args: { filter?: UserQueryOptions; sort?: SortInput; pagination?: PaginationOptions },
+      args: {
+        filter?: UserQueryOptions;
+        sort?: SortInput;
+        pagination?: PaginationOptions;
+      },
       context: AppContext,
       info: GraphQLResolveInfo,
     ) => {
@@ -39,17 +43,29 @@ export const resolvers = {
       userCountInput.parse(args);
       return usersService.countUsers(args.filter, context);
     },
-    user: (_: unknown, { id }: { id: ObjectId }, context: AppContext, info: GraphQLResolveInfo) => {
+    user: (
+      _: unknown,
+      { id }: { id: ObjectId },
+      context: AppContext,
+      info: GraphQLResolveInfo,
+    ) => {
       return usersService.getUser(id, context, getMongoProjection(info));
     },
   },
   User: {
-    accesses: async (user: { _id: ObjectId; role?: string | null }) => {
-      return await usersService.getUserAccesses(user._id, user.role as never);
+    accesses: async (user: { _id: ObjectId; systemRole?: string | null }) => {
+      return await usersService.getUserAccesses(
+        user._id,
+        user.systemRole as never,
+      );
     },
   },
   Mutation: {
-    createUser: (_: unknown, { input }: { input: typeof createUserInput._type }, context: AppContext) => {
+    createUser: (
+      _: unknown,
+      { input }: { input: typeof createUserInput._type },
+      context: AppContext,
+    ) => {
       createUserInput.parse(input);
       return usersService.createUserAction(input, context);
     },
@@ -63,7 +79,10 @@ export const resolvers = {
     },
     updateUserPassword: (
       _: unknown,
-      { id, input }: { id: ObjectId; input: typeof updateUserPasswordInput._type },
+      { id, input }: {
+        id: ObjectId;
+        input: typeof updateUserPasswordInput._type;
+      },
       context: AppContext,
     ) => {
       updateUserPasswordInput.parse(input);

@@ -13,24 +13,13 @@ import {
 } from '../../../services/operations/master-activities';
 import { MasterActivityFormDrawer, type MasterActivityFormValue } from './master-activity-form-drawer';
 import {
+  getResolvedActivityCategories,
+  type ResolvedActivityCategory,
+} from '../../../services/operations/daycare-config';
+import {
   initialMasterActivityFormValue,
   normalizeMasterActivityCategory,
 } from './master-activity-form.schema';
-
-function getCategoryLabel(category: MasterActivity['category']) {
-  switch (category) {
-    case 'MEAL':
-      return 'Makan';
-    case 'NAP':
-      return 'Tidur';
-    case 'CARE':
-      return 'Perawatan';
-    case 'PLAY':
-      return 'Main';
-    case 'LEARNING':
-      return 'Belajar';
-  }
-}
 
 export function MasterActivitiesContainer() {
   const router = useRouter();
@@ -39,6 +28,7 @@ export function MasterActivitiesContainer() {
   const { showConfirm } = useConfirm();
 
   const [activities, setActivities] = useState<MasterActivity[]>([]);
+  const [categories, setCategories] = useState<ResolvedActivityCategory[]>([]);
   const [screenLoading, setScreenLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -54,8 +44,12 @@ export function MasterActivitiesContainer() {
 
       try {
         setScreenLoading(true);
-        const data = await listMasterActivities(session.token, session.daycareId, true);
-        setActivities(data);
+        const [activityData, categoryData] = await Promise.all([
+          listMasterActivities(session.token, session.daycareId, true),
+          getResolvedActivityCategories(session.token, session.daycareId),
+        ]);
+        setActivities(activityData);
+        setCategories(categoryData.filter((category) => category.enabled));
       } catch (error) {
         showToast({
           message: error instanceof Error ? error.message : 'Gagal memuat master activity.',
@@ -73,6 +67,15 @@ export function MasterActivitiesContainer() {
     () => [...activities].sort((left, right) => left.name.localeCompare(right.name)),
     [activities]
   );
+  const categoryOptions = categories.map((category) => ({
+    label: category.label,
+    value: category.code,
+  }));
+  const categoryLabels = new Map(
+    categories.map((category) => [category.code, category.label]),
+  );
+  const getCategoryLabel = (category: string) =>
+    categoryLabels.get(category.toUpperCase()) ?? category;
 
   if (isLoading) {
     return null;
@@ -81,10 +84,14 @@ export function MasterActivitiesContainer() {
   if (!session) {
     return <Redirect href="/(auth)/login" />;
   }
+  const activeSession = session;
 
   function openCreateDrawer() {
     setEditingActivity(null);
-    setFormValue(initialMasterActivityFormValue);
+    setFormValue({
+      ...initialMasterActivityFormValue,
+      category: categoryOptions[0]?.value ?? '',
+    });
     setDrawerVisible(true);
   }
 
@@ -105,7 +112,7 @@ export function MasterActivitiesContainer() {
   }
 
   async function handleSubmit(value: MasterActivityFormValue) {
-    if (!session.daycareId) {
+    if (!activeSession.daycareId) {
       showToast({
         message: 'Daycare belum terhubung ke akun ini.',
         tone: 'danger',
@@ -120,7 +127,7 @@ export function MasterActivitiesContainer() {
       setFormValue(value);
 
       if (editingActivity) {
-        const updated = await updateMasterActivity(session.token, editingActivity.id, {
+        const updated = await updateMasterActivity(activeSession.token, editingActivity.id, {
           name: value.name.trim(),
           category: normalizeMasterActivityCategory(value.category),
           defaultDuration: duration,
@@ -129,8 +136,8 @@ export function MasterActivitiesContainer() {
         setActivities((current) => current.map((item) => (item.id === updated.id ? updated : item)));
         showToast({ message: 'Aktivitas berhasil diperbarui.', tone: 'success' });
       } else {
-        const created = await createMasterActivity(session.token, {
-          daycareId: session.daycareId,
+        const created = await createMasterActivity(activeSession.token, {
+          daycareId: activeSession.daycareId,
           name: value.name.trim(),
           category: normalizeMasterActivityCategory(value.category),
           defaultDuration: duration,
@@ -159,7 +166,7 @@ export function MasterActivitiesContainer() {
       cancelLabel: 'Batal',
       onConfirm: async () => {
         try {
-          const updated = await deactivateMasterActivity(session.token, activity.id);
+          const updated = await deactivateMasterActivity(activeSession.token, activity.id);
           setActivities((current) => current.filter((item) => item.id !== updated.id));
           showToast({ message: 'Aktivitas dinonaktifkan.', tone: 'success' });
         } catch (error) {
@@ -229,6 +236,7 @@ export function MasterActivitiesContainer() {
         value={formValue}
         editingActivity={editingActivity}
         loading={saving}
+        categoryOptions={categoryOptions}
         onClose={closeDrawer}
         onSubmit={handleSubmit}
       />

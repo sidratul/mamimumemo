@@ -13,7 +13,7 @@ export function ProfileContainer() {
       <View style={{ gap: 12 }}>
         <TextMuted>Nama: {user?.name ?? '-'}</TextMuted>
         <TextMuted>Email: {user?.email ?? '-'}</TextMuted>
-        <TextMuted>Role: {user?.role ?? '-'}</TextMuted>
+        <TextMuted>Akses: {user?.access ?? '-'}</TextMuted>
       </View>
       <View style={{ gap: 12 }}>
         <Button label="Update Profile" onPress={() => router.push('/(app)/profile-update')} />

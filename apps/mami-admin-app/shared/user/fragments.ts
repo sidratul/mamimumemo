@@ -6,7 +6,7 @@ export const USER_FIELDS = gql`
     name
     email
     phone
-    role
+    systemRole
     accesses
     createdAt
     updatedAt

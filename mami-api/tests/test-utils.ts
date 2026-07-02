@@ -1,5 +1,5 @@
 import { AppContext } from "../shared/config/context.ts";
-import { UserRole } from "../shared/enums/enum.ts";
+import { SystemRole, UserRole } from "../shared/enums/enum.ts";
 import { AuthDoc } from "../src/auth/auth.d.ts";
 
 export const TEST_CONFIG = {
@@ -10,8 +10,14 @@ export const TEST_CONFIG = {
 };
 
 Deno.env.set("JWT_SECRET", Deno.env.get("JWT_SECRET") || TEST_CONFIG.jwtSecret);
-Deno.env.set("JWT_ACCESS_SECRET", Deno.env.get("JWT_ACCESS_SECRET") || TEST_CONFIG.jwtSecret);
-Deno.env.set("JWT_REFRESH_SECRET", Deno.env.get("JWT_REFRESH_SECRET") || TEST_CONFIG.jwtSecret);
+Deno.env.set(
+  "JWT_ACCESS_SECRET",
+  Deno.env.get("JWT_ACCESS_SECRET") || TEST_CONFIG.jwtSecret,
+);
+Deno.env.set(
+  "JWT_REFRESH_SECRET",
+  Deno.env.get("JWT_REFRESH_SECRET") || TEST_CONFIG.jwtSecret,
+);
 
 // Test database connection
 import mongoose from "mongoose";
@@ -65,7 +71,6 @@ export function createTestUser(overrides = {}) {
     email: `test.${Date.now()}@example.com`,
     password: "password123",
     phone: "0812-3456-7890",
-    role: UserRole.PARENT,
     ...overrides,
   };
 }
@@ -103,6 +108,7 @@ export function createTestActivity(overrides = {}) {
 type MockContextUser = Partial<AuthDoc> & {
   id?: string;
   token?: string;
+  role?: UserRole;
 };
 
 export type MockAppContext = AppContext & {
@@ -113,15 +119,20 @@ export type MockAppContext = AppContext & {
   };
 };
 
-export function createMockContext(user: MockContextUser | null = null): MockAppContext {
-  return Object.assign(new AppContext((user ?? undefined) as AuthDoc | undefined), {
-    user: (user ?? undefined) as AuthDoc | undefined,
-    req: {
-      headers: {
-        authorization: user ? `Bearer ${user.token}` : "",
+export function createMockContext(
+  user: MockContextUser | null = null,
+): MockAppContext {
+  return Object.assign(
+    new AppContext((user ?? undefined) as AuthDoc | undefined),
+    {
+      user: (user ?? undefined) as AuthDoc | undefined,
+      req: {
+        headers: {
+          authorization: user ? `Bearer ${user.token}` : "",
+        },
       },
     },
-  }) as MockAppContext;
+  ) as MockAppContext;
 }
 
 export function createContextFromUser(user: MockContextUser): MockAppContext {
@@ -146,11 +157,18 @@ export function createRoleContext(
   });
 }
 
-export function createSuperAdminContext(overrides: Partial<MockContextUser> = {}) {
-  return createRoleContext(UserRole.SUPER_ADMIN, overrides);
+export function createSuperAdminContext(
+  overrides: Partial<MockContextUser> = {},
+) {
+  return createRoleContext(UserRole.SUPER_ADMIN, {
+    systemRole: SystemRole.SUPER_ADMIN,
+    ...overrides,
+  });
 }
 
-export function createDaycareOwnerContext(overrides: Partial<MockContextUser> = {}) {
+export function createDaycareOwnerContext(
+  overrides: Partial<MockContextUser> = {},
+) {
   return createRoleContext(UserRole.DAYCARE_OWNER, overrides);
 }
 
@@ -168,8 +186,13 @@ export function assertId(value: unknown, message?: string) {
 }
 
 export function assertDate(value: unknown, message?: string) {
-  if (!(value instanceof Date) && typeof value !== "string" && typeof value !== "number") {
-    throw new Error(message || `Expected date-like value, got ${String(value)}`);
+  if (
+    !(value instanceof Date) && typeof value !== "string" &&
+    typeof value !== "number"
+  ) {
+    throw new Error(
+      message || `Expected date-like value, got ${String(value)}`,
+    );
   }
 
   const date = new Date(value);
@@ -185,9 +208,8 @@ export const generateTestData = {
     email: `test${index}@example.com`,
     password: "password123",
     phone: `0812-3456-789${index}`,
-    role: UserRole.PARENT,
   }),
-  
+
   child: (index: number) => ({
     profile: {
       name: `Test Child ${index}`,
@@ -201,7 +223,7 @@ export const generateTestData = {
       medications: [],
     },
   }),
-  
+
   activity: (index: number) => ({
     activityName: `Activity ${index}`,
     category: ["MEAL", "NAP", "PLAY", "LEARNING"][index % 4],

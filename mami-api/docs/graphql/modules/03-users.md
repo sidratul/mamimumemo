@@ -40,6 +40,7 @@ Inputs:
 
 Enums:
 
+- `SystemRole`
 - `UserAccess`
 - `UserRole`
 
@@ -49,5 +50,6 @@ Scalars:
 
 ## Notes
 
+- `systemRole` hanya untuk role tingkat sistem dan saat ini hanya menerima `SUPER_ADMIN`.
+- Akses daycare berasal dari `daycare_memberships`; akses parent berasal dari record `parents` aktif.
 - `ActionResponse` hanya mengembalikan `id` dan `message`.
-- Validasi source masih memiliki nama `personas`, sedangkan typedef GraphQL memakai `accesses`; ikuti typedef untuk request GraphQL.

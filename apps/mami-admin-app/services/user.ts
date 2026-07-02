@@ -2,7 +2,7 @@ import { gql } from '@apollo/client';
 import { apolloClient } from './apollo';
 import { mapUser } from '../shared/user/logic';
 import { USER_FIELDS } from '../shared/user/fragments';
-import { UserRecord, UserAccess, UserRole, UserDaycareMembership } from '../shared/user/types';
+import { UserRecord, UserAccess, SystemRole, UserDaycareMembership } from '../shared/user/types';
 
 let v = 0;
 export const getUserDataVersion = () => v;
@@ -50,7 +50,7 @@ export async function getUserById(id: string) {
   }
 }
 
-export async function createUser(input: { name: string, email: string, password: string, phone?: string, role: UserRole }) {
+export async function createUser(input: { name: string, email: string, password: string, phone?: string, systemRole?: SystemRole | null }) {
   const res = await apolloClient.mutate<{ createUser: { _id: string, message: string } }>({
     mutation: gql`mutation CreateUser($input: CreateUserInput!) { createUser(input: $input) { _id: id message } }`,
     variables: { input }
@@ -59,7 +59,7 @@ export async function createUser(input: { name: string, email: string, password:
   return { data: res.data?.createUser, errors: res.errors };
 }
 
-export async function updateUser(id: string, input: { name?: string, email?: string, phone?: string, role?: UserRole }) {
+export async function updateUser(id: string, input: { name?: string, email?: string, phone?: string, systemRole?: SystemRole | null }) {
   const res = await apolloClient.mutate<{ updateUser: { _id: string, message: string } }>({
     mutation: gql`mutation UpdateUser($id: ObjectId!, $input: UpdateUserInput!) { updateUser(id: $id, input: $input) { _id: id message } }`,
     variables: { id, input }

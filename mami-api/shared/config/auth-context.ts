@@ -2,7 +2,7 @@ import { verifyAccessToken } from "#shared/utils/jwt.ts";
 import { YogaInitialContext } from "graphql-yoga";
 import { Types } from "mongoose";
 import { AuthenticatedUser } from "#shared/config/context.ts";
-import { UserRole } from "#shared/enums/enum.ts";
+import { SystemRole, UserRole } from "#shared/enums/enum.ts";
 import DaycareMembershipsService from "@/daycare_memberships/daycare_memberships.service.ts";
 import { DaycareMembershipAccess } from "@/daycare_memberships/daycare_memberships.enum.ts";
 import UsersService from "@/users/users.service.ts";
@@ -10,7 +10,9 @@ import UsersService from "@/users/users.service.ts";
 const usersService = new UsersService();
 const daycareMembershipsService = new DaycareMembershipsService();
 
-function mapMembershipAccessToUserRole(access: DaycareMembershipAccess): UserRole {
+function mapMembershipAccessToUserRole(
+  access: DaycareMembershipAccess,
+): UserRole {
   switch (access) {
     case DaycareMembershipAccess.OWNER:
       return UserRole.DAYCARE_OWNER;
@@ -30,6 +32,7 @@ export async function getAuthenticatedUserFromRequest(request: Request) {
       const payload = verifyAccessToken(token) as {
         _id?: string;
         daycareId?: string;
+        role?: string;
         daycare?: {
           _id?: string;
           name?: string;
@@ -46,44 +49,66 @@ export async function getAuthenticatedUserFromRequest(request: Request) {
       const userId = payload._id && Types.ObjectId.isValid(payload._id)
         ? new Types.ObjectId(payload._id)
         : null;
-      const userOrNull = userId ? await usersService.findUserById(userId) : null;
+      const userOrNull = userId
+        ? await usersService.findUserById(userId)
+        : null;
       if (userOrNull) {
         const authenticatedUser = userOrNull as AuthenticatedUser;
+        authenticatedUser.role =
+          authenticatedUser.systemRole === SystemRole.SUPER_ADMIN
+            ? UserRole.SUPER_ADMIN
+            : payload.role === UserRole.PARENT
+            ? UserRole.PARENT
+            : undefined;
         if (
           payload.daycareMembership?._id &&
           Types.ObjectId.isValid(payload.daycareMembership._id) &&
           payload.daycareMembership.daycare?._id &&
           Types.ObjectId.isValid(payload.daycareMembership.daycare._id)
         ) {
-          authenticatedUser.daycareMembershipId = new Types.ObjectId(payload.daycareMembership._id);
+          authenticatedUser.daycareMembershipId = new Types.ObjectId(
+            payload.daycareMembership._id,
+          );
           authenticatedUser.daycareAccess = payload.daycareMembership.access;
           if (
-            authenticatedUser.role !== UserRole.SUPER_ADMIN &&
+            authenticatedUser.systemRole !== SystemRole.SUPER_ADMIN &&
             payload.daycareMembership.access
           ) {
             authenticatedUser.role = mapMembershipAccessToUserRole(
               payload.daycareMembership.access as DaycareMembershipAccess,
             );
           }
-          authenticatedUser.daycareId = new Types.ObjectId(payload.daycareMembership.daycare._id);
+          authenticatedUser.daycareId = new Types.ObjectId(
+            payload.daycareMembership.daycare._id,
+          );
           authenticatedUser.daycare = {
             _id: authenticatedUser.daycareId,
             name: payload.daycareMembership.daycare.name || "",
           };
-        } else if (payload.daycare?._id && Types.ObjectId.isValid(payload.daycare._id)) {
+        } else if (
+          payload.daycare?._id && Types.ObjectId.isValid(payload.daycare._id)
+        ) {
           authenticatedUser.daycareId = new Types.ObjectId(payload.daycare._id);
           authenticatedUser.daycare = {
             _id: authenticatedUser.daycareId,
             name: payload.daycare.name || "",
           };
-        } else if (payload.daycareId && Types.ObjectId.isValid(payload.daycareId)) {
+        } else if (
+          payload.daycareId && Types.ObjectId.isValid(payload.daycareId)
+        ) {
           authenticatedUser.daycareId = new Types.ObjectId(payload.daycareId);
         } else {
-          const membershipOrNull = await daycareMembershipsService.getActiveMembershipByUserId(authenticatedUser._id);
+          const membershipOrNull = await daycareMembershipsService
+            .getActiveMembershipByUserId(authenticatedUser._id);
           authenticatedUser.daycareMembershipId = membershipOrNull?._id;
           authenticatedUser.daycareAccess = membershipOrNull?.access;
-          if (authenticatedUser.role !== UserRole.SUPER_ADMIN && membershipOrNull?.access) {
-            authenticatedUser.role = mapMembershipAccessToUserRole(membershipOrNull.access);
+          if (
+            authenticatedUser.systemRole !== SystemRole.SUPER_ADMIN &&
+            membershipOrNull?.access
+          ) {
+            authenticatedUser.role = mapMembershipAccessToUserRole(
+              membershipOrNull.access,
+            );
           }
           authenticatedUser.daycareId = membershipOrNull?.daycare._id;
           if (membershipOrNull?.daycare._id) {

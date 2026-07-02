@@ -37,7 +37,7 @@ export const typeDefs = `
     activityName: String!
     startTime: String!
     endTime: String!
-    category: ActivityCategory!
+    category: String!
     assignedSitters: [UserRef!]
     notes: String
   }
@@ -52,7 +52,7 @@ export const typeDefs = `
     activityName: String!
     startTime: String!
     endTime: String!
-    category: ActivityCategory!
+    category: String!
     assignedSitters: [UserRefInput!]
     notes: String
   }

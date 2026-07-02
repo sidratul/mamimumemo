@@ -7,7 +7,7 @@ type LoginResult = {
     id: string;
     name: string;
     email: string;
-    role: 'PARENT';
+    access: 'PARENT';
   };
 };
 
@@ -33,7 +33,7 @@ const PROFILE_QUERY = `
       _id
       name
       email
-      role
+      accesses
     }
   }
 `;
@@ -115,11 +115,11 @@ export async function loginAsParent(email: string, password: string): Promise<Lo
       _id: string;
       name: string;
       email: string;
-      role: string;
+      accesses: string[];
     };
   }>('profile', PROFILE_QUERY, undefined, accessToken);
 
-  if (profileData.profile.role !== 'PARENT') {
+  if (!profileData.profile.accesses.includes('PARENT')) {
     throw new Error('Akun ini bukan PARENT dan tidak bisa mengakses aplikasi parent.');
   }
 
@@ -130,7 +130,7 @@ export async function loginAsParent(email: string, password: string): Promise<Lo
       id: profileData.profile._id,
       name: profileData.profile.name,
       email: profileData.profile.email,
-      role: 'PARENT',
+      access: 'PARENT',
     },
   };
 }

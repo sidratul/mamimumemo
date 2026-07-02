@@ -5,8 +5,10 @@ import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
 import { UserRole } from "#shared/enums/enum.ts";
+import { ActivityCategoriesService } from "@/activity_categories/activity_categories.service.ts";
 
 const scheduleTemplatesRepository = new ScheduleTemplatesRepository();
+const activityCategoriesService = new ActivityCategoriesService();
 
 export class ScheduleTemplatesService {
   async getScheduleTemplates(
@@ -64,11 +66,14 @@ export class ScheduleTemplatesService {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }
 
-    const templateData = {
-      ...input,
-    };
+    const parsed = createScheduleTemplateInput.parse(input);
+    await Promise.all(
+      parsed.activities.map((activity) =>
+        activityCategoriesService.getDefaultFieldConfig(activity.category)
+      ),
+    );
 
-    return await scheduleTemplatesRepository.create(templateData);
+    return await scheduleTemplatesRepository.create(parsed);
   }
 
   async updateScheduleTemplate(
@@ -92,7 +97,15 @@ export class ScheduleTemplatesService {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }
 
-    return await scheduleTemplatesRepository.update(id, input);
+    const parsed = updateScheduleTemplateInput.parse(input);
+    if (parsed.activities) {
+      await Promise.all(
+        parsed.activities.map((activity) =>
+          activityCategoriesService.getDefaultFieldConfig(activity.category)
+        ),
+      );
+    }
+    return await scheduleTemplatesRepository.update(id, parsed);
   }
 
   async deactivateScheduleTemplate(id: string, context: AppContext) {

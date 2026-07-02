@@ -40,6 +40,8 @@ REST endpoint tambahan:
 ## Source Exists But Not Mounted
 
 - [21. Weekly Schedules](./modules/21-weekly_schedules.md) - Module source ada di `src/weekly_schedules`, tetapi belum diregister di `main.ts`; endpoint GraphQL belum exposed sampai import resolver/typeDefs ditambahkan ke schema.
+- [22. Activity Categories](./modules/22-activity_categories.md) - `code` adalah identifier stabil yang digunakan pada activity, master activity, dan schedule.
+- [23. Daycare Configs](./modules/23-daycare_configs.md) - Satu dokumen config per daycare dengan unique index pada `daycareId`.
 
 ## Maintenance
 

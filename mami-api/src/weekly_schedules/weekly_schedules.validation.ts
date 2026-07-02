@@ -1,12 +1,13 @@
 import { z } from "zod";
-import { ActivityCategoryEnum, DayOfWeekEnum, ShiftTypeEnum } from "#shared/types/enums.ts";
+import { DayOfWeekEnum, ShiftTypeEnum } from "#shared/types/enums.ts";
+import { storedCategoryCodeSchema } from "@/activity_categories/activity_categories.validation.ts";
 
 export const weeklyActivityInput = z.object({
   masterActivityId: z.string().optional(),
   activityName: z.string().min(1, "Activity name is required"),
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
-  category: z.nativeEnum(ActivityCategoryEnum),
+  category: storedCategoryCodeSchema,
   assignedSitters: z.array(z.object({
     userId: z.string(),
     name: z.string(),

@@ -5,6 +5,23 @@ import { invalidateUserData } from './user';
 
 export type DaycareMembershipAccess = 'OWNER' | 'ADMIN' | 'SITTER';
 export type DaycareMembershipStatus = 'ACTIVE' | 'INACTIVE';
+export type AddUserToDaycareInput = {
+  daycareId: string;
+  access: DaycareMembershipAccess;
+  notes?: string;
+} & (
+  | { userId: string; userData?: never }
+  | { userEmail: string; userId?: never; userData?: never }
+  | {
+      userId?: never;
+      userData: {
+        name: string;
+        email: string;
+        password: string;
+        phone?: string;
+      };
+    }
+);
 
 export type DaycareMembershipRecord = {
   _id: string;
@@ -41,7 +58,7 @@ export async function getDaycareMemberships(daycareId: string) {
   return { ...res, items: res.data?.daycareMemberships || [] };
 }
 
-export async function addExistingUserToDaycare(input: any) {
+export async function addUserToDaycare(input: AddUserToDaycareInput) {
   const res = await apolloClient.mutate({
     mutation: gql`
       mutation AddUserToDaycare($input: AddUserToDaycareInput!) {
@@ -54,6 +71,8 @@ export async function addExistingUserToDaycare(input: any) {
   invalidateDaycareData();
   return res;
 }
+
+export const addExistingUserToDaycare = addUserToDaycare;
 
 export async function deactivateDaycareMembership(id: string) {
   const res = await apolloClient.mutate({

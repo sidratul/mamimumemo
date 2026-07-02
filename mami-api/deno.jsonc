@@ -9,6 +9,8 @@
     "deploy": "deno deploy --prod",
     "deploy:preview": "deno deploy",
     "seed:admin": "deno run -A --env-file=.env scripts/seed-admin.ts",
+    "seed:daycare": "deno run -A --env-file=.env scripts/seed-daycare.ts",
+    "seed:categories": "deno run -A --env-file=.env scripts/seed-activity-categories.ts",
     "purge:db": "deno run -A --env-file=.env scripts/purge-db.ts",
     "cleanup:tmp-uploads": "deno run -A --env-file=.env scripts/cleanup-temp-uploads.ts",
     "migrate": "deno run -A --env-file=.env",
@@ -22,4 +24,3 @@
     "app": "mamimumemo"
   }
 }
-

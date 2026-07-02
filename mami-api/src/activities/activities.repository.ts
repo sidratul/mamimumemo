@@ -1,4 +1,11 @@
 import ActivityModel from "./activities.schema.ts";
+
+function exactCaseInsensitive(value: string) {
+  return {
+    $regex: `^${value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+    $options: "i",
+  };
+}
 import { GraphQLError } from "graphql";
 import { AppContext } from "#shared/config/context.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
@@ -19,7 +26,7 @@ export class ActivitiesRepository {
     }
     
     if (filters.category) {
-      query.category = filters.category;
+      query.category = exactCaseInsensitive(filters.category);
     }
     
     return await ActivityModel.find(query)

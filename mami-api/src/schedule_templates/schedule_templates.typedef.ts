@@ -26,7 +26,7 @@ export const typeDefs = `
     startTime: String!
     endTime: String!
     duration: Int
-    category: ActivityCategory!
+    category: String!
     defaultSitterRole: SitterRole!
   }
 
@@ -42,7 +42,7 @@ export const typeDefs = `
     startTime: String!
     endTime: String!
     duration: Int
-    category: ActivityCategory!
+    category: String!
     defaultSitterRole: SitterRole
   }
 

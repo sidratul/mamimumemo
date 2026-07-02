@@ -1,28 +1,22 @@
 import { z } from "zod";
-import { UserRole } from "#shared/enums/enum.ts";
+import { SystemRole, UserAccess } from "#shared/enums/enum.ts";
 
-const userRoleEnum = z.nativeEnum(UserRole);
-const userPersonaEnum = z.enum([
-  "SUPER_ADMIN",
-  "PARENT",
-  "OWNER",
-  "DAYCARE_ADMIN",
-  "DAYCARE_SITTER",
-]);
+const systemRoleEnum = z.nativeEnum(SystemRole);
+const userAccessEnum = z.nativeEnum(UserAccess);
 
 export const createUserInput = z.object({
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
   password: z.string().min(6, "Password must be at least 6 characters"),
   phone: z.string().optional(),
-  role: userRoleEnum.optional(),
+  systemRole: systemRoleEnum.nullable().optional(),
 });
 
 export const updateUserInput = z.object({
   name: z.string().min(1).optional(),
   email: z.string().email("Invalid email").optional(),
   phone: z.string().optional(),
-  role: userRoleEnum.optional(),
+  systemRole: systemRoleEnum.nullable().optional(),
 });
 
 export const updateUserPasswordInput = z.object({
@@ -32,7 +26,7 @@ export const updateUserPasswordInput = z.object({
 
 export const userFilterInput = z.object({
   search: z.string().optional(),
-  personas: z.array(userPersonaEnum).optional(),
+  accesses: z.array(userAccessEnum).optional(),
 });
 
 export const userSortInput = z.object({

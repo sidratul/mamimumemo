@@ -2,19 +2,27 @@ import { loginInput, refreshTokenInput } from "./auth.validation.ts";
 import { GraphQLError } from "graphql";
 import bcrypt from "bcrypt";
 import { Types } from "mongoose";
-import { createAccessToken, createRefreshToken, verifyRefreshToken } from "#shared/utils/jwt.ts";
+import {
+  createAccessToken,
+  createRefreshToken,
+  verifyRefreshToken,
+} from "#shared/utils/jwt.ts";
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
-import { UserRole } from "#shared/enums/enum.ts";
+import { SystemRole, UserRole } from "#shared/enums/enum.ts";
 import UsersService from "@/users/users.service.ts";
 import DaycareMembershipsService from "@/daycare_memberships/daycare_memberships.service.ts";
 import { DaycareMembershipAccess } from "@/daycare_memberships/daycare_memberships.enum.ts";
+import { ParentsRepository } from "@/parents/parents.repository.ts";
 
 const usersService = new UsersService();
 const daycareMembershipsService = new DaycareMembershipsService();
+const parentsRepository = new ParentsRepository();
 
-function mapMembershipAccessToUserRole(access: DaycareMembershipAccess): UserRole {
+function mapMembershipAccessToUserRole(
+  access: DaycareMembershipAccess,
+): UserRole {
   switch (access) {
     case DaycareMembershipAccess.OWNER:
       return UserRole.DAYCARE_OWNER;
@@ -29,7 +37,7 @@ export class AuthService {
   private async buildAccessTokenPayload(user: {
     _id: { toString(): string };
     email: string;
-    role?: string;
+    systemRole?: string | null;
     name: string;
   }) {
     let daycareMembership:
@@ -43,9 +51,10 @@ export class AuthService {
       }
       | undefined;
 
-    const membershipOrNull = await daycareMembershipsService.getActiveMembershipByUserId(
-      new Types.ObjectId(user._id.toString()),
-    );
+    const membershipOrNull = await daycareMembershipsService
+      .getActiveMembershipByUserId(
+        new Types.ObjectId(user._id.toString()),
+      );
     if (membershipOrNull) {
       daycareMembership = {
         _id: membershipOrNull._id.toString(),
@@ -57,15 +66,23 @@ export class AuthService {
       };
     }
 
-    const effectiveRole = user.role === UserRole.SUPER_ADMIN
-      ? user.role
+    const isParent = await parentsRepository.existsActiveByUserId(
+      user._id.toString(),
+    );
+    const effectiveRole = user.systemRole === SystemRole.SUPER_ADMIN
+      ? UserRole.SUPER_ADMIN
       : daycareMembership
-      ? mapMembershipAccessToUserRole(daycareMembership.access as DaycareMembershipAccess)
-      : user.role;
+      ? mapMembershipAccessToUserRole(
+        daycareMembership.access as DaycareMembershipAccess,
+      )
+      : isParent
+      ? UserRole.PARENT
+      : undefined;
 
     return {
       _id: user._id.toString(),
       email: user.email,
+      systemRole: user.systemRole ?? null,
       role: effectiveRole,
       name: user.name,
       daycareMembership,
@@ -76,23 +93,42 @@ export class AuthService {
     console.log(`[Auth] Attempting login for email: ${input.email}`);
     loginInput.parse(input);
     const userOrNull = await usersService.findUserByEmail(input.email);
-    
+
     if (!userOrNull) {
-      console.error(`[Auth] Login failed: User with email ${input.email} not found.`);
+      console.error(
+        `[Auth] Login failed: User with email ${input.email} not found.`,
+      );
       throw new GraphQLError(MESSAGES.AUTH.INVALID_CREDENTIALS);
     }
 
-    console.log(`[Auth] User found: ${userOrNull.name} (Role: ${userOrNull.role})`);
-    
-    const isPasswordValid = await bcrypt.compare(input.password, userOrNull.password);
+    console.log(
+      `[Auth] User found: ${userOrNull.name} (System role: ${
+        userOrNull.systemRole || "none"
+      })`,
+    );
+
+    const isPasswordValid = await bcrypt.compare(
+      input.password,
+      userOrNull.password,
+    );
     if (!isPasswordValid) {
-      console.error(`[Auth] Login failed: Password mismatch for user ${input.email}.`);
-      console.log(`[Auth] Debug - Input password length: ${input.password.length}`);
-      console.log(`[Auth] Debug - Stored hash prefix: ${userOrNull.password.substring(0, 7)}...`);
+      console.error(
+        `[Auth] Login failed: Password mismatch for user ${input.email}.`,
+      );
+      console.log(
+        `[Auth] Debug - Input password length: ${input.password.length}`,
+      );
+      console.log(
+        `[Auth] Debug - Stored hash prefix: ${
+          userOrNull.password.substring(0, 7)
+        }...`,
+      );
       throw new GraphQLError(MESSAGES.AUTH.INVALID_CREDENTIALS);
     }
 
-    console.log(`[Auth] Login successful for ${input.email}. Building token...`);
+    console.log(
+      `[Auth] Login successful for ${input.email}. Building token...`,
+    );
     const tokenPayload = await this.buildAccessTokenPayload(userOrNull);
     const accessToken = createAccessToken(tokenPayload);
     const refreshToken = createRefreshToken({
@@ -111,12 +147,18 @@ export class AuthService {
     let payload: string | { _id?: string; tokenType?: string };
 
     try {
-      payload = verifyRefreshToken(input.refreshToken) as { _id?: string; tokenType?: string };
+      payload = verifyRefreshToken(input.refreshToken) as {
+        _id?: string;
+        tokenType?: string;
+      };
     } catch {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    if (typeof payload === "string" || !payload._id || payload.tokenType !== "refresh") {
+    if (
+      typeof payload === "string" || !payload._id ||
+      payload.tokenType !== "refresh"
+    ) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
@@ -124,13 +166,17 @@ export class AuthService {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const userOrNull = await usersService.findUserById(new Types.ObjectId(payload._id));
+    const userOrNull = await usersService.findUserById(
+      new Types.ObjectId(payload._id),
+    );
     if (!userOrNull) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
     return {
-      accessToken: createAccessToken(await this.buildAccessTokenPayload(userOrNull)),
+      accessToken: createAccessToken(
+        await this.buildAccessTokenPayload(userOrNull),
+      ),
       refreshToken: createRefreshToken({
         _id: userOrNull._id.toString(),
         tokenType: "refresh",
@@ -153,15 +199,16 @@ export class AuthService {
       name: string;
       email: string;
       phone?: string;
-      role?: string;
+      systemRole?: string | null;
       createdAt?: Date;
       updatedAt?: Date;
     };
 
     return {
-      _id: (_id ? _id.toString() : context.user._id?.toString?.() || context.user.id || id),
+      _id: _id
+        ? _id.toString()
+        : context.user._id?.toString?.() || context.user.id || id,
       ...profile,
-      role: profile.role,
     };
   }
 }

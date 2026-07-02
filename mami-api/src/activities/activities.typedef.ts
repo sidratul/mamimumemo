@@ -5,7 +5,7 @@ export const typeDefs = `
     daycareId: ObjectId
     masterActivityId: ObjectId
     activityName: String!
-    category: ActivityCategory!
+    category: String!
     date: Date!
     startTime: String!
     endTime: String
@@ -33,21 +33,6 @@ export const typeDefs = `
     notes: String
     createdAt: Date!
     updatedAt: Date!
-  }
-
-  enum ActivityCategory {
-    MEAL
-    NAP
-    TOILETING
-    CARE
-    PLAY
-    LEARNING
-    CREATIVE
-    PHYSICAL
-    OUTDOOR
-    ROUTINE
-    SOCIAL
-    DEVELOPMENT
   }
 
   enum MealType {
@@ -117,7 +102,7 @@ export const typeDefs = `
 
   type DaycareActivity {
     activityName: String!
-    category: ActivityCategory!
+    category: String!
     startTime: String!
     endTime: String!
     source: String!
@@ -135,7 +120,7 @@ export const typeDefs = `
     daycareId: ObjectId
     masterActivityId: ObjectId
     activityName: String!
-    category: ActivityCategory!
+    category: String!
     date: Date!
     startTime: String!
     endTime: String
@@ -157,7 +142,7 @@ export const typeDefs = `
 
   input UpdateActivityInput {
     activityName: String
-    category: ActivityCategory
+    category: String
     date: Date
     startTime: String
     endTime: String
@@ -185,7 +170,7 @@ export const typeDefs = `
 
   extend type Query {
     "Get activities for a child"
-    childActivities(childId: ObjectId!, date: Date, category: ActivityCategory): [Activity!]!
+    childActivities(childId: ObjectId!, date: Date, category: String): [Activity!]!
     
     "Get activity by ID"
     activity(id: ObjectId!): Activity

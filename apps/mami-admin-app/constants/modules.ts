@@ -7,6 +7,12 @@ export type ModuleDefinition = {
 
 export const moduleDefinitions: ModuleDefinition[] = [
   {
+    slug: 'activity-categories',
+    title: 'Kategori Aktivitas',
+    description: 'Kelola kategori aktivitas global dan behavior field.',
+    route: '/(app)/modules/activity-categories',
+  },
+  {
     slug: 'daycare-approval',
     title: 'Daycare Approval',
     description: 'List daycare global + approval pendaftaran oleh system admin.',
@@ -15,7 +21,7 @@ export const moduleDefinitions: ModuleDefinition[] = [
   {
     slug: 'users',
     title: 'Users',
-    description: 'List user global, filter role, dan monitoring akun system-level.',
+    description: 'List user global, filter akses, dan monitoring akun system-level.',
     route: '/(app)/(tabs)/users',
   },
   {

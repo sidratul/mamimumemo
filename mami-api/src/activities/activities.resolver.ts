@@ -5,6 +5,12 @@ import { AppContext } from "#shared/config/context.ts";
 const activitiesService = new ActivitiesService();
 
 export const resolvers = {
+  Activity: {
+    category: (activity: { category?: string }) => activity.category?.toUpperCase(),
+  },
+  DaycareActivity: {
+    category: (activity: { category?: string }) => activity.category?.toUpperCase(),
+  },
   Query: {
     childActivities: (
       _: unknown,

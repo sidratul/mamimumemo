@@ -12,10 +12,38 @@ deno run -A scripts/seed-admin.ts
 
 - Email: `admin@mami.com`
 - Password: `admin123`
-- Role: `SUPER_ADMIN`
+- System role: `SUPER_ADMIN`
 
 ## Catatan
 
 - Script ini melakukan upsert berdasarkan email, jadi aman dijalankan ulang
-- Script ini sengaja membuat `SUPER_ADMIN`, bukan `ADMIN`, karena flow approval admin system saat ini mensyaratkan role `SUPER_ADMIN`
+- Script menyimpan `systemRole: SUPER_ADMIN` dan menghapus field legacy `role`
 - Ganti password default setelah first login
+
+## Seed Daycare
+
+Membuat atau memperbarui user owner, `Saldira Daycare`, dan membership
+`OWNER` dalam satu command:
+
+```bash
+deno task seed:daycare
+```
+
+Default owner:
+
+- Email: `admin@saldira.com`
+- Password: `Admin@2026`
+
+## Seed Activity Categories
+
+Membuat atau memperbarui kategori aktivitas global:
+
+```bash
+deno task seed:categories
+```
+
+Dalam Docker Compose:
+
+```bash
+docker compose exec deno-app deno task seed:categories
+```

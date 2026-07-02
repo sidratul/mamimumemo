@@ -1,10 +1,9 @@
-import { getUserRoleLabel as getSharedUserRoleLabel } from '@mami/core';
-import { UserRecord, UserRole } from './types';
+import { UserRecord, SystemRoleSelection } from './types';
 
 export function mapUser(node: UserRecord): UserRecord {
   return node;
 }
 
-export function getUserRoleLabel(role: UserRole) {
-  return getSharedUserRoleLabel(role as any);
+export function getSystemRoleLabel(role: SystemRoleSelection) {
+  return role === 'SUPER_ADMIN' ? 'Super Admin' : 'Tidak ada akses sistem';
 }

@@ -5,6 +5,9 @@ import { AppContext } from "#shared/config/context.ts";
 const scheduleTemplatesService = new ScheduleTemplatesService();
 
 export const resolvers = {
+  TemplateActivity: {
+    category: (activity: { category?: string }) => activity.category?.toUpperCase(),
+  },
   Query: {
     scheduleTemplates: (
       _: unknown,

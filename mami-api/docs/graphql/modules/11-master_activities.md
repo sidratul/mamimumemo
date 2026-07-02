@@ -13,9 +13,9 @@ Status: **Exposed di GraphQL schema**
 
 ## Queries
 
-- `masterActivities(daycareId: ObjectId!, active: Boolean, category: ActivityCategory): [MasterActivity!]!`
+- `masterActivities(daycareId: ObjectId!, active: Boolean, category: String): [MasterActivity!]!`
 - `masterActivity(id: ObjectId!): MasterActivity`
-- `defaultFieldConfig(category: ActivityCategory!): FieldConfig!`
+- `defaultFieldConfig(category: String!): FieldConfig!`
 
 ## Mutations
 

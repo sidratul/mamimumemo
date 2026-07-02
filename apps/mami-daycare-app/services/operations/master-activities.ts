@@ -1,6 +1,6 @@
 import { graphqlRequest } from '../graphql/client';
 
-export type MasterActivityCategory = 'MEAL' | 'NAP' | 'CARE' | 'PLAY' | 'LEARNING';
+export type MasterActivityCategory = string;
 
 export type MasterActivity = {
   id: string;

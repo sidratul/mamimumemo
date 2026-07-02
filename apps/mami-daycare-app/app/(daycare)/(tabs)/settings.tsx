@@ -15,6 +15,12 @@ type MenuItem = {
 
 const menuItems: MenuItem[] = [
   {
+    label: 'Label Kategori',
+    description: 'Sesuaikan label dan warna kategori aktivitas.',
+    icon: 'tag-multiple-outline',
+    route: '/(daycare)/category-config',
+  },
+  {
     label: 'Aktivitas',
     description: 'Buat daftar master activity yang bisa dipakai oleh daycare.',
     icon: 'calendar-check-outline',

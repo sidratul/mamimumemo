@@ -7,6 +7,21 @@ export enum UserRole {
   PARENT = "PARENT",
 }
 
+export enum SystemRole {
+  SUPER_ADMIN = "SUPER_ADMIN",
+}
+
+export const SYSTEM_ROLES = [SystemRole.SUPER_ADMIN] as const;
+export type SystemRoleType = typeof SYSTEM_ROLES[number];
+
+export enum UserAccess {
+  SUPER_ADMIN = "SUPER_ADMIN",
+  PARENT = "PARENT",
+  OWNER = "OWNER",
+  DAYCARE_ADMIN = "DAYCARE_ADMIN",
+  DAYCARE_SITTER = "DAYCARE_SITTER",
+}
+
 // Array role untuk validasi dan referensi
 export const USER_ROLES = [
   UserRole.SUPER_ADMIN,

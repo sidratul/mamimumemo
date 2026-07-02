@@ -1,10 +1,14 @@
 import { ChildrenRepository } from "./children.repository.ts";
-import { createChildInput, updateChildInput, addGuardianInput, removeGuardianInput } from "./children.validation.ts";
+import {
+  addGuardianInput,
+  createChildInput,
+  removeGuardianInput,
+  updateChildInput,
+} from "./children.validation.ts";
 import { GraphQLError } from "graphql";
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
-import { UserRole } from "#shared/enums/enum.ts";
 import UserModel from "@/auth/auth.schema.ts";
 
 const childrenRepository = new ChildrenRepository();
@@ -25,7 +29,10 @@ export class ChildrenService {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const hasAccess = await childrenRepository.userHasAccess(id, context.user.id);
+    const hasAccess = await childrenRepository.userHasAccess(
+      id,
+      context.user.id,
+    );
     if (!hasAccess) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -55,7 +62,7 @@ export class ChildrenService {
     }
 
     const guardians = input.guardians || [];
-    
+
     // Add owner as guardian if not already added
     const ownerAsGuardian = {
       user: {
@@ -96,7 +103,7 @@ export class ChildrenService {
   async updateChild(
     id: string,
     input: typeof updateChildInput._type,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     const user = context.user;
@@ -116,10 +123,14 @@ export class ChildrenService {
     }
 
     const isOwner = child.ownerId.toString() === user.id;
-    const guardian = child.guardians.find((g) => g.user.userId.toString() === user.id);
+    const guardian = child.guardians.find((g) =>
+      g.user.userId.toString() === user.id
+    );
 
     if (!isOwner && !guardian?.permissions?.includes("edit_profile")) {
-      throw new GraphQLError("You don't have permission to edit this child's profile");
+      throw new GraphQLError(
+        "You don't have permission to edit this child's profile",
+      );
     }
 
     return await childrenRepository.update(id, input);
@@ -128,7 +139,7 @@ export class ChildrenService {
   async addGuardian(
     childId: string,
     input: typeof addGuardianInput._type,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     if (!context.user) {
@@ -147,7 +158,7 @@ export class ChildrenService {
 
     // Check if guardian already exists
     const existingGuardian = child.guardians.find(
-      (g: any) => g.user.userId.toString() === input.userId
+      (g: any) => g.user.userId.toString() === input.userId,
     );
 
     if (existingGuardian) {
@@ -166,7 +177,7 @@ export class ChildrenService {
         name: guardianUser.name,
         email: guardianUser.email,
         phone: guardianUser.phone || "",
-        role: guardianUser.role === UserRole.PARENT ? "parent" : "guardian",
+        role: "guardian" as const,
       },
       relation: input.relation,
       permissions: input.permissions,
@@ -185,7 +196,7 @@ export class ChildrenService {
   async removeGuardian(
     childId: string,
     input: typeof removeGuardianInput._type,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     if (!context.user) {
@@ -202,6 +213,9 @@ export class ChildrenService {
       throw new GraphQLError("Only the child's owner can remove guardians");
     }
 
-    return await childrenRepository.removeGuardian(childId, input.guardianUserId);
+    return await childrenRepository.removeGuardian(
+      childId,
+      input.guardianUserId,
+    );
   }
 }

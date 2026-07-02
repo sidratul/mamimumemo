@@ -3,34 +3,47 @@ import { ClientSession, ProjectionType } from "mongoose";
 import { GraphQLError } from "graphql";
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
-import { RoleType, UserRole } from "#shared/enums/enum.ts";
+import {
+  SystemRole,
+  SystemRoleType,
+  UserAccess,
+  UserRole,
+} from "#shared/enums/enum.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
 import { ObjectId } from "#shared/types/objectid.type.ts";
-import { User, UserAccess, UserQueryOptions } from "./users.d.ts";
+import { User, UserQueryOptions } from "./users.d.ts";
 import usersRepository from "./users.repository.ts";
 import { DaycareMembershipsRepository } from "@/daycare_memberships/daycare_memberships.repository.ts";
 import { DaycareMembershipAccess } from "@/daycare_memberships/daycare_memberships.enum.ts";
 import { mapMembershipAccessToUserAccess } from "@/users/users.access.ts";
-import { createUserInput, updateUserInput, updateUserPasswordInput } from "./users.validation.ts";
+import { ParentsRepository } from "@/parents/parents.repository.ts";
+import {
+  createUserInput,
+  updateUserInput,
+  updateUserPasswordInput,
+} from "./users.validation.ts";
 
 const daycareMembershipsRepository = new DaycareMembershipsRepository();
+const parentsRepository = new ParentsRepository();
 
 export class UsersService {
   async createUser(
     input: typeof createUserInput._type,
     options?: { session?: ClientSession },
   ) {
-    const existingUserOrNull = await usersRepository.find({ email: input.email });
+    const validatedInput = createUserInput.parse(input);
+    const existingUserOrNull = await usersRepository.find({
+      email: validatedInput.email,
+    });
     if (existingUserOrNull) {
       throw new GraphQLError(MESSAGES.AUTH.EMAIL_EXISTS);
     }
 
-    const hashedPassword = await bcrypt.hash(input.password, 10);
+    const hashedPassword = await bcrypt.hash(validatedInput.password, 10);
     return await usersRepository.create({
-      ...input,
-      phone: input.phone || "",
+      ...validatedInput,
+      phone: validatedInput.phone || "",
       password: hashedPassword,
-      role: (input.role || UserRole.PARENT) as RoleType,
     }, options);
   }
 
@@ -42,7 +55,11 @@ export class UsersService {
     return await usersRepository.findById(id, projection);
   }
 
-  async listUsers(options: UserQueryOptions, context: AppContext, projection?: ProjectionType<User>) {
+  async listUsers(
+    options: UserQueryOptions,
+    context: AppContext,
+    projection?: ProjectionType<User>,
+  ) {
     this.requireSuperAdmin(context);
     const filter = await this.buildUserFilter(options);
     return await usersRepository.findAll(filter, options, projection);
@@ -53,7 +70,11 @@ export class UsersService {
     return await usersRepository.count(await this.buildUserFilter(filter));
   }
 
-  async getUser(id: ObjectId, context: AppContext, projection?: ProjectionType<User>) {
+  async getUser(
+    id: ObjectId,
+    context: AppContext,
+    projection?: ProjectionType<User>,
+  ) {
     this.requireSuperAdmin(context);
     const user = await usersRepository.findById(id, projection);
     if (!user) {
@@ -62,7 +83,10 @@ export class UsersService {
     return user;
   }
 
-  async createUserAction(input: typeof createUserInput._type, context: AppContext) {
+  async createUserAction(
+    input: typeof createUserInput._type,
+    context: AppContext,
+  ) {
     this.requireSuperAdmin(context);
     const user = await this.createUser(input);
     return {
@@ -71,7 +95,11 @@ export class UsersService {
     };
   }
 
-  async updateUser(id: ObjectId, input: typeof updateUserInput._type, context: AppContext) {
+  async updateUser(
+    id: ObjectId,
+    input: typeof updateUserInput._type,
+    context: AppContext,
+  ) {
     this.requireSuperAdminOrSelf(id, context);
     const existingUser = await usersRepository.findById(id);
     if (!existingUser) {
@@ -99,7 +127,11 @@ export class UsersService {
     };
   }
 
-  async updateUserPassword(id: ObjectId, input: typeof updateUserPasswordInput._type, context: AppContext) {
+  async updateUserPassword(
+    id: ObjectId,
+    input: typeof updateUserPasswordInput._type,
+    context: AppContext,
+  ) {
     this.requireSuperAdminOrSelf(id, context);
     const user = await usersRepository.findById(id);
     if (!user) {
@@ -109,14 +141,19 @@ export class UsersService {
     const isSuperAdmin = context.user?.role === UserRole.SUPER_ADMIN;
     if (!isSuperAdmin) {
       const currentPassword = input.currentPassword || "";
-      const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+      const isPasswordValid = await bcrypt.compare(
+        currentPassword,
+        user.password,
+      );
       if (!isPasswordValid) {
         throw new GraphQLError(MESSAGES.AUTH.INVALID_CREDENTIALS);
       }
     }
 
     const hashedPassword = await bcrypt.hash(input.newPassword, 10);
-    const updatedUser = await usersRepository.update(user._id, { password: hashedPassword });
+    const updatedUser = await usersRepository.update(user._id, {
+      password: hashedPassword,
+    });
     if (!updatedUser) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -148,15 +185,21 @@ export class UsersService {
     return await usersRepository.deleteByIdOrEmail(input, options);
   }
 
-  async getUserAccesses(userId: ObjectId, fallbackRole?: RoleType): Promise<UserAccess[]> {
+  async getUserAccesses(
+    userId: ObjectId,
+    systemRole?: SystemRoleType | null,
+  ): Promise<UserAccess[]> {
     const accesses = new Set<UserAccess>();
+    const effectiveSystemRole = systemRole === undefined
+      ? (await usersRepository.findById(userId, { systemRole: 1 }))?.systemRole
+      : systemRole;
 
-    if (fallbackRole === UserRole.SUPER_ADMIN) {
-      accesses.add("SUPER_ADMIN");
+    if (effectiveSystemRole === SystemRole.SUPER_ADMIN) {
+      accesses.add(UserAccess.SUPER_ADMIN);
     }
 
-    if (fallbackRole === UserRole.PARENT) {
-      accesses.add("PARENT");
+    if (await parentsRepository.existsActiveByUserId(userId.toString())) {
+      accesses.add(UserAccess.PARENT);
     }
 
     const memberships = await daycareMembershipsRepository.listByUserId(userId);
@@ -165,16 +208,6 @@ export class UsersService {
         continue;
       }
       accesses.add(mapMembershipAccessToUserAccess(membership.access));
-    }
-
-    if (accesses.size === 0 && fallbackRole) {
-      if (fallbackRole === UserRole.DAYCARE_OWNER) {
-        accesses.add("OWNER");
-      } else if (fallbackRole === UserRole.DAYCARE_ADMIN) {
-        accesses.add("DAYCARE_ADMIN");
-      } else if (fallbackRole === UserRole.DAYCARE_SITTER) {
-        accesses.add("DAYCARE_SITTER");
-      }
     }
 
     return [...accesses];
@@ -196,31 +229,34 @@ export class UsersService {
       return filter;
     }
 
-    const roleFilters: RoleType[] = [];
+    const systemRoleFilters: SystemRoleType[] = [];
     const membershipAccessFilters: DaycareMembershipAccess[] = [];
+    const orFilters: import("mongoose").FilterQuery<User>[] = [];
 
     for (const access of accesses) {
-      if (access === "SUPER_ADMIN") {
-        roleFilters.push(UserRole.SUPER_ADMIN);
-      } else if (access === "PARENT") {
-        roleFilters.push(UserRole.PARENT);
-      } else if (access === "OWNER") {
+      if (access === UserAccess.SUPER_ADMIN) {
+        systemRoleFilters.push(SystemRole.SUPER_ADMIN);
+      } else if (access === UserAccess.PARENT) {
+        const parentUserIds = await parentsRepository.findActiveUserIds();
+        if (parentUserIds.length > 0) {
+          orFilters.push({ _id: { $in: parentUserIds } });
+        }
+      } else if (access === UserAccess.OWNER) {
         membershipAccessFilters.push(DaycareMembershipAccess.OWNER);
-      } else if (access === "DAYCARE_ADMIN") {
+      } else if (access === UserAccess.DAYCARE_ADMIN) {
         membershipAccessFilters.push(DaycareMembershipAccess.ADMIN);
-      } else if (access === "DAYCARE_SITTER") {
+      } else if (access === UserAccess.DAYCARE_SITTER) {
         membershipAccessFilters.push(DaycareMembershipAccess.SITTER);
       }
     }
 
-    const orFilters: import("mongoose").FilterQuery<User>[] = [];
-
-    if (roleFilters.length > 0) {
-      orFilters.push({ role: { $in: roleFilters } });
+    if (systemRoleFilters.length > 0) {
+      orFilters.push({ systemRole: { $in: systemRoleFilters } });
     }
 
     if (membershipAccessFilters.length > 0) {
-      const membershipUserIds = await daycareMembershipsRepository.findActiveUserIdsByAccesses(membershipAccessFilters);
+      const membershipUserIds = await daycareMembershipsRepository
+        .findActiveUserIdsByAccesses(membershipAccessFilters);
       if (membershipUserIds.length > 0) {
         orFilters.push({ _id: { $in: membershipUserIds } });
       }
@@ -259,7 +295,8 @@ export class UsersService {
 
     const isSuperAdmin = context.user.role === UserRole.SUPER_ADMIN;
     const normalizedUserId = userId.toString();
-    const isSelf = context.user.id === normalizedUserId || context.user._id?.toString() === normalizedUserId;
+    const isSelf = context.user.id === normalizedUserId ||
+      context.user._id?.toString() === normalizedUserId;
     if (!isSuperAdmin && !isSelf) {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }

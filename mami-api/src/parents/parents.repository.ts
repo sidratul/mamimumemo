@@ -27,6 +27,17 @@ export class ParentsRepository {
     }).populate("childrenIds").exec();
   }
 
+  async existsActiveByUserId(userId: string) {
+    return await ParentModel.exists({
+      "user.userId": userId,
+      active: true,
+    }) !== null;
+  }
+
+  async findActiveUserIds() {
+    return await ParentModel.distinct("user.userId", { active: true });
+  }
+
   async create(data: any) {
     const parent = new ParentModel(data);
     return await parent.save();
@@ -40,7 +51,7 @@ export class ParentsRepository {
     return await ParentModel.findByIdAndUpdate(
       id,
       { active: false },
-      { new: true }
+      { new: true },
     ).exec();
   }
 

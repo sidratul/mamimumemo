@@ -3,17 +3,9 @@ import { SelectInput, TextField, type FormFieldProps, type SelectOption } from '
 
 import type { MasterActivityCategory } from '../../../services/operations/master-activities';
 
-export const masterActivityCategoryOptions: SelectOption[] = [
-  { label: 'Makan', value: 'MEAL' },
-  { label: 'Tidur', value: 'NAP' },
-  { label: 'Perawatan', value: 'CARE' },
-  { label: 'Main', value: 'PLAY' },
-  { label: 'Belajar', value: 'LEARNING' },
-];
-
 export const masterActivityFormSchema = z.object({
   name: z.string().min(1, 'Nama aktivitas wajib diisi.'),
-  category: z.enum(['MEAL', 'NAP', 'CARE', 'PLAY', 'LEARNING']),
+  category: z.string().min(1, 'Kategori wajib dipilih.'),
   defaultDuration: z
     .string()
     .min(1, 'Durasi wajib diisi.')
@@ -28,7 +20,10 @@ export const initialMasterActivityFormValue: MasterActivityFormValue = {
   defaultDuration: '30',
 };
 
-export const masterActivityFormFields: FormFieldProps<MasterActivityFormValue> = {
+export function createMasterActivityFormFields(
+  categoryOptions: SelectOption[],
+): FormFieldProps<MasterActivityFormValue> {
+  return {
   name: {
     label: 'Nama Aktivitas',
     required: true,
@@ -48,7 +43,7 @@ export const masterActivityFormFields: FormFieldProps<MasterActivityFormValue> =
     props: {
       placeholder: 'Pilih kategori',
       title: 'Kategori',
-      options: masterActivityCategoryOptions,
+      options: categoryOptions,
     },
   },
   defaultDuration: {
@@ -64,7 +59,8 @@ export const masterActivityFormFields: FormFieldProps<MasterActivityFormValue> =
       useBottomSheetInput: true,
     },
   },
-};
+  };
+}
 
 export function normalizeMasterActivityCategory(value: string): MasterActivityCategory {
   return value as MasterActivityCategory;

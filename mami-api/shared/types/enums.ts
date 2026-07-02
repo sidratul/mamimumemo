@@ -16,7 +16,7 @@ export const ActivityCategoryEnum = {
   DEVELOPMENT: "development",
 } as const;
 
-export type ActivityCategory = typeof ActivityCategoryEnum[keyof typeof ActivityCategoryEnum];
+export type ActivityCategory = string;
 
 // Meal Type
 export const MealTypeEnum = {

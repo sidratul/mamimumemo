@@ -39,6 +39,7 @@ export const typeDefs = `
     daycareId: ObjectId!
     access: DaycareMembershipAccess!
     userId: ObjectId
+    userEmail: String
     userData: DaycareMembershipUserDataInput
     notes: String
   }

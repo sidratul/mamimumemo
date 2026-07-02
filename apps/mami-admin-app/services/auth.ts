@@ -17,7 +17,7 @@ export const refreshAdminSession = createRefreshSessionHandler({
 type LoginResult = {
   accessToken: string;
   refreshToken: string;
-  profile: { _id: string; name: string; email: string; role: string; };
+  profile: { _id: string; name: string; email: string; systemRole: 'SUPER_ADMIN'; };
 };
 
 const LOGIN_MUTATION = `
@@ -28,7 +28,7 @@ const LOGIN_MUTATION = `
 
 const PROFILE_QUERY = `
   query GetProfile {
-    profile { _id name email role }
+    profile { _id name email systemRole }
   }
 `;
 
@@ -46,6 +46,6 @@ async function requestGQL<T>(query: string, vars?: any, token?: string) {
 export async function loginAsAdmin(email: string, password: string): Promise<LoginResult> {
   const { login } = await requestGQL<{ login: any }>(LOGIN_MUTATION, { input: { email, password } });
   const { profile } = await requestGQL<{ profile: any }>(PROFILE_QUERY, undefined, login.accessToken);
-  if (profile.role !== 'SUPER_ADMIN') throw new Error('Akses ditolak: Hanya SUPER_ADMIN yang diizinkan.');
+  if (profile.systemRole !== 'SUPER_ADMIN') throw new Error('Akses ditolak: Hanya SUPER_ADMIN yang diizinkan.');
   return { accessToken: login.accessToken, refreshToken: login.refreshToken, profile };
 }

@@ -1,6 +1,6 @@
 import { HydratedDocument } from "mongoose";
 import { ObjectId, PaginationOptions, SortOptions } from "#shared/index.ts";
-import { RoleType } from "#shared/enums/enum.ts";
+import { SystemRoleType, UserAccess } from "#shared/enums/enum.ts";
 
 export interface User {
   _id: ObjectId;
@@ -8,7 +8,7 @@ export interface User {
   email: string;
   password: string;
   phone?: string;
-  role?: RoleType;
+  systemRole?: SystemRoleType | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -17,16 +17,10 @@ export type UserDoc = HydratedDocument<User>;
 
 export type UserSubDoc = Pick<User, "_id" | "name" | "email" | "phone">;
 
-export type UserAccess =
-  | "SUPER_ADMIN"
-  | "PARENT"
-  | "OWNER"
-  | "DAYCARE_ADMIN"
-  | "DAYCARE_SITTER";
-
 export interface UserFilter {
   search?: string;
   accesses?: UserAccess[];
 }
 
-export interface UserQueryOptions extends UserFilter, PaginationOptions, SortOptions {}
+export interface UserQueryOptions
+  extends UserFilter, PaginationOptions, SortOptions {}

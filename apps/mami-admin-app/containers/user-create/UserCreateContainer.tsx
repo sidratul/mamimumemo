@@ -6,14 +6,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppPageHeader } from '../../components/common/AppPageHeader';
 import { ADMIN_MANAGED_ROLE_OPTIONS } from '../../components/input/RoleSelect';
 import { createUser } from '../../services/user';
-import { UserRole } from '../../shared/user/types';
+import { SystemRoleSelection } from '../../shared/user/types';
 import { UserCreateFormSection } from './UserCreateFormSection';
 
 type UserCreateFormData = {
   name: string;
   email: string;
   phone: string;
-  role: UserRole;
+  systemRole: SystemRoleSelection;
   password: string;
 };
 
@@ -31,7 +31,7 @@ export function UserCreateContainer() {
         email: values.email.trim(),
         phone: values.phone.trim(),
         password: values.password,
-        role: values.role,
+        systemRole: values.systemRole === 'NONE' ? null : values.systemRole,
       });
       if (res.errors) throw new Error(res.errors[0].message);
       const result = res.data;

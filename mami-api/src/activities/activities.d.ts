@@ -35,19 +35,7 @@ export interface IActivity {
   updatedAt: Date;
 }
 
-export type ActivityCategory =
-  | "meal"
-  | "nap"
-  | "toileting"
-  | "care"
-  | "play"
-  | "learning"
-  | "creative"
-  | "physical"
-  | "outdoor"
-  | "routine"
-  | "social"
-  | "development";
+export type ActivityCategory = string;
 
 export type MealType = "breakfast" | "snack" | "lunch" | "dinner";
 export type EatenAmount = "all" | "some" | "none";

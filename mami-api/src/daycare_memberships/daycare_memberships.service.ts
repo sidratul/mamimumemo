@@ -13,22 +13,14 @@ import { DaycareRepository } from "@/daycare/daycare.repository.ts";
 import { addUserToDaycareInput } from "./daycare_memberships.validation.ts";
 import { DaycareMembershipsRepository } from "./daycare_memberships.repository.ts";
 import { DaycareMembershipDocShape } from "./daycare_memberships.d.ts";
-import { DaycareMembershipAccess, DaycareMembershipStatus } from "./daycare_memberships.enum.ts";
+import {
+  DaycareMembershipAccess,
+  DaycareMembershipStatus,
+} from "./daycare_memberships.enum.ts";
 
 const usersService = new UsersService();
 const daycareRepository = new DaycareRepository();
 const repository = new DaycareMembershipsRepository();
-
-function mapAccessToUserRole(access: DaycareMembershipAccess): UserRole {
-  switch (access) {
-    case DaycareMembershipAccess.OWNER:
-      return UserRole.DAYCARE_OWNER;
-    case DaycareMembershipAccess.ADMIN:
-      return UserRole.DAYCARE_ADMIN;
-    case DaycareMembershipAccess.SITTER:
-      return UserRole.DAYCARE_SITTER;
-  }
-}
 
 export class DaycareMembershipsService {
   async getActiveMembershipByUserId(userId: ObjectId) {
@@ -78,15 +70,21 @@ export class DaycareMembershipsService {
     }, options);
   }
 
-  async addUserToDaycare(input: typeof addUserToDaycareInput._type, context: AppContext) {
+  async addUserToDaycare(
+    input: typeof addUserToDaycareInput._type,
+    context: AppContext,
+  ) {
     this.requireManageDaycare(input.daycareId, context);
+    this.requireCanManageAccess(input.access, context);
     const daycare = await daycareRepository.findViewById(input.daycareId);
     if (!daycare) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
 
-    if (input.userId) {
-      const user = await usersService.findUserById(input.userId);
+    if (input.userId || input.userEmail) {
+      const user = input.userId
+        ? await usersService.findUserById(input.userId)
+        : await usersService.findUserByEmail(input.userEmail!.trim().toLowerCase());
       if (!user) {
         throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
       }
@@ -119,7 +117,6 @@ export class DaycareMembershipsService {
         email: userData.email,
         password: userData.password,
         phone: userData.phone,
-        role: mapAccessToUserRole(input.access),
       }, { session });
 
       return await this.createMembershipForUser({
@@ -146,6 +143,10 @@ export class DaycareMembershipsService {
     }
 
     this.requireManageDaycare(membership.daycare._id, context);
+    this.requireCanManageAccess(
+      membership.access as DaycareMembershipAccess,
+      context,
+    );
     const deactivated = await repository.deactivate(id);
     if (!deactivated) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
@@ -157,11 +158,17 @@ export class DaycareMembershipsService {
     };
   }
 
-  async deleteMembershipsByDaycareId(daycareId: ObjectId, options?: { session?: ClientSession }) {
+  async deleteMembershipsByDaycareId(
+    daycareId: ObjectId,
+    options?: { session?: ClientSession },
+  ) {
     return await repository.deleteByDaycareId(daycareId, options);
   }
 
-  async deleteMembershipsByUserId(userId: ObjectId, options?: { session?: ClientSession }) {
+  async deleteMembershipsByUserId(
+    userId: ObjectId,
+    options?: { session?: ClientSession },
+  ) {
     return await repository.deleteByUserId(userId, options);
   }
 
@@ -174,9 +181,14 @@ export class DaycareMembershipsService {
     },
     options?: { session?: ClientSession },
   ) {
-    const existingMembership = await repository.findActiveByUserAndDaycare(input.user._id, input.daycare._id);
+    const existingMembership = await repository.findActiveByUserAndDaycare(
+      input.user._id,
+      input.daycare._id,
+    );
     if (existingMembership) {
-      throw new GraphQLError("Pengguna sudah memiliki membership aktif di daycare ini.");
+      throw new GraphQLError(
+        "Pengguna sudah memiliki membership aktif di daycare ini.",
+      );
     }
 
     const membership = await repository.create({
@@ -212,11 +224,41 @@ export class DaycareMembershipsService {
       return;
     }
 
-    const hasSameDaycare = context.user.daycareId?.toString() === daycareId.toString();
+    const hasSameDaycare =
+      context.user.daycareId?.toString() === daycareId.toString();
     const allowedRoles = [UserRole.DAYCARE_OWNER, UserRole.DAYCARE_ADMIN];
-    if (!hasSameDaycare || !context.user.role || !allowedRoles.includes(context.user.role)) {
+    if (
+      !hasSameDaycare || !context.user.role ||
+      !allowedRoles.includes(context.user.role)
+    ) {
       throw new AuthorizationError();
     }
+  }
+
+  private requireCanManageAccess(
+    access: DaycareMembershipAccess,
+    context: AppContext,
+  ) {
+    if (context.user?.role === UserRole.SUPER_ADMIN) {
+      return;
+    }
+
+    if (access === DaycareMembershipAccess.OWNER) {
+      throw new AuthorizationError();
+    }
+
+    if (context.user?.role === UserRole.DAYCARE_OWNER) {
+      return;
+    }
+
+    if (
+      context.user?.role === UserRole.DAYCARE_ADMIN &&
+      access === DaycareMembershipAccess.SITTER
+    ) {
+      return;
+    }
+
+    throw new AuthorizationError();
   }
 
   private requireAdmin(context: AppContext) {

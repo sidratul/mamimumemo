@@ -4,29 +4,23 @@ import { Text } from '../../theme/theme';
 
 export function RoleAccessContainer() {
   return (
-    <Screen title="Role & Access" subtitle="Kontrol role system-level untuk semua aplikasi.">
+    <Screen title="Role & Access" subtitle="Ringkasan sumber akses user di seluruh aplikasi.">
       <ScreenSection>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Supported Roles</Text>
-        <BulletList
-          items={[
-            'SUPER_ADMIN',
-            'DAYCARE_OWNER',
-            'DAYCARE_ADMIN',
-            'DAYCARE_SITTER',
-            'PARENT',
-          ]}
-        />
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Akses Sistem</Text>
+        <BulletList items={['SUPER_ADMIN']} />
       </ScreenSection>
 
       <ScreenSection>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Planned Actions</Text>
-        <TextMuted>Placeholder kontrol akses ini nanti lebih tepat dibaca dari schema/permission GraphQL, bukan hardcoded screen-local.</TextMuted>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Akses Daycare</Text>
+        <TextMuted>Akses ini berasal dari membership daycare, bukan dari user.</TextMuted>
+        <BulletList items={['OWNER', 'ADMIN', 'SITTER']} />
+      </ScreenSection>
+
+      <ScreenSection>
+        <Text style={{ fontSize: 18, fontWeight: '700', color: '#24324B' }}>Akses Parent</Text>
+        <TextMuted>Akses parent berasal dari record parent aktif pada daycare.</TextMuted>
         <BulletList
-          items={[
-            'Assign role to user',
-            'Revoke role from user',
-            'Set active role policy per app',
-          ]}
+          items={['PARENT']}
         />
       </ScreenSection>
     </Screen>

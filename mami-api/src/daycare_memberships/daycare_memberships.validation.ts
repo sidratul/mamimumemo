@@ -16,10 +16,14 @@ export const addUserToDaycareInput = z.object({
   daycareId: objectIdSchema,
   access: membershipAccessEnum,
   userId: objectIdSchema.optional(),
+  userEmail: z.string().email("Invalid email").optional(),
   userData: daycareMembershipUserDataInput.optional(),
   notes: z.string().optional(),
-}).refine((value) => (value.userId ? 1 : 0) + (value.userData ? 1 : 0) === 1, {
-  message: "Exactly one of userId or userData is required",
+}).refine((value) =>
+  (value.userId ? 1 : 0) +
+    (value.userEmail ? 1 : 0) +
+    (value.userData ? 1 : 0) === 1, {
+  message: "Exactly one of userId, userEmail, or userData is required",
 });
 
 export const daycareMembershipsByDaycareInput = z.object({

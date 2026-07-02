@@ -3,21 +3,12 @@ import { GraphQLError } from "graphql";
 import { AppContext } from "#shared/config/context.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
 
-// Default field config untuk setiap category
-const DEFAULT_FIELD_CONFIGS: Record<string, any> = {
-  meal: { mealType: true, menu: true, eaten: true, mood: true },
-  nap: { quality: true, mood: true },
-  toileting: { toiletingType: true, toiletingNotes: true },
-  care: { mood: true, photos: true, description: true },
-  play: { mood: true, photos: true, description: true },
-  learning: { mood: true, photos: true, description: true },
-  creative: { materials: true, photos: true, description: true },
-  physical: { intensity: true, mood: true },
-  outdoor: { location: true, photos: true, description: true },
-  routine: { mood: true, description: true },
-  social: { mood: true, photos: true, description: true },
-  development: { mood: true, photos: true, description: true },
-};
+function exactCaseInsensitive(value: string) {
+  return {
+    $regex: `^${value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`,
+    $options: "i",
+  };
+}
 
 export class MasterActivitiesRepository {
   async findByDaycareId(daycareId: string, filters: any) {
@@ -28,7 +19,7 @@ export class MasterActivitiesRepository {
     }
     
     if (filters.category) {
-      query.category = filters.category;
+      query.category = exactCaseInsensitive(filters.category);
     }
     
     return await MasterActivityModel.find(query).exec();
@@ -55,7 +46,4 @@ export class MasterActivitiesRepository {
     ).exec();
   }
 
-  async getDefaultFieldConfig(category: string) {
-    return DEFAULT_FIELD_CONFIGS[category] || DEFAULT_FIELD_CONFIGS.play;
-  }
 }

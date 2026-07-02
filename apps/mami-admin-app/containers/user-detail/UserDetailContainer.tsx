@@ -14,7 +14,7 @@ import {
 import {
   UserRecord,
   UserDaycareMembership,
-  UserRole,
+  SystemRoleSelection,
 } from '../../shared/user/types';
 import { DaycareMembershipAccess } from '../../services/membership';
 import { Box, Text } from '../../theme/theme';
@@ -46,7 +46,7 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [role, setRole] = useState<UserRole>('PARENT');
+  const [systemRole, setSystemRole] = useState<SystemRoleSelection>('NONE');
   const [newPassword, setNewPassword] = useState('');
   const [membershipDrawerVisible, setMembershipDrawerVisible] = useState(false);
   const [membershipLoading, setMembershipLoading] = useState(false);
@@ -55,7 +55,6 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
   const [selectedMembershipAccess, setSelectedMembershipAccess] = useState<DaycareMembershipAccess>('ADMIN');
   const [membershipNotes, setMembershipNotes] = useState('');
   const [busyMembershipId, setBusyMembershipId] = useState('');
-  const canManageRole = role === 'SUPER_ADMIN' || role === 'DAYCARE_ADMIN';
 
   const activeMembershipDaycareIds = useMemo(
     () => new Set(memberships.filter((membership) => membership.status === 'ACTIVE').map((membership) => membership.daycare._id)),
@@ -79,7 +78,7 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
           setName(data.name);
           setEmail(data.email);
           setPhone(data.phone ?? '');
-          setRole(data.role ?? 'PARENT');
+          setSystemRole(data.systemRole ?? 'NONE');
         }
         setMemberships(userMembershipsRes.items ?? []);
         setDaycareOptions((daycaresRes.items ?? []).map((daycare: any) => ({ label: daycare.name, value: daycare._id })));
@@ -101,7 +100,7 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim(),
-        ...(canManageRole ? { role } : {}),
+        systemRole: systemRole === 'NONE' ? null : systemRole,
       });
       if (res.errors) throw new Error(res.errors[0].message);
 
@@ -222,14 +221,13 @@ export function UserDetailContainer({ id }: UserDetailContainerProps) {
                   name={name}
                   email={email}
                   phone={phone}
-                  role={role}
-                  canManageRole={canManageRole}
+                  systemRole={systemRole}
                   saving={savingProfile}
                   error={submitError}
                   onChangeName={setName}
                   onChangeEmail={setEmail}
                   onChangePhone={setPhone}
-                  onChangeRole={setRole}
+                  onChangeSystemRole={setSystemRole}
                   onSubmit={() => void handleSaveProfile()}
                 />
                 <UserDangerSection userName={user.name} loading={deleting} onConfirmDelete={() => void handleDelete()} />

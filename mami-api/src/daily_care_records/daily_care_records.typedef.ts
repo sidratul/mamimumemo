@@ -20,7 +20,7 @@ export const typeDefs = `
   type PlannedDailyActivity {
     masterActivityId: ObjectId
     activityName: String!
-    category: ActivityCategory!
+    category: String!
     startTime: String!
     endTime: String
     duration: Int
@@ -82,7 +82,7 @@ export const typeDefs = `
   type DailyActivity {
     masterActivityId: ObjectId
     activityName: String!
-    category: ActivityCategory!
+    category: String!
     startTime: String!
     endTime: String
     duration: Int
@@ -125,7 +125,7 @@ export const typeDefs = `
   input DailyActivityInput {
     masterActivityId: ObjectId
     activityName: String!
-    category: ActivityCategory!
+    category: String!
     startTime: String!
     endTime: String
     duration: Int
@@ -182,7 +182,7 @@ export const typeDefs = `
   input PlannedDailyActivityInput {
     masterActivityId: ObjectId
     activityName: String!
-    category: ActivityCategory!
+    category: String!
     startTime: String!
     endTime: String
     duration: Int

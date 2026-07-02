@@ -4,16 +4,18 @@ import { BottomDrawer, Button, DynamicForm } from '@mami/ui';
 import { Box, Text } from '../../../theme/theme';
 import type { MasterActivity } from '../../../services/operations/master-activities';
 import {
-  masterActivityFormFields,
+  createMasterActivityFormFields,
   masterActivityFormSchema,
   type MasterActivityFormValue,
 } from './master-activity-form.schema';
+export type { MasterActivityFormValue } from './master-activity-form.schema';
 
 type MasterActivityFormDrawerProps = {
   visible: boolean;
   value: MasterActivityFormValue;
   editingActivity: MasterActivity | null;
   loading: boolean;
+  categoryOptions: Array<{ label: string; value: string }>;
   onClose: () => void;
   onSubmit: (value: MasterActivityFormValue, helper: FormikHelpers<MasterActivityFormValue>) => void | Promise<void>;
 };
@@ -23,6 +25,7 @@ export function MasterActivityFormDrawer({
   value,
   editingActivity,
   loading,
+  categoryOptions,
   onClose,
   onSubmit,
 }: MasterActivityFormDrawerProps) {
@@ -38,7 +41,7 @@ export function MasterActivityFormDrawer({
       </Box>
 
       <DynamicForm<MasterActivityFormValue>
-        fields={masterActivityFormFields}
+        fields={createMasterActivityFormFields(categoryOptions)}
         data={value}
         schema={masterActivityFormSchema}
         submitLabel={loading ? 'Menyimpan...' : editingActivity ? 'Simpan Perubahan' : 'Simpan Aktivitas'}

@@ -11,8 +11,10 @@ import {
   updateDaycareDocuments,
 } from '../../services/daycare';
 import {
+  addUserToDaycare,
   getDaycareMemberships,
 } from '../../services/membership';
+import { listUsers } from '../../services/user';
 import {
   getApprovalStatusLabel,
   getApprovalStatusHelperText,
@@ -29,6 +31,7 @@ import { DaycareMembershipsSection } from './DaycareMembershipsSection';
 import { DaycareOwnerSection } from './DaycareOwnerSection';
 import { DaycareStatusSection } from './DaycareStatusSection';
 import { DaycareStatusForm } from './DaycareStatusForm';
+import { DaycareStaffForm, type DaycareStaffFormValue } from './DaycareStaffForm';
 import { getDocumentName, getInitials } from './daycare-detail.utils';
 
 type DaycareDetailContainerProps = {
@@ -45,15 +48,20 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
   const router = useRouter();
   const [daycare, setDaycare] = useState<DaycareRecord | null>(null);
   const [memberships, setMemberships] = useState<any[]>([]);
+  const [userOptions, setUserOptions] = useState<SelectOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   const [statusSheetVisible, setStatusSheetVisible] = useState(false);
   const [documentsSheetVisible, setDocumentsSheetVisible] = useState(false);
+  const [staffSheetVisible, setStaffSheetVisible] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [documentsLoading, setDocumentsLoading] = useState(false);
+  const [staffLoading, setStaffLoading] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [documentsError, setDocumentsError] = useState('');
+  const [staffError, setStaffError] = useState('');
+  const [staffFormKey, setStaffFormKey] = useState(0);
   const [nextStatus, setNextStatus] = useState('');
   const [reviewNote, setReviewNote] = useState('');
   const [documentDrafts, setDocumentDrafts] = useState<DocumentDraft[]>([]);
@@ -63,13 +71,20 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
       try {
         setLoading(true);
         setError('');
-        const [daycareRes, membershipsRes] = await Promise.all([
+        const [daycareRes, membershipsRes, usersRes] = await Promise.all([
           getDaycareById(id),
           getDaycareMemberships(id),
+          listUsers({ limit: 100 }),
         ]);
         if (daycareRes.error) throw daycareRes.error;
         setDaycare(daycareRes.data || null);
         setMemberships(membershipsRes.items ?? []);
+        setUserOptions(
+          (usersRes.items ?? []).map((user) => ({
+            label: `${user.name} (${user.email})`,
+            value: user._id,
+          })),
+        );
       } catch (nextError) {
         setDaycare(null);
         setError(nextError instanceof Error ? nextError.message : 'Gagal mengambil detail daycare.');
@@ -121,6 +136,45 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
 
   const submittedLabel = daycare?.submittedAt ? formatDateTimeId(daycare.submittedAt) : 'Belum diajukan';
   const latestHistory = daycare?.approval?.history?.slice(0, 3) ?? [];
+  const activeMembershipUserIds = new Set(
+    memberships
+      .filter((membership) => membership.status === 'ACTIVE')
+      .map((membership) => membership.user._id),
+  );
+  const availableUserOptions = userOptions.filter(
+    (option) => !activeMembershipUserIds.has(option.value),
+  );
+
+  async function handleAddStaff(value: DaycareStaffFormValue) {
+    try {
+      setStaffLoading(true);
+      setStaffError('');
+      const res = value.mode === 'existing'
+        ? await addUserToDaycare({
+          daycareId: id,
+          userId: value.userId,
+          access: value.access,
+          notes: value.notes,
+        })
+        : await addUserToDaycare({
+          daycareId: id,
+          userData: value.userData,
+          access: value.access,
+          notes: value.notes,
+        });
+      if (res.errors?.length) {
+        throw new Error(res.errors[0].message);
+      }
+
+      const membershipsRes = await getDaycareMemberships(id);
+      setMemberships(membershipsRes.items ?? []);
+      setStaffSheetVisible(false);
+    } catch (nextError) {
+      setStaffError(nextError instanceof Error ? nextError.message : 'Gagal menambahkan staff.');
+    } finally {
+      setStaffLoading(false);
+    }
+  }
 
   if (loading) {
     return (
@@ -186,6 +240,11 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
                   phone: daycare.owner.phone ?? undefined,
                 }}
                 memberships={memberships}
+                onAddPress={() => {
+                  setStaffError('');
+                  setStaffFormKey((current) => current + 1);
+                  setStaffSheetVisible(true);
+                }}
               />
             ),
           },
@@ -208,6 +267,20 @@ export function DaycareDetailContainer({ id }: DaycareDetailContainerProps) {
           },
         ]}
       />
+
+      <BottomDrawer visible={staffSheetVisible} onDismiss={() => setStaffSheetVisible(false)}>
+        <Text style={{ fontSize: 18, fontWeight: '800', color: '#0F172A', marginBottom: 16 }}>
+          Tambah Staff
+        </Text>
+        <DaycareStaffForm
+          key={staffFormKey}
+          loading={staffLoading}
+          error={staffError}
+          userOptions={availableUserOptions}
+          onCancel={() => setStaffSheetVisible(false)}
+          onSubmit={(value) => void handleAddStaff(value)}
+        />
+      </BottomDrawer>
 
       <BottomDrawer visible={statusSheetVisible} onDismiss={() => setStatusSheetVisible(false)}>
         <Text style={{ fontSize: 18, fontWeight: '800', color: '#0F172A', marginBottom: 16 }}>Update Status</Text>

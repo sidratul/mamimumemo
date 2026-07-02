@@ -38,6 +38,10 @@ import { resolvers as DaycareResolvers } from "@/daycare/daycare.resolver.ts";
 import { typeDefs as DaycareTypeDefs } from "@/daycare/daycare.typedef.ts";
 import { resolvers as DaycareMembershipResolvers } from "@/daycare_memberships/daycare_memberships.resolver.ts";
 import { typeDefs as DaycareMembershipTypeDefs } from "@/daycare_memberships/daycare_memberships.typedef.ts";
+import { resolvers as ActivityCategoryResolvers } from "@/activity_categories/activity_categories.resolver.ts";
+import { typeDefs as ActivityCategoryTypeDefs } from "@/activity_categories/activity_categories.typedef.ts";
+import { resolvers as DaycareConfigResolvers } from "@/daycare_configs/daycare_configs.resolver.ts";
+import { typeDefs as DaycareConfigTypeDefs } from "@/daycare_configs/daycare_configs.typedef.ts";
 // SCAFFOLD_IMPORT
 import { scalarResolvers } from "#shared/scalar/scalar.resolver.ts";
 import { sharedTypeDefs, baseTypeDefs } from "#shared/types/shared.type.ts";
@@ -71,6 +75,8 @@ const schema = makeExecutableSchema({
     NotificationsResolvers,
     DaycareResolvers,
     DaycareMembershipResolvers,
+    ActivityCategoryResolvers,
+    DaycareConfigResolvers,
     // SCAFFOLD_RESOLVER
   ],
   typeDefs: [
@@ -95,6 +101,8 @@ const schema = makeExecutableSchema({
     NotificationsTypeDefs,
     DaycareTypeDefs,
     DaycareMembershipTypeDefs,
+    ActivityCategoryTypeDefs,
+    DaycareConfigTypeDefs,
     // SCAFFOLD_TYPEDEF
   ],
 });

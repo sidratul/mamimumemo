@@ -7,6 +7,10 @@ export const typeDefs = `
     PARENT
   }
 
+  enum SystemRole {
+    SUPER_ADMIN
+  }
+
   enum UserAccess {
     SUPER_ADMIN
     PARENT
@@ -20,7 +24,7 @@ export const typeDefs = `
     name: String!
     email: String!
     phone: String
-    role: UserRole
+    systemRole: SystemRole
     accesses: [UserAccess!]!
     createdAt: Date
     updatedAt: Date
@@ -31,14 +35,14 @@ export const typeDefs = `
     email: String!
     password: String!
     phone: String
-    role: UserRole
+    systemRole: SystemRole
   }
 
   input UpdateUserInput {
     name: String
     email: String
     phone: String
-    role: UserRole
+    systemRole: SystemRole
   }
 
   input UpdateUserPasswordInput {

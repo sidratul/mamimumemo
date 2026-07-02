@@ -25,15 +25,7 @@ const dailyActivitySchema = new mongoose.Schema<Record<string, unknown>>({
   _id: false,
   masterActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "MasterActivity" },
   activityName: { type: String, required: true },
-  category: { 
-    type: String, 
-    enum: [
-      "meal", "nap", "toileting", "care", "play",
-      "learning", "creative", "physical", "outdoor",
-      "routine", "social", "development"
-    ],
-    required: true 
-  },
+  category: { type: String, required: true },
   startTime: { type: String, required: true },
   endTime: { type: String },
   duration: { type: Number }, // menit
@@ -60,15 +52,7 @@ const plannedDailyActivitySchema = new mongoose.Schema<Record<string, unknown>>(
   _id: false,
   masterActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "MasterActivity" },
   activityName: { type: String, required: true },
-  category: {
-    type: String,
-    enum: [
-      "meal", "nap", "toileting", "care", "play",
-      "learning", "creative", "physical", "outdoor",
-      "routine", "social", "development"
-    ],
-    required: true
-  },
+  category: { type: String, required: true },
   startTime: { type: String, required: true },
   endTime: { type: String },
   duration: { type: Number },
