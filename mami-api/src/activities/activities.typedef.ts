@@ -3,7 +3,7 @@ export const typeDefs = `
     id: ObjectId!
     childId: ObjectId!
     daycareId: ObjectId
-    masterActivityId: ObjectId
+    daycareActivityId: ObjectId
     activityName: String!
     category: String!
     date: Date!
@@ -25,6 +25,14 @@ export const typeDefs = `
     intensity: Intensity
     location: String
     materials: String
+    drinkName: String
+    drinkAmountMl: Int
+    hygieneType: String
+    medicationName: String
+    medicationDose: Float
+    medicationUnit: String
+    administeredAt: Date
+    parentConsent: Boolean
     
     # Metadata
     source: ActivitySource!
@@ -97,10 +105,10 @@ export const typeDefs = `
   type ActivityTimeline {
     date: Date!
     activities: [Activity!]!
-    daycareActivities: [DaycareActivity!]
+    daycareActivities: [DaycareTimelineActivity!]
   }
 
-  type DaycareActivity {
+  type DaycareTimelineActivity {
     activityName: String!
     category: String!
     startTime: String!
@@ -118,7 +126,7 @@ export const typeDefs = `
   input CreateActivityInput {
     childId: ObjectId!
     daycareId: ObjectId
-    masterActivityId: ObjectId
+    daycareActivityId: ObjectId
     activityName: String!
     category: String!
     date: Date!
@@ -136,6 +144,14 @@ export const typeDefs = `
     intensity: Intensity
     location: String
     materials: String
+    drinkName: String
+    drinkAmountMl: Int
+    hygieneType: String
+    medicationName: String
+    medicationDose: Float
+    medicationUnit: String
+    administeredAt: Date
+    parentConsent: Boolean
     visibleTo: [ObjectId!]
     notes: String
   }
@@ -158,6 +174,14 @@ export const typeDefs = `
     intensity: Intensity
     location: String
     materials: String
+    drinkName: String
+    drinkAmountMl: Int
+    hygieneType: String
+    medicationName: String
+    medicationDose: Float
+    medicationUnit: String
+    administeredAt: Date
+    parentConsent: Boolean
     notes: String
   }
 

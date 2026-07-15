@@ -72,10 +72,24 @@ export const typeDefs = `
     childrenIds: [ObjectId!]
   }
 
+  input CreateParentAccountInput {
+    daycareId: ObjectId!
+    name: String!
+    email: String!
+    phone: String!
+    password: String!
+    notes: String
+  }
+
   input UpdateParentInput {
     customData: ParentCustomDataInput
     childrenIds: [ObjectId!]
     active: Boolean
+  }
+
+  input UpdateParentAccountInput {
+    name: String!
+    notes: String
   }
 
   extend type Query {
@@ -92,9 +106,15 @@ export const typeDefs = `
   extend type Mutation {
     "Create a new parent in daycare"
     createParent(input: CreateParentInput!): Parent!
+
+    "Create parent user account and attach it to daycare"
+    createParentAccount(input: CreateParentAccountInput!): Parent!
     
     "Update parent information"
     updateParent(id: ObjectId!, input: UpdateParentInput!): Parent!
+
+    "Update parent account display name and daycare notes"
+    updateParentAccount(id: ObjectId!, input: UpdateParentAccountInput!): Parent!
     
     "Deactivate parent (soft delete)"
     deactivateParent(id: ObjectId!): Parent!

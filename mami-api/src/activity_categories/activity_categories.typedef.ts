@@ -1,8 +1,11 @@
 export const typeDefs = `
   enum ActivityCategoryBehaviorType {
     MEAL
+    DRINK
     NAP
     TOILETING
+    HYGIENE
+    MEDICATION
     CARE
     PLAY
     LEARNING
@@ -11,6 +14,7 @@ export const typeDefs = `
 
   type ActivityCategoryDefinition {
     _id: ObjectId!
+    id: ObjectId!
     code: String!
     defaultLabel: String!
     label: String!

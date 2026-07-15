@@ -1,5 +1,5 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { Box, Text, useAppTheme } from '../../theme/theme';
+import { Box, Text } from '../../theme/theme';
 
 export type ActivityCategory = 'MEAL' | 'NAP' | 'PLAY' | 'LEARNING' | 'CARE';
 

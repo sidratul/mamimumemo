@@ -18,7 +18,7 @@ export const typeDefs = `
   }
 
   type PlannedDailyActivity {
-    masterActivityId: ObjectId
+    daycareActivityId: ObjectId
     activityName: String!
     category: String!
     startTime: String!
@@ -80,7 +80,7 @@ export const typeDefs = `
   }
 
   type DailyActivity {
-    masterActivityId: ObjectId
+    daycareActivityId: ObjectId
     activityName: String!
     category: String!
     startTime: String!
@@ -100,6 +100,14 @@ export const typeDefs = `
     intensity: Intensity
     location: String
     materials: String
+    drinkName: String
+    drinkAmountMl: Int
+    hygieneType: String
+    medicationName: String
+    medicationDose: Float
+    medicationUnit: String
+    administeredAt: Date
+    parentConsent: Boolean
     
     loggedBy: UserRef!
     loggedAt: Date!
@@ -123,7 +131,7 @@ export const typeDefs = `
   }
 
   input DailyActivityInput {
-    masterActivityId: ObjectId
+    daycareActivityId: ObjectId
     activityName: String!
     category: String!
     startTime: String!
@@ -141,6 +149,14 @@ export const typeDefs = `
     intensity: Intensity
     location: String
     materials: String
+    drinkName: String
+    drinkAmountMl: Int
+    hygieneType: String
+    medicationName: String
+    medicationDose: Float
+    medicationUnit: String
+    administeredAt: Date
+    parentConsent: Boolean
   }
 
   input AssignedSitterInput {
@@ -180,7 +196,7 @@ export const typeDefs = `
   }
 
   input PlannedDailyActivityInput {
-    masterActivityId: ObjectId
+    daycareActivityId: ObjectId
     activityName: String!
     category: String!
     startTime: String!

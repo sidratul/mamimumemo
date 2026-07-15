@@ -7,7 +7,7 @@ import {
 import { storedCategoryCodeSchema } from "@/activity_categories/activity_categories.validation.ts";
 
 export const templateActivityInput = z.object({
-  masterActivityId: z.string().optional(),
+  daycareActivityId: z.string().optional(),
   activityName: z.string().min(1, "Activity name is required"),
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
   endTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),

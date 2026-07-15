@@ -37,7 +37,7 @@ export interface ISitterAssignment {
 }
 
 export interface IWeeklyActivity {
-  masterActivityId?: Types.ObjectId;
+  daycareActivityId?: Types.ObjectId;
   activityName: string;
   startTime: string;
   endTime: string;

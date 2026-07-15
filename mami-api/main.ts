@@ -20,10 +20,14 @@ import { resolvers as ContractsResolvers } from "@/contracts/contracts.resolver.
 import { typeDefs as ContractsTypeDefs } from "@/contracts/contracts.typedef.ts";
 import { resolvers as MasterActivitiesResolvers } from "@/master_activities/master_activities.resolver.ts";
 import { typeDefs as MasterActivitiesTypeDefs } from "@/master_activities/master_activities.typedef.ts";
+import { resolvers as DaycareActivitiesResolvers } from "@/daycare_activities/daycare_activities.resolver.ts";
+import { typeDefs as DaycareActivitiesTypeDefs } from "@/daycare_activities/daycare_activities.typedef.ts";
 import { resolvers as DailyCareRecordsResolvers } from "@/daily_care_records/daily_care_records.resolver.ts";
 import { typeDefs as DailyCareRecordsTypeDefs } from "@/daily_care_records/daily_care_records.typedef.ts";
 import { resolvers as ScheduleTemplatesResolvers } from "@/schedule_templates/schedule_templates.resolver.ts";
 import { typeDefs as ScheduleTemplatesTypeDefs } from "@/schedule_templates/schedule_templates.typedef.ts";
+import { resolvers as WeeklySchedulesResolvers } from "@/weekly_schedules/weekly_schedules.resolver.ts";
+import { typeDefs as WeeklySchedulesTypeDefs } from "@/weekly_schedules/weekly_schedules.typedef.ts";
 import { resolvers as InvoicesResolvers } from "@/invoices/invoices.resolver.ts";
 import { typeDefs as InvoicesTypeDefs } from "@/invoices/invoices.typedef.ts";
 import { resolvers as StaffPaymentsResolvers } from "@/staff_payments/staff_payments.resolver.ts";
@@ -53,9 +57,46 @@ import UploadsService from "@/uploads/uploads.service.ts";
 // Connect to the database
 await connectToDatabase();
 
+const resolveMongoId = (source: { id?: unknown; _id?: unknown }) => {
+  if (source.id) {
+    return source.id;
+  }
+
+  if (source._id && typeof source._id === "object" && "toString" in source._id) {
+    return source._id.toString();
+  }
+
+  return source._id ?? null;
+};
+
+const mongoIdResolvers = {
+  Activity: { id: resolveMongoId },
+  ActivityCategoryDefinition: { id: resolveMongoId },
+  Child: { id: resolveMongoId },
+  ChildrenDaycare: { id: resolveMongoId },
+  Contract: { id: resolveMongoId },
+  DailyCareRecord: { id: resolveMongoId },
+  Daycare: { id: resolveMongoId },
+  DaycareActivity: { id: resolveMongoId },
+  DaycareMembership: { id: resolveMongoId },
+  DaycareMembershipDaycare: { id: resolveMongoId },
+  Gallery: { id: resolveMongoId },
+  Invoice: { id: resolveMongoId },
+  MasterActivity: { id: resolveMongoId },
+  MedicalRecord: { id: resolveMongoId },
+  Menu: { id: resolveMongoId },
+  Notification: { id: resolveMongoId },
+  Parent: { id: resolveMongoId },
+  ScheduleTemplate: { id: resolveMongoId },
+  StaffPayment: { id: resolveMongoId },
+  User: { id: resolveMongoId },
+  WeeklySchedule: { id: resolveMongoId },
+};
+
 const schema = makeExecutableSchema({
   resolvers: [
     scalarResolvers,
+    mongoIdResolvers,
     healthResolvers,
     AuthResolvers,
     UsersResolvers,
@@ -66,8 +107,10 @@ const schema = makeExecutableSchema({
     ChildrenDaycareResolvers,
     ContractsResolvers,
     MasterActivitiesResolvers,
+    DaycareActivitiesResolvers,
     DailyCareRecordsResolvers,
     ScheduleTemplatesResolvers,
+    WeeklySchedulesResolvers,
     InvoicesResolvers,
     StaffPaymentsResolvers,
     MenusResolvers,
@@ -92,8 +135,10 @@ const schema = makeExecutableSchema({
     ChildrenDaycareTypeDefs,
     ContractsTypeDefs,
     MasterActivitiesTypeDefs,
+    DaycareActivitiesTypeDefs,
     DailyCareRecordsTypeDefs,
     ScheduleTemplatesTypeDefs,
+    WeeklySchedulesTypeDefs,
     InvoicesTypeDefs,
     StaffPaymentsTypeDefs,
     MenusTypeDefs,

@@ -9,6 +9,8 @@
     "build": "echo \"@mami/core uses source exports (no build step yet).\""
   },
   "dependencies": {
+    "expo-secure-store": "~15.0.8",
+    "react-native": "0.81.5",
     "zod": "^4.3.6"
   }
 }

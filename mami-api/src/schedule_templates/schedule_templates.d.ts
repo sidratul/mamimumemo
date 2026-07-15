@@ -17,7 +17,7 @@ export interface IScheduleTemplate {
 }
 
 export interface ITemplateActivity {
-  masterActivityId?: Types.ObjectId;
+  daycareActivityId?: Types.ObjectId;
   activityName: string;
   startTime: string;
   endTime: string;

@@ -7,6 +7,12 @@ export type ModuleDefinition = {
 
 export const moduleDefinitions: ModuleDefinition[] = [
   {
+    slug: 'master-activities',
+    title: 'Master Aktivitas',
+    description: 'Kelola katalog aktivitas global dan starter daycare.',
+    route: '/(app)/modules/master-activities',
+  },
+  {
     slug: 'activity-categories',
     title: 'Kategori Aktivitas',
     description: 'Kelola kategori aktivitas global dan behavior field.',

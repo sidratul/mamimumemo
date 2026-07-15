@@ -11,6 +11,25 @@ import {
 
 const repository = new ActivityCategoriesRepository();
 const daycareConfigsRepository = new DaycareConfigsRepository();
+const behaviorFieldConfigs: Record<string, Record<string, boolean>> = {
+  MEAL: { mealType: true, menu: true, eaten: true, mood: true },
+  DRINK: { drinkName: true, drinkAmountMl: true, mood: true },
+  NAP: { quality: true, mood: true },
+  TOILETING: { toiletingType: true, toiletingNotes: true },
+  HYGIENE: { hygieneType: true, description: true },
+  MEDICATION: {
+    medicationName: true,
+    medicationDose: true,
+    medicationUnit: true,
+    administeredAt: true,
+    parentConsent: true,
+    description: true,
+  },
+  CARE: { mood: true, photos: true, description: true },
+  PLAY: { mood: true, photos: true, description: true },
+  LEARNING: { mood: true, photos: true, description: true },
+  GENERIC: { description: true },
+};
 
 export class ActivityCategoriesService {
   async list(daycareId: string | undefined, active: boolean | undefined, context: AppContext) {
@@ -50,7 +69,11 @@ export class ActivityCategoriesService {
     if (await repository.findByCode(parsed.code)) {
       throw new GraphQLError("Kode kategori sudah digunakan.");
     }
-    return await repository.create(parsed);
+    return await repository.create({
+      ...parsed,
+      defaultFieldConfig: parsed.defaultFieldConfig ??
+        behaviorFieldConfigs[parsed.behaviorType ?? "GENERIC"],
+    });
   }
 
   async update(id: string, input: typeof updateActivityCategoryInput._type, context: AppContext) {

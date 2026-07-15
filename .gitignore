@@ -1,4 +1,5 @@
 node_modules
+.pnpm-store
 /api-example
 /images-example
 /image

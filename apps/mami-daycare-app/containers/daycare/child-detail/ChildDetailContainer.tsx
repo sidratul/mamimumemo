@@ -1,16 +1,18 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, ScrollView } from 'react-native';
+import { Modal, Pressable, ScrollView, View } from 'react-native';
 import { Redirect, router } from 'expo-router';
+import { FieldShell, TextAreaField, TextField, useToast } from '@mami/ui';
 
 import { useSession } from '../../../providers/session-provider';
 import {
   getChildDailyRecords,
   getDaycareRoster,
   getTodayDailyCare,
+  updateDaycareChildDetails,
   type DailyCareChildRecord,
   type DaycareChild,
   type DaycareParent,
-} from '../../../services/registration';
+} from '../../../services/operations';
 import { Box, Text } from '../../../theme/theme';
 
 type ChildDetailContainerProps = {
@@ -18,6 +20,34 @@ type ChildDetailContainerProps = {
 };
 
 type HistoryWindow = 7 | 14 | 30;
+
+type ChildDetailFormValue = {
+  notes: string;
+  allergies: string;
+  medicalNotes: string;
+  cognitiveNotes: string;
+  developmentNotes: string;
+  strengths: string;
+  weaknesses: string;
+  favoriteFoods: string;
+  favoriteActivities: string;
+  comfortItems: string;
+  napRoutine: string;
+};
+
+const emptyDetailForm: ChildDetailFormValue = {
+  notes: '',
+  allergies: '',
+  medicalNotes: '',
+  cognitiveNotes: '',
+  developmentNotes: '',
+  strengths: '',
+  weaknesses: '',
+  favoriteFoods: '',
+  favoriteActivities: '',
+  comfortItems: '',
+  napRoutine: '',
+};
 
 function formatBirthDate(value: string) {
   if (!value) {
@@ -52,15 +82,65 @@ function SummaryCard({ label, value }: { label: string; value: string }) {
   );
 }
 
+function listValue(values?: string[] | null) {
+  const cleaned = values?.map((item) => item.trim()).filter(Boolean) ?? [];
+  return cleaned.length ? cleaned.join(', ') : '-';
+}
+
+function textValue(value?: string | null) {
+  return value?.trim() || '-';
+}
+
+function DetailRow({ label, value }: { label: string; value: string }) {
+  return (
+    <Box gap="xxs">
+      <Text color="textSecondary" style={{ fontSize: 12, fontWeight: '700' }}>{label}</Text>
+      <Text style={{ fontSize: 14, fontWeight: value === '-' ? '500' : '700' }}>{value}</Text>
+    </Box>
+  );
+}
+
+function joinList(values?: string[] | null) {
+  return values?.filter(Boolean).join(', ') ?? '';
+}
+
+function splitList(value: string) {
+  return value
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
+function formFromChild(child: DaycareChild): ChildDetailFormValue {
+  return {
+    notes: child.customData.notes ?? '',
+    allergies: joinList(child.medical.allergies),
+    medicalNotes: child.medical.medicalNotes ?? '',
+    cognitiveNotes: child.customData.cognitiveNotes ?? '',
+    developmentNotes: child.customData.developmentNotes ?? '',
+    strengths: joinList(child.customData.strengths),
+    weaknesses: joinList(child.customData.weaknesses),
+    favoriteFoods: joinList(child.preferences.favoriteFoods),
+    favoriteActivities: joinList(child.preferences.favoriteActivities),
+    comfortItems: joinList(child.preferences.comfortItems),
+    napRoutine: child.preferences.napRoutine ?? '',
+  };
+}
+
 export function ChildDetailContainer({ id }: ChildDetailContainerProps) {
   const { isLoading, session } = useSession();
+  const { showToast } = useToast();
   const [loading, setLoading] = useState(true);
+  const [savingDetails, setSavingDetails] = useState(false);
+  const [detailFormVisible, setDetailFormVisible] = useState(false);
+  const [detailForm, setDetailForm] = useState<ChildDetailFormValue>(emptyDetailForm);
   const [child, setChild] = useState<DaycareChild | null>(null);
   const [parent, setParent] = useState<DaycareParent | null>(null);
   const [todayRecord, setTodayRecord] = useState<DailyCareChildRecord | null>(null);
-  const [history, setHistory] = useState<Array<{ date: string; record: DailyCareChildRecord }>>([]);
+  const [history, setHistory] = useState<{ date: string; record: DailyCareChildRecord }[]>([]);
   const [historyWindow, setHistoryWindow] = useState<HistoryWindow>(7);
   const [error, setError] = useState('');
+  const [historyError, setHistoryError] = useState('');
 
   useEffect(() => {
     async function run() {
@@ -71,6 +151,7 @@ export function ChildDetailContainer({ id }: ChildDetailContainerProps) {
       try {
         setLoading(true);
         setError('');
+        setHistoryError('');
 
         if (!session.daycareId) {
           setError('daycareId belum tersedia di session.');
@@ -98,21 +179,26 @@ export function ChildDetailContainer({ id }: ChildDetailContainerProps) {
         setParent(selectedParent);
         setTodayRecord(selectedRecord);
 
-        const historyRecords = await getChildDailyRecords(
-          session.token,
-          id,
-          startDate.toISOString(),
-          endDate.toISOString()
-        );
+        try {
+          const historyRecords = await getChildDailyRecords(
+            session.token,
+            id,
+            startDate.toISOString(),
+            endDate.toISOString()
+          );
 
-        const nextHistory = historyRecords
-          .map((record) => ({
-            date: record.date,
-            record: record.children.find((item) => item.childId === id),
-          }))
-          .filter((item): item is { date: string; record: DailyCareChildRecord } => Boolean(item.record));
+          const nextHistory = historyRecords
+            .map((record) => ({
+              date: record.date,
+              record: record.children.find((item) => item.childId === id),
+            }))
+            .filter((item): item is { date: string; record: DailyCareChildRecord } => Boolean(item.record));
 
-        setHistory(nextHistory);
+          setHistory(nextHistory);
+        } catch (nextError) {
+          setHistory([]);
+          setHistoryError(nextError instanceof Error ? nextError.message : 'Gagal memuat riwayat harian.');
+        }
 
         if (!selectedChild) {
           setError('Data child tidak ditemukan.');
@@ -139,6 +225,54 @@ export function ChildDetailContainer({ id }: ChildDetailContainerProps) {
     return `Masuk ${todayRecord.attendance.checkIn.time}`;
   }, [todayRecord]);
 
+  function openDetailForm() {
+    if (!child) return;
+    setDetailForm(formFromChild(child));
+    setDetailFormVisible(true);
+  }
+
+  function updateDetailForm<K extends keyof ChildDetailFormValue>(key: K, value: ChildDetailFormValue[K]) {
+    setDetailForm((current) => ({ ...current, [key]: value }));
+  }
+
+  async function handleSaveDetails() {
+    if (!session || !child) return;
+
+    try {
+      setSavingDetails(true);
+      const updated = await updateDaycareChildDetails(session.token, child.id, {
+        medical: {
+          allergies: splitList(detailForm.allergies),
+          medicalNotes: detailForm.medicalNotes.trim() || null,
+          medications: child.medical.medications,
+        },
+        preferences: {
+          favoriteFoods: splitList(detailForm.favoriteFoods),
+          favoriteActivities: splitList(detailForm.favoriteActivities),
+          comfortItems: splitList(detailForm.comfortItems),
+          napRoutine: detailForm.napRoutine.trim() || null,
+        },
+        customData: {
+          notes: detailForm.notes.trim() || null,
+          cognitiveNotes: detailForm.cognitiveNotes.trim() || null,
+          developmentNotes: detailForm.developmentNotes.trim() || null,
+          strengths: splitList(detailForm.strengths),
+          weaknesses: splitList(detailForm.weaknesses),
+        },
+      });
+      setChild(updated);
+      setDetailFormVisible(false);
+      showToast({ message: 'Detail anak berhasil diperbarui.', tone: 'success' });
+    } catch (nextError) {
+      showToast({
+        message: nextError instanceof Error ? nextError.message : 'Gagal memperbarui detail anak.',
+        tone: 'danger',
+      });
+    } finally {
+      setSavingDetails(false);
+    }
+  }
+
   if (isLoading) {
     return null;
   }
@@ -150,8 +284,19 @@ export function ChildDetailContainer({ id }: ChildDetailContainerProps) {
   return (
     <ScrollView style={{ flex: 1, backgroundColor: '#FFF8F4' }} contentContainerStyle={{ padding: 16, gap: 14 }}>
       <Box gap="xs">
-        <Text style={{ fontSize: 28, fontWeight: '700' }}>{child?.profile.name || 'Child'}</Text>
-        <Text color="textSecondary">{parent?.user.name || 'Parent belum terhubung'}</Text>
+        <Box flexDirection="row" justifyContent="space-between" alignItems="flex-start" gap="md">
+          <Box flex={1} gap="xs">
+            <Text style={{ fontSize: 28, fontWeight: '700' }}>{child?.profile.name || 'Child'}</Text>
+            <Text color="textSecondary">{parent?.user.name || 'Parent belum terhubung'}</Text>
+          </Box>
+          {child ? (
+            <Pressable onPress={openDetailForm}>
+              <Box backgroundColor="primary" borderRadius="lg" paddingHorizontal="md" paddingVertical="sm">
+                <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>Edit Detail</Text>
+              </Box>
+            </Pressable>
+          ) : null}
+        </Box>
       </Box>
 
       {loading ? (
@@ -176,10 +321,45 @@ export function ChildDetailContainer({ id }: ChildDetailContainerProps) {
 
           <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="sm">
             <Text style={{ fontSize: 20, fontWeight: '700' }}>Profil</Text>
-            <Text>{parent?.user.name || '-'}</Text>
-            <Text color="textSecondary">{parent?.user.email || '-'}</Text>
-            <Text color="textSecondary">{parent?.user.phone || '-'}</Text>
+            <DetailRow label="Orang tua" value={parent?.user.name || '-'} />
+            <DetailRow label="Email" value={parent?.user.email || '-'} />
+            <DetailRow label="Telepon" value={parent?.user.phone || '-'} />
             {child.customData.notes ? <Text color="textSecondary">{child.customData.notes}</Text> : null}
+          </Box>
+
+          <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="md">
+            <Text style={{ fontSize: 20, fontWeight: '700' }}>Kesehatan & Riwayat Penyakit</Text>
+            <DetailRow label="Alergi" value={listValue(child.medical.allergies)} />
+            <DetailRow label="Riwayat penyakit / catatan medis" value={textValue(child.medical.medicalNotes)} />
+            <Box gap="xs">
+              <Text color="textSecondary" style={{ fontSize: 12, fontWeight: '700' }}>Obat rutin</Text>
+              {child.medical.medications.length ? (
+                child.medical.medications.map((medication, index) => (
+                  <Box key={`${medication.name}-${index}`} backgroundColor="background" borderRadius="md" padding="md" gap="xxs">
+                    <Text style={{ fontWeight: '700' }}>{medication.name}</Text>
+                    <Text color="textSecondary">{medication.dosage} · {medication.schedule}</Text>
+                  </Box>
+                ))
+              ) : (
+                <Text>-</Text>
+              )}
+            </Box>
+          </Box>
+
+          <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="md">
+            <Text style={{ fontSize: 20, fontWeight: '700' }}>Perkembangan Anak</Text>
+            <DetailRow label="Kognitif" value={textValue(child.customData.cognitiveNotes)} />
+            <DetailRow label="Tumbuh kembang / kesulitan" value={textValue(child.customData.developmentNotes)} />
+            <DetailRow label="Keahlian / kelebihan" value={listValue(child.customData.strengths)} />
+            <DetailRow label="Kekurangan / hal yang perlu didampingi" value={listValue(child.customData.weaknesses)} />
+          </Box>
+
+          <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="md">
+            <Text style={{ fontSize: 20, fontWeight: '700' }}>Preferensi & Kebiasaan</Text>
+            <DetailRow label="Makanan favorit" value={listValue(child.preferences.favoriteFoods)} />
+            <DetailRow label="Aktivitas favorit" value={listValue(child.preferences.favoriteActivities)} />
+            <DetailRow label="Comfort item" value={listValue(child.preferences.comfortItems)} />
+            <DetailRow label="Rutinitas tidur" value={textValue(child.preferences.napRoutine)} />
           </Box>
 
           <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="sm">
@@ -257,6 +437,11 @@ export function ChildDetailContainer({ id }: ChildDetailContainerProps) {
                   </Box>
                 );
               })
+            ) : historyError ? (
+              <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg" gap="xs">
+                <Text color="danger" style={{ fontWeight: '700' }}>Riwayat belum bisa dimuat</Text>
+                <Text color="textSecondary">{historyError}</Text>
+              </Box>
             ) : (
               <Box backgroundColor="surface" borderRadius="lg" borderWidth={1} borderColor="border" padding="lg">
                 <Text color="textSecondary">Belum ada riwayat harian yang tersimpan.</Text>
@@ -278,6 +463,117 @@ export function ChildDetailContainer({ id }: ChildDetailContainerProps) {
           </Box>
         </Pressable>
       </Box>
+
+      <ChildDetailFormModal
+        visible={detailFormVisible}
+        saving={savingDetails}
+        value={detailForm}
+        onChange={updateDetailForm}
+        onClose={() => setDetailFormVisible(false)}
+        onSubmit={handleSaveDetails}
+      />
     </ScrollView>
+  );
+}
+
+type ChildDetailFormModalProps = {
+  visible: boolean;
+  saving: boolean;
+  value: ChildDetailFormValue;
+  onChange: <K extends keyof ChildDetailFormValue>(key: K, value: ChildDetailFormValue[K]) => void;
+  onClose: () => void;
+  onSubmit: () => void;
+};
+
+function ChildDetailFormModal({
+  visible,
+  saving,
+  value,
+  onChange,
+  onClose,
+  onSubmit,
+}: ChildDetailFormModalProps) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <View style={{ alignItems: 'center', backgroundColor: 'rgba(15, 23, 42, 0.42)', flex: 1, justifyContent: 'center', padding: 24 }}>
+        <Pressable accessibilityRole="button" accessibilityLabel="Tutup form" onPress={onClose} style={{ bottom: 0, left: 0, position: 'absolute', right: 0, top: 0 }} />
+        <View style={{ backgroundColor: '#FFFFFF', borderColor: '#E2E8F0', borderRadius: 8, borderWidth: 1, maxHeight: '88%', maxWidth: 760, padding: 18, width: '100%' }}>
+          <Box gap="md">
+            <Box flexDirection="row" justifyContent="space-between" alignItems="flex-start" gap="md">
+              <Box flex={1} gap="xxs">
+                <Text style={{ color: '#0F172A', fontSize: 20, fontWeight: '900', lineHeight: 26 }}>Edit Detail Anak</Text>
+                <Text color="textSecondary">Isi informasi yang dipakai daycare untuk memahami kebutuhan anak.</Text>
+              </Box>
+              <Pressable onPress={onClose}>
+                <Box borderRadius="md" borderWidth={1} borderColor="border" paddingHorizontal="md" paddingVertical="sm">
+                  <Text style={{ fontWeight: '700' }}>Tutup</Text>
+                </Box>
+              </Pressable>
+            </Box>
+
+            <ScrollView showsVerticalScrollIndicator={false} contentContainerStyle={{ gap: 14, paddingBottom: 2 }}>
+              <FieldShell label="Catatan umum">
+                <TextAreaField value={value.notes} disabled={saving} placeholder="Catatan umum tentang anak" backgroundColor="#FFFFFF" borderRadius={8} numberOfLines={3} useBottomSheetInput={false} onChange={(next) => onChange('notes', next)} />
+              </FieldShell>
+
+              <Box gap="sm">
+                <Text style={{ fontSize: 16, fontWeight: '800' }}>Kesehatan</Text>
+                <FieldShell label="Alergi">
+                  <TextField value={value.allergies} disabled={saving} placeholder="Contoh: susu sapi, kacang" backgroundColor="#FFFFFF" borderRadius={8} useBottomSheetInput={false} onChange={(next) => onChange('allergies', next)} />
+                </FieldShell>
+                <FieldShell label="Riwayat penyakit / catatan medis">
+                  <TextAreaField value={value.medicalNotes} disabled={saving} placeholder="Contoh: asma ringan, pernah demam kejang" backgroundColor="#FFFFFF" borderRadius={8} numberOfLines={3} useBottomSheetInput={false} onChange={(next) => onChange('medicalNotes', next)} />
+                </FieldShell>
+              </Box>
+
+              <Box gap="sm">
+                <Text style={{ fontSize: 16, fontWeight: '800' }}>Perkembangan</Text>
+                <FieldShell label="Kognitif">
+                  <TextAreaField value={value.cognitiveNotes} disabled={saving} placeholder="Cara anak belajar, fokus, memahami instruksi" backgroundColor="#FFFFFF" borderRadius={8} numberOfLines={3} useBottomSheetInput={false} onChange={(next) => onChange('cognitiveNotes', next)} />
+                </FieldShell>
+                <FieldShell label="Tumbuh kembang / kesulitan">
+                  <TextAreaField value={value.developmentNotes} disabled={saving} placeholder="Kesulitan bicara, motorik, sosial, adaptasi, dll" backgroundColor="#FFFFFF" borderRadius={8} numberOfLines={3} useBottomSheetInput={false} onChange={(next) => onChange('developmentNotes', next)} />
+                </FieldShell>
+                <FieldShell label="Keahlian / kelebihan">
+                  <TextField value={value.strengths} disabled={saving} placeholder="Contoh: menggambar, berhitung, cepat bergaul" backgroundColor="#FFFFFF" borderRadius={8} useBottomSheetInput={false} onChange={(next) => onChange('strengths', next)} />
+                </FieldShell>
+                <FieldShell label="Kekurangan / perlu didampingi">
+                  <TextField value={value.weaknesses} disabled={saving} placeholder="Contoh: sulit berbagi, perlu bantuan makan" backgroundColor="#FFFFFF" borderRadius={8} useBottomSheetInput={false} onChange={(next) => onChange('weaknesses', next)} />
+                </FieldShell>
+              </Box>
+
+              <Box gap="sm">
+                <Text style={{ fontSize: 16, fontWeight: '800' }}>Preferensi & Kebiasaan</Text>
+                <FieldShell label="Makanan favorit">
+                  <TextField value={value.favoriteFoods} disabled={saving} placeholder="Contoh: pisang, nasi ayam" backgroundColor="#FFFFFF" borderRadius={8} useBottomSheetInput={false} onChange={(next) => onChange('favoriteFoods', next)} />
+                </FieldShell>
+                <FieldShell label="Aktivitas favorit">
+                  <TextField value={value.favoriteActivities} disabled={saving} placeholder="Contoh: puzzle, membaca buku" backgroundColor="#FFFFFF" borderRadius={8} useBottomSheetInput={false} onChange={(next) => onChange('favoriteActivities', next)} />
+                </FieldShell>
+                <FieldShell label="Comfort item">
+                  <TextField value={value.comfortItems} disabled={saving} placeholder="Contoh: boneka, selimut" backgroundColor="#FFFFFF" borderRadius={8} useBottomSheetInput={false} onChange={(next) => onChange('comfortItems', next)} />
+                </FieldShell>
+                <FieldShell label="Rutinitas tidur">
+                  <TextAreaField value={value.napRoutine} disabled={saving} placeholder="Contoh: perlu dibacakan cerita sebelum tidur" backgroundColor="#FFFFFF" borderRadius={8} numberOfLines={3} useBottomSheetInput={false} onChange={(next) => onChange('napRoutine', next)} />
+                </FieldShell>
+              </Box>
+
+              <Box flexDirection="row" gap="sm" justifyContent="flex-end">
+                <Pressable disabled={saving} onPress={onClose}>
+                  <Box borderRadius="md" borderWidth={1} borderColor="border" paddingHorizontal="lg" paddingVertical="md">
+                    <Text style={{ fontWeight: '700' }}>Batal</Text>
+                  </Box>
+                </Pressable>
+                <Pressable disabled={saving} onPress={onSubmit}>
+                  <Box backgroundColor="primary" borderRadius="md" paddingHorizontal="lg" paddingVertical="md">
+                    <Text style={{ color: '#FFFFFF', fontWeight: '700' }}>{saving ? 'Menyimpan...' : 'Simpan'}</Text>
+                  </Box>
+                </Pressable>
+              </Box>
+            </ScrollView>
+          </Box>
+        </View>
+      </View>
+    </Modal>
   );
 }

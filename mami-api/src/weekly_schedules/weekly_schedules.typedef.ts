@@ -33,7 +33,7 @@ export const typeDefs = `
   }
 
   type WeeklyActivity {
-    masterActivityId: ObjectId
+    daycareActivityId: ObjectId
     activityName: String!
     startTime: String!
     endTime: String!
@@ -48,7 +48,7 @@ export const typeDefs = `
   }
 
   input WeeklyActivityInput {
-    masterActivityId: ObjectId
+    daycareActivityId: ObjectId
     activityName: String!
     startTime: String!
     endTime: String!

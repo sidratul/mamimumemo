@@ -12,11 +12,13 @@ export const typeDefs = `
 
   type DaycareMembershipDaycare {
     _id: ObjectId!
+    id: ObjectId!
     name: String!
   }
 
   type DaycareMembership {
     _id: ObjectId!
+    id: ObjectId!
     user: User!
     daycare: DaycareMembershipDaycare!
     access: DaycareMembershipAccess!

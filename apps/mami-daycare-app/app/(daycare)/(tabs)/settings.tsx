@@ -5,6 +5,7 @@ import { useConfirm, Button } from '@mami/ui';
 
 import { Box, Text, useAppTheme } from '../../../theme/theme';
 import { useSession } from '../../../providers/session-provider';
+import { ServerApiSettings } from '../../../containers/app-config/ServerApiSettings';
 
 type MenuItem = {
   label: string;
@@ -19,6 +20,12 @@ const menuItems: MenuItem[] = [
     description: 'Sesuaikan label dan warna kategori aktivitas.',
     icon: 'tag-multiple-outline',
     route: '/(daycare)/category-config',
+  },
+  {
+    label: 'Orang Tua',
+    description: 'Kelola akun parent dan kontak keluarga.',
+    icon: 'account-heart-outline',
+    route: '/(daycare)/parents',
   },
   {
     label: 'Aktivitas',
@@ -93,6 +100,8 @@ export default function DaycareSettingsScreen() {
             <MenuRow key={item.label} item={item} />
           ))}
         </Box>
+
+        <ServerApiSettings />
 
         <Box gap="sm">
           <Text variant="bodySmall" color="textSecondary" fontWeight="800">Akun</Text>

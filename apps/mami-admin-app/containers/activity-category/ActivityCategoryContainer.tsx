@@ -13,8 +13,11 @@ import { Box, Text } from '../../theme/theme';
 const behaviorOptions = [
   'GENERIC',
   'MEAL',
+  'DRINK',
   'NAP',
   'TOILETING',
+  'HYGIENE',
+  'MEDICATION',
   'CARE',
   'PLAY',
   'LEARNING',

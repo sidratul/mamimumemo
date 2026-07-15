@@ -4,22 +4,36 @@ import { AppContext } from "#shared/config/context.ts";
 
 const childrenDaycareService = new ChildrenDaycareService();
 
+type MongoRefValue = string | null | undefined | {
+  _id?: unknown;
+  id?: unknown;
+  toHexString?: () => string;
+};
+
+function resolveObjectIdRef(value: MongoRefValue): unknown {
+  if (!value || typeof value === "string") {
+    return value;
+  }
+
+  if (typeof value === "object" && typeof value.toHexString === "function") {
+    return value;
+  }
+
+  if (typeof value === "object" && value._id) {
+    return resolveObjectIdRef(value._id as MongoRefValue);
+  }
+
+  if (typeof value === "object" && typeof value.id === "string") {
+    return value.id;
+  }
+
+  return value;
+}
+
 export const resolvers = {
   ChildrenDaycare: {
-    parentId: (child: { parentId?: { id?: string; _id?: string } | string }) => {
-      if (!child.parentId || typeof child.parentId === "string") {
-        return child.parentId;
-      }
-
-      return child.parentId.id || child.parentId._id || child.parentId;
-    },
-    globalChildId: (child: { globalChildId?: { id?: string; _id?: string } | string | null }) => {
-      if (!child.globalChildId || typeof child.globalChildId === "string") {
-        return child.globalChildId;
-      }
-
-      return child.globalChildId.id || child.globalChildId._id || child.globalChildId;
-    },
+    parentId: (child: { parentId?: MongoRefValue }) => resolveObjectIdRef(child.parentId),
+    globalChildId: (child: { globalChildId?: MongoRefValue }) => resolveObjectIdRef(child.globalChildId),
   },
   ChildProfile: {
     gender: (profile: { gender?: string }) => {
@@ -29,6 +43,19 @@ export const resolvers = {
 
       return profile.gender.toUpperCase();
     },
+  },
+  ChildMedical: {
+    allergies: (medical: { allergies?: string[] | null }) => medical.allergies ?? [],
+    medications: (medical: { medications?: unknown[] | null }) => medical.medications ?? [],
+  },
+  ChildPreferences: {
+    favoriteFoods: (preferences: { favoriteFoods?: string[] | null }) => preferences.favoriteFoods ?? [],
+    favoriteActivities: (preferences: { favoriteActivities?: string[] | null }) => preferences.favoriteActivities ?? [],
+    comfortItems: (preferences: { comfortItems?: string[] | null }) => preferences.comfortItems ?? [],
+  },
+  ChildCustomData: {
+    strengths: (customData: { strengths?: string[] | null }) => customData.strengths ?? [],
+    weaknesses: (customData: { weaknesses?: string[] | null }) => customData.weaknesses ?? [],
   },
   Query: {
     daycareChildren: (
@@ -66,16 +93,16 @@ export const resolvers = {
       { input }: { input: typeof createChildrenDaycareInput._type },
       context: AppContext
     ) => {
-      createChildrenDaycareInput.parse(input);
-      return childrenDaycareService.createChildrenDaycare(input, context);
+      const parsedInput = createChildrenDaycareInput.parse(input);
+      return childrenDaycareService.createChildrenDaycare(parsedInput, context);
     },
     updateChildrenDaycare: (
       _: unknown,
       { id, input }: { id: string; input: typeof updateChildrenDaycareInput._type },
       context: AppContext
     ) => {
-      updateChildrenDaycareInput.parse(input);
-      return childrenDaycareService.updateChildrenDaycare(id, input, context);
+      const parsedInput = updateChildrenDaycareInput.parse(input);
+      return childrenDaycareService.updateChildrenDaycare(id, parsedInput, context);
     },
     deactivateChildrenDaycare: (
       _: unknown,
@@ -83,6 +110,13 @@ export const resolvers = {
       context: AppContext
     ) => {
       return childrenDaycareService.deactivateChildrenDaycare(id, context);
+    },
+    purgeChildrenDaycare: (
+      _: unknown,
+      { id }: { id: string },
+      context: AppContext,
+    ) => {
+      return childrenDaycareService.purgeChildrenDaycare(id, context);
     },
   },
 };

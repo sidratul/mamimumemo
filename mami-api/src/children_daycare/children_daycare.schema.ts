@@ -4,23 +4,26 @@ const childProfileSchema = new mongoose.Schema({
   name: { type: String, required: true },
   birthDate: { type: Date, required: true },
   photo: String,
-  gender: { type: String, enum: ["male", "female"], required: true },
+  gender: { type: String, enum: ["MALE", "FEMALE"], required: true },
 }, { _id: false });
 
 const childMedicalSchema = new mongoose.Schema({
-  allergies: [String],
+  allergies: { type: [String], default: [] },
   medicalNotes: String,
-  medications: [{
-    name: String,
-    dosage: String,
-    schedule: String,
-  }],
+  medications: {
+    type: [{
+      name: String,
+      dosage: String,
+      schedule: String,
+    }],
+    default: [],
+  },
 }, { _id: false });
 
 const childPreferencesSchema = new mongoose.Schema({
-  favoriteFoods: [String],
-  favoriteActivities: [String],
-  comfortItems: [String], // selimut, boneka, dll
+  favoriteFoods: { type: [String], default: [] },
+  favoriteActivities: { type: [String], default: [] },
+  comfortItems: { type: [String], default: [] }, // selimut, boneka, dll
   napRoutine: String,
 }, { _id: false });
 
@@ -28,6 +31,10 @@ const childCustomDataSchema = new mongoose.Schema({
   customName: String, // nama panggilan di daycare
   customPhoto: String, // foto custom untuk daycare
   notes: String,
+  cognitiveNotes: String,
+  developmentNotes: String,
+  strengths: { type: [String], default: [] },
+  weaknesses: { type: [String], default: [] },
 }, { _id: false });
 
 const childrenDaycareSchema = new mongoose.Schema({

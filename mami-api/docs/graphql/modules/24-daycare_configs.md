@@ -4,7 +4,7 @@ Konfigurasi multi-tenant daycare untuk branding, override kategori aktivitas, da
 
 Source schema: `src/daycare_configs/daycare_configs.typedef.ts`
 
-Status: **Belum exposed di GraphQL schema**
+Status: **Exposed di GraphQL schema**
 
 ## Access
 

@@ -45,6 +45,10 @@ export const typeDefs = `
     customName: String
     customPhoto: String
     notes: String
+    cognitiveNotes: String
+    developmentNotes: String
+    strengths: [String!]!
+    weaknesses: [String!]!
   }
 
   input ChildProfileInput {
@@ -77,6 +81,10 @@ export const typeDefs = `
     customName: String
     customPhoto: String
     notes: String
+    cognitiveNotes: String
+    developmentNotes: String
+    strengths: [String!]
+    weaknesses: [String!]
   }
 
   input CreateChildrenDaycareInput {
@@ -121,5 +129,8 @@ export const typeDefs = `
     
     "Deactivate child (soft delete)"
     deactivateChildrenDaycare(id: ObjectId!): ChildrenDaycare!
+
+    "Permanently delete child from daycare"
+    purgeChildrenDaycare(id: ObjectId!): ActionResponse!
   }
 `;

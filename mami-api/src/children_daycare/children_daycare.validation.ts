@@ -1,12 +1,19 @@
 import { z } from "zod";
-import { GenderEnum } from "#shared/types/enums.ts";
+
+const objectIdString = z.preprocess(
+  (value) =>
+    value && typeof value === "object" && "toString" in value
+      ? value.toString()
+      : value,
+  z.string(),
+);
 
 const genderInput = z.preprocess((value) => {
   if (typeof value === "string") {
-    return value.toLowerCase();
+    return value.toUpperCase();
   }
   return value;
-}, z.nativeEnum(GenderEnum));
+}, z.enum(["MALE", "FEMALE"]));
 
 export const childProfileInput = z.object({
   name: z.string().min(1, "Name is required"),
@@ -35,13 +42,17 @@ export const childPreferencesInput = z.object({
 export const childCustomDataInput = z.object({
   customName: z.string().optional(),
   customPhoto: z.string().url().optional().or(z.literal("")),
-  notes: z.string().optional(),
+  notes: z.string().nullable().optional(),
+  cognitiveNotes: z.string().nullable().optional(),
+  developmentNotes: z.string().nullable().optional(),
+  strengths: z.array(z.string()).optional(),
+  weaknesses: z.array(z.string()).optional(),
 });
 
 export const createChildrenDaycareInput = z.object({
-  daycareId: z.string(),
-  parentId: z.string(),
-  globalChildId: z.string().optional(),
+  daycareId: objectIdString,
+  parentId: objectIdString,
+  globalChildId: objectIdString.optional(),
   profile: childProfileInput,
   medical: childMedicalInput.optional(),
   preferences: childPreferencesInput.optional(),

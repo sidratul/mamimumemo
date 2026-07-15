@@ -1,5 +1,6 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Button } from '@mami/ui';
+import { router } from 'expo-router';
 
 import { Box, Text } from '../../../theme/theme';
 
@@ -31,7 +32,12 @@ export function ActivitiesExtrasSection() {
         <Text variant="bodySmall" color="textSecondary">
           Aktivitas di luar jadwal utama, seperti obat, toilet, atau catatan khusus.
         </Text>
-        <Button label="Tambah Aktivitas" variant="secondary" style={{ alignSelf: 'flex-start', borderRadius: 16 }} />
+        <Button
+          label="Tambah Aktivitas"
+          variant="secondary"
+          style={{ alignSelf: 'flex-start', borderRadius: 16 }}
+          onPress={() => router.push('/(daycare)/daily-record-create')}
+        />
       </Box>
 
       {DUMMY_EXTRA_ACTIVITIES.map((item) => (

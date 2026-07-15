@@ -21,6 +21,7 @@ export const typeDefs = `
 
   type User {
     _id: ObjectId!
+    id: ObjectId!
     name: String!
     email: String!
     phone: String

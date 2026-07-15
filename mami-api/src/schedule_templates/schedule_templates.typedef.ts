@@ -21,7 +21,7 @@ export const typeDefs = `
   }
 
   type TemplateActivity {
-    masterActivityId: ObjectId
+    daycareActivityId: ObjectId
     activityName: String!
     startTime: String!
     endTime: String!
@@ -37,7 +37,7 @@ export const typeDefs = `
   }
 
   input TemplateActivityInput {
-    masterActivityId: ObjectId
+    daycareActivityId: ObjectId
     activityName: String!
     startTime: String!
     endTime: String!

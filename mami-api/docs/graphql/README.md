@@ -26,22 +26,24 @@ REST endpoint tambahan:
 - [08. Children Daycare](./modules/08-children_daycare.md) - Data anak dalam konteks daycare, termasuk profil, medis, preferensi, dan status aktif.
 - [09. Medical Records](./modules/09-medical_records.md) - Rekam medis anak: sakit, cedera, alergi, medication, dan kondisi kronis.
 - [10. Contracts](./modules/10-contracts.md) - Kontrak layanan daycare antara daycare, parent, dan anak.
-- [11. Master Activities](./modules/11-master_activities.md) - Master aktivitas daycare dan konfigurasi field per kategori.
-- [12. Schedule Templates](./modules/12-schedule_templates.md) - Template jadwal daycare berdasarkan hari, rentang tanggal, atau tanggal spesifik.
-- [13. Daily Care Records](./modules/13-daily_care_records.md) - Catatan operasional harian daycare: attendance, planned activities, dan activity log per anak.
-- [14. Activities](./modules/14-activities.md) - Aktivitas anak yang dibuat parent/guardian/daycare, termasuk timeline gabungan dengan aktivitas daycare.
-- [15. Menus](./modules/15-menus.md) - Menu makanan daycare per tanggal dan rentang tanggal.
-- [16. Gallery](./modules/16-gallery.md) - Dokumentasi foto daycare, umum maupun per anak.
-- [17. Notifications](./modules/17-notifications.md) - Notifikasi user, unread count, mark read, dan notifikasi bulk oleh daycare/admin.
-- [18. Invoices](./modules/18-invoices.md) - Tagihan daycare untuk parent berdasarkan kontrak dan periode.
-- [19. Staff Payments](./modules/19-staff_payments.md) - Pembayaran staff daycare per periode kerja.
-- [20. Uploads](./modules/20-uploads.md) - Upload file melalui REST endpoint.
+- [11. Master Activities](./modules/11-master_activities.md) - Katalog aktivitas global yang dikelola system admin.
+- [12. Daycare Activities](./modules/12-daycare_activities.md) - Aktivitas milik tenant daycare, baik hasil adopsi katalog global maupun aktivitas custom.
+- [13. Schedule Templates](./modules/13-schedule_templates.md) - Template jadwal daycare berdasarkan hari, rentang tanggal, atau tanggal spesifik.
+- [14. Daily Care Records](./modules/14-daily_care_records.md) - Catatan operasional harian daycare: attendance, planned activities, dan activity log per anak.
+- [15. Activities](./modules/15-activities.md) - Aktivitas anak yang dibuat parent/guardian/daycare, termasuk timeline gabungan dengan aktivitas daycare.
+- [16. Menus](./modules/16-menus.md) - Menu makanan daycare per tanggal dan rentang tanggal.
+- [17. Gallery](./modules/17-gallery.md) - Dokumentasi foto daycare, umum maupun per anak.
+- [18. Notifications](./modules/18-notifications.md) - Notifikasi user, unread count, mark read, dan notifikasi bulk oleh daycare/admin.
+- [19. Invoices](./modules/19-invoices.md) - Tagihan daycare untuk parent berdasarkan kontrak dan periode.
+- [20. Staff Payments](./modules/20-staff_payments.md) - Pembayaran staff daycare per periode kerja.
+- [21. Uploads](./modules/21-uploads.md) - Upload file melalui REST endpoint.
+- [22. Weekly Schedules](./modules/22-weekly_schedules.md) - Jadwal mingguan daycare, assignment sitter, dan schedule per child.
+- [23. Activity Categories](./modules/23-activity_categories.md) - Master kategori aktivitas global yang dikelola system admin dan di-resolve dengan override daycare.
+- [24. Daycare Configs](./modules/24-daycare_configs.md) - Konfigurasi multi-tenant daycare untuk branding, override kategori aktivitas, dan preferensi.
 
 ## Source Exists But Not Mounted
 
-- [21. Weekly Schedules](./modules/21-weekly_schedules.md) - Module source ada di `src/weekly_schedules`, tetapi belum diregister di `main.ts`; endpoint GraphQL belum exposed sampai import resolver/typeDefs ditambahkan ke schema.
-- [22. Activity Categories](./modules/22-activity_categories.md) - `code` adalah identifier stabil yang digunakan pada activity, master activity, dan schedule.
-- [23. Daycare Configs](./modules/23-daycare_configs.md) - Satu dokumen config per daycare dengan unique index pada `daycareId`.
+- Tidak ada.
 
 ## Maintenance
 

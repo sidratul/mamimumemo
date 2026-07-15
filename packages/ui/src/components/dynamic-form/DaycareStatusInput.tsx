@@ -1,4 +1,4 @@
-import { SelectInput as BaseSelectInput, type SelectOption } from '@mami/ui';
+import { SelectInput as BaseSelectInput, type SelectOption } from './SelectInput';
 import type { InputComponentProps } from './form.types';
 
 type DaycareStatusInputProps = InputComponentProps<string> & {

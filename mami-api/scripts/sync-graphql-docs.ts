@@ -37,18 +37,19 @@ const moduleOrder: Record<string, number> = {
   medical_records: 9,
   contracts: 10,
   master_activities: 11,
-  schedule_templates: 12,
-  daily_care_records: 13,
-  activities: 14,
-  menus: 15,
-  gallery: 16,
-  notifications: 17,
-  invoices: 18,
-  staff_payments: 19,
-  uploads: 20,
-  weekly_schedules: 21,
-  activity_categories: 22,
-  daycare_configs: 23,
+  daycare_activities: 12,
+  schedule_templates: 13,
+  daily_care_records: 14,
+  activities: 15,
+  menus: 16,
+  gallery: 17,
+  notifications: 18,
+  invoices: 19,
+  staff_payments: 20,
+  uploads: 21,
+  weekly_schedules: 22,
+  activity_categories: 23,
+  daycare_configs: 24,
 };
 
 const moduleMeta: Record<
@@ -66,6 +67,7 @@ const moduleMeta: Record<
     notes: [
       "`code` adalah identifier stabil yang digunakan pada activity, master activity, dan schedule.",
       "Label efektif menggunakan override `daycare_configs` jika tersedia.",
+      "`DRINK`, `HYGIENE`, dan `MEDICATION` memiliki field behavior khusus; `ROUTINE` legacy dinonaktifkan oleh seeder.",
     ],
   },
   activities: {
@@ -79,6 +81,7 @@ const moduleMeta: Record<
     notes: [
       "Format jam memakai `HH:mm`.",
       "Field dinamis tergantung kategori aktivitas.",
+      "Referensi aktivitas tenant memakai `daycareActivityId`, bukan ID katalog global.",
     ],
   },
   auth: {
@@ -137,6 +140,7 @@ const moduleMeta: Record<
     notes: [
       "Format jam memakai `HH:mm`.",
       "`createDailyCareRecord` bersifat create/update record pada tanggal terkait.",
+      "`daycareActivityId` divalidasi aktif dan harus dimiliki daycare record.",
     ],
   },
   daycare: {
@@ -153,6 +157,21 @@ const moduleMeta: Record<
     notes: [
       "`deleteDaycare` soft delete.",
       "`purgeDaycare` hard delete dan bisa ikut menghapus owner jika `deleteOwner = true`.",
+      "Saat status menjadi `APPROVED`, sistem membuat daycare config dan mengadopsi master aktivitas dengan `isStarter = true` secara idempotent.",
+    ],
+  },
+  daycare_activities: {
+    title: "Daycare Activities",
+    purpose:
+      "Aktivitas milik tenant daycare, baik hasil adopsi katalog global maupun aktivitas custom.",
+    access: [
+      "Query: user pada daycare terkait atau `SUPER_ADMIN`.",
+      "Create/adopt/update/deactivate: `SUPER_ADMIN`, `DAYCARE_OWNER`, `DAYCARE_ADMIN`.",
+    ],
+    notes: [
+      "`sourceMasterActivityId` kosong untuk aktivitas custom.",
+      "Adopsi menyalin nilai master saat itu dan tidak ditimpa otomatis ketika master berubah.",
+      "Satu master hanya dapat diadopsi sekali per daycare.",
     ],
   },
   daycare_memberships: {
@@ -211,13 +230,15 @@ const moduleMeta: Record<
   },
   master_activities: {
     title: "Master Activities",
-    purpose: "Master aktivitas daycare dan konfigurasi field per kategori.",
+    purpose: "Katalog aktivitas global yang dikelola system admin.",
     access: [
       "Query butuh login.",
-      "Create/update/deactivate: `SUPER_ADMIN`, `DAYCARE_OWNER`, `DAYCARE_ADMIN`.",
+      "Create/update/deactivate hanya `SUPER_ADMIN`.",
     ],
     notes: [
       "`defaultFieldConfig` mengembalikan konfigurasi field default untuk kategori aktivitas.",
+      "`isStarter` menentukan master yang otomatis diadopsi saat daycare disetujui.",
+      "Update menaikkan `version`, tetapi tidak menimpa salinan tenant.",
     ],
   },
   medical_records: {
@@ -275,6 +296,7 @@ const moduleMeta: Record<
       "Jika target `DAY_OF_WEEK`, `dayOfWeek` wajib ada.",
       "Jika target `DATE_RANGE`, `startDate` dan `endDate` wajib ada.",
       "Jika target `SPECIFIC_DATE`, `specificDate` wajib ada.",
+      "Aktivitas template menggunakan `daycareActivityId` dan harus dimiliki tenant yang sama.",
     ],
   },
   staff_payments: {
@@ -362,7 +384,8 @@ function isMounted(mainSource: string, slug: string) {
   const aliases = [
     pascal,
     pascal.replace("DaycareMemberships", "DaycareMembership"),
-    pascal.replace("Auth", "Auth"),
+    pascal.replace("ActivityCategories", "ActivityCategory"),
+    pascal.replace("DaycareConfigs", "DaycareConfig"),
   ];
   return aliases.some((alias) =>
     mainSource.includes(`${alias}TypeDefs`) ||

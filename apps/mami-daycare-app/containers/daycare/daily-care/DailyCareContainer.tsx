@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Pressable, ScrollView } from 'react-native';
 import { Redirect, router } from 'expo-router';
 import { DynamicForm, TextAreaField, TextField, type FormFieldProps } from '@mami/ui';
@@ -16,7 +16,7 @@ import {
   logQuickDailyActivity,
   type DailyCareChildRecord,
   type ViewerProfile,
-} from '../../../services/registration';
+} from '../../../services/operations';
 import { Box, Text } from '../../../theme/theme';
 
 type Gate = 'loading' | 'approved' | 'pending';
@@ -184,7 +184,7 @@ function getPlannedCategoryLabel(category: string) {
 export function DailyCareContainer() {
   const { isLoading, session } = useSession();
   const [gate, setGate] = useState<Gate>('loading');
-  const [children, setChildren] = useState<Array<{ id: string; name: string }>>([]);
+  const [children, setChildren] = useState<{ id: string; name: string }[]>([]);
   const [todayRecord, setTodayRecord] = useState<DailyCareRecord | null>(null);
   const [recordChildren, setRecordChildren] = useState<DailyCareChildRecord[]>([]);
   const [viewer, setViewer] = useState<ViewerProfile | null>(null);
@@ -199,7 +199,7 @@ export function DailyCareContainer() {
 
   const activityErrors = useMemo(() => validateActivity(form), [form]);
 
-  async function loadScreen(activeToken = session?.token, activeDaycareId = session?.daycareId) {
+  const loadScreen = useCallback(async (activeToken = session?.token, activeDaycareId = session?.daycareId) => {
     if (!activeToken) {
       return;
     }
@@ -232,7 +232,7 @@ export function DailyCareContainer() {
       ...current,
       childId: current.childId || nextChildren[0]?.id || '',
     }));
-  }
+  }, [session?.daycareId, session?.token]);
 
   useEffect(() => {
     async function run() {
@@ -252,7 +252,7 @@ export function DailyCareContainer() {
     }
 
     void run();
-  }, [session]);
+  }, [loadScreen, session]);
 
   if (isLoading) {
     return null;

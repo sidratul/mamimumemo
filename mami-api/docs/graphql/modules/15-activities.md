@@ -31,7 +31,7 @@ Types:
 - `Activity`
 - `ActivityTimeline`
 - `ActivityUser`
-- `DaycareActivity`
+- `DaycareTimelineActivity`
 - `LoggedBy`
 
 Inputs:
@@ -59,3 +59,4 @@ Scalars:
 
 - Format jam memakai `HH:mm`.
 - Field dinamis tergantung kategori aktivitas.
+- Referensi aktivitas tenant memakai `daycareActivityId`, bukan ID katalog global.

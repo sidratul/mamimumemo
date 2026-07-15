@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 
 const templateActivitySchema = new mongoose.Schema({
-  masterActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "MasterActivity" },
+  daycareActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "DaycareActivity" },
   activityName: { type: String, required: true },
   startTime: { type: String, required: true }, // Format: "HH:mm"
   endTime: { type: String, required: true }, // Format: "HH:mm"

@@ -15,7 +15,7 @@ type MasterActivityFormDrawerProps = {
   value: MasterActivityFormValue;
   editingActivity: MasterActivity | null;
   loading: boolean;
-  categoryOptions: Array<{ label: string; value: string }>;
+  categoryOptions: { label: string; value: string }[];
   onClose: () => void;
   onSubmit: (value: MasterActivityFormValue, helper: FormikHelpers<MasterActivityFormValue>) => void | Promise<void>;
 };

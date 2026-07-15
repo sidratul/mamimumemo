@@ -1,7 +1,7 @@
 import { graphqlRequest } from '../graphql/client';
 
 type MasterActivitiesResponse = {
-  masterActivities: MasterActivity[];
+  daycareActivities: MasterActivity[];
 };
 
 type ScheduleTemplatesResponse = {
@@ -23,7 +23,7 @@ export type MasterActivity = {
   id: string;
   daycareId: string;
   name: string;
-  category: 'MEAL' | 'NAP' | 'CARE' | 'PLAY' | 'LEARNING';
+  category: string;
   defaultDuration: number;
   active: boolean;
 };
@@ -31,7 +31,7 @@ export type MasterActivity = {
 export type ScheduleTemplateTargetType = 'DAY_OF_WEEK' | 'DATE_RANGE' | 'SPECIFIC_DATE';
 
 export type ScheduleTemplateActivityInput = {
-  masterActivityId?: string;
+  daycareActivityId?: string;
   activityName: string;
   startTime: string;
   endTime: string;
@@ -54,8 +54,8 @@ export type ScheduleTemplate = {
 };
 
 const MASTER_ACTIVITIES_QUERY = `
-  query MasterActivities($daycareId: ObjectId!, $active: Boolean) {
-    masterActivities(daycareId: $daycareId, active: $active) {
+  query DaycareActivities($daycareId: ObjectId!, $active: Boolean) {
+    daycareActivities(daycareId: $daycareId, active: $active) {
       id
       daycareId
       name
@@ -79,7 +79,7 @@ const SCHEDULE_TEMPLATES_QUERY = `
       specificDate
       active
       activities {
-        masterActivityId
+        daycareActivityId
         activityName
         startTime
         endTime
@@ -104,7 +104,7 @@ const CREATE_SCHEDULE_TEMPLATE_MUTATION = `
       specificDate
       active
       activities {
-        masterActivityId
+        daycareActivityId
         activityName
         startTime
         endTime
@@ -132,7 +132,7 @@ export async function listMasterActivities(token: string, daycareId: string, act
     token
   );
 
-  return data.masterActivities;
+  return data.daycareActivities;
 }
 
 export async function listScheduleTemplates(token: string, daycareId: string, active = true) {

@@ -1,11 +1,10 @@
+import mongoose from "mongoose";
+import { Types } from "mongoose";
 import ChildrenDaycareModel from "./children_daycare.schema.ts";
-import { GraphQLError } from "graphql";
-import { AppContext } from "#shared/config/context.ts";
-import { MESSAGES } from "#shared/enums/constant.ts";
 
 export class ChildrenDaycareRepository {
   async findByDaycareId(daycareId: string, active?: boolean) {
-    const query: any = { daycareId };
+    const query: Record<string, unknown> = { daycareId };
     if (active !== undefined) {
       query.active = active;
     }
@@ -36,12 +35,26 @@ export class ChildrenDaycareRepository {
     }).exec();
   }
 
-  async create(data: any) {
+  async create(data: Record<string, unknown>) {
     const child = new ChildrenDaycareModel(data);
     return await child.save();
   }
 
-  async update(id: string, data: any) {
+  async attachToParent(parentId: string, childId: unknown) {
+    const ParentModel = mongoose.model("Parent");
+    await ParentModel.findByIdAndUpdate(parentId, {
+      $addToSet: { childrenIds: childId },
+    }).exec();
+  }
+
+  async detachFromParents(childId: unknown) {
+    const ParentModel = mongoose.model("Parent");
+    await ParentModel.updateMany({}, {
+      $pull: { childrenIds: childId },
+    }).exec();
+  }
+
+  async update(id: string, data: Record<string, unknown>) {
     return await ChildrenDaycareModel.findByIdAndUpdate(id, data, { new: true }).exec();
   }
 
@@ -51,6 +64,35 @@ export class ChildrenDaycareRepository {
       { active: false, exitedAt: new Date() },
       { new: true }
     ).exec();
+  }
+
+  async hasOperationalReferences(id: string) {
+    const childId = new Types.ObjectId(id);
+    const DailyCareRecordModel = mongoose.model("DailyCareRecord");
+    const WeeklyScheduleModel = mongoose.model("WeeklySchedule");
+    const ActivityModel = mongoose.model("Activity");
+    const MedicalRecordModel = mongoose.model("MedicalRecord");
+    const ContractModel = mongoose.model("Contract");
+
+    const [
+      dailyRecords,
+      weeklySchedules,
+      activities,
+      medicalRecords,
+      contracts,
+    ] = await Promise.all([
+      DailyCareRecordModel.exists({ "children.childId": childId }),
+      WeeklyScheduleModel.exists({ "days.childAssignments.childId": childId }),
+      ActivityModel.exists({ childId }),
+      MedicalRecordModel.exists({ childId }),
+      ContractModel.exists({ childIds: childId }),
+    ]);
+
+    return Boolean(dailyRecords || weeklySchedules || activities || medicalRecords || contracts);
+  }
+
+  async hardDelete(id: string) {
+    return await ChildrenDaycareModel.findByIdAndDelete(id).exec();
   }
 
   async daycareExists(daycareId: string): Promise<boolean> {
@@ -65,5 +107,3 @@ export class ChildrenDaycareRepository {
     return !!parent;
   }
 }
-
-import mongoose from "mongoose";

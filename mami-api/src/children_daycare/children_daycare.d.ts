@@ -20,7 +20,7 @@ export interface IChildProfile {
   name: string;
   birthDate: Date;
   photo?: string;
-  gender: "male" | "female";
+  gender: "MALE" | "FEMALE";
 }
 
 export interface IChildMedical {
@@ -44,4 +44,8 @@ export interface IChildCustomData {
   customName?: string;
   customPhoto?: string;
   notes?: string;
+  cognitiveNotes?: string;
+  developmentNotes?: string;
+  strengths?: string[];
+  weaknesses?: string[];
 }

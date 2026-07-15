@@ -1,12 +1,11 @@
 import { createGraphqlRequester } from '@mami/graphql';
 
-import { env } from '../../config/env';
-import { clearDaycareSession } from '../storage/session';
 import { refreshDaycareSession } from '../auth/session-auth';
-import { getDaycareSession } from '../storage/session';
+import { clearDaycareSession, getDaycareSession } from '../storage/session';
+import { getConfiguredGraphqlUrl } from '../app-config';
 
 export const graphqlRequest = createGraphqlRequester({
-  graphqlUrl: env.graphqlUrl,
+  graphqlUrl: getConfiguredGraphqlUrl,
   session: {
     getAccessToken: async () => (await getDaycareSession())?.token ?? null,
     clearSession: clearDaycareSession,

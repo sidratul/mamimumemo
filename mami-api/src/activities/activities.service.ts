@@ -1,5 +1,8 @@
 import { ActivitiesRepository } from "./activities.repository.ts";
-import { createActivityInput, updateActivityInput } from "./activities.validation.ts";
+import {
+  createActivityInput,
+  updateActivityInput,
+} from "./activities.validation.ts";
 import { GraphQLError } from "graphql";
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
@@ -7,17 +10,19 @@ import { MESSAGES } from "#shared/enums/constant.ts";
 import { UserRole } from "#shared/enums/enum.ts";
 import { ChildrenRepository } from "@/children/children.repository.ts";
 import { ActivityCategoriesService } from "@/activity_categories/activity_categories.service.ts";
+import { DaycareActivitiesService } from "@/daycare_activities/daycare_activities.service.ts";
 
 const activitiesRepository = new ActivitiesRepository();
 const childrenRepository = new ChildrenRepository();
 const activityCategoriesService = new ActivityCategoriesService();
+const daycareActivitiesService = new DaycareActivitiesService();
 
 export class ActivitiesService {
   async getChildActivities(
     childId: string,
     date: Date | undefined,
     category: string | undefined,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     const user = context.user;
@@ -25,7 +30,10 @@ export class ActivitiesService {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const hasAccess = await activitiesRepository.userHasAccess(childId, user.id);
+    const hasAccess = await activitiesRepository.userHasAccess(
+      childId,
+      user.id,
+    );
     if (!hasAccess) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -65,7 +73,7 @@ export class ActivitiesService {
     startDate: Date,
     endDate: Date,
     includeDaycare: boolean,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     const user = context.user;
@@ -73,7 +81,10 @@ export class ActivitiesService {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const hasAccess = await activitiesRepository.userHasAccess(childId, user.id);
+    const hasAccess = await activitiesRepository.userHasAccess(
+      childId,
+      user.id,
+    );
     if (!hasAccess) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -82,15 +93,18 @@ export class ActivitiesService {
       childId,
       startDate,
       endDate,
-      includeDaycare
+      includeDaycare,
     );
 
     // Group activities by date
-    const timelineByDate: Record<string, { date: string; activities: unknown[]; daycareActivities: unknown[] }> = {};
-    
+    const timelineByDate: Record<
+      string,
+      { date: string; activities: unknown[]; daycareActivities: unknown[] }
+    > = {};
+
     for (const activity of activities) {
       const dateKey = activity.date.toISOString().split("T")[0];
-      
+
       if (!timelineByDate[dateKey]) {
         timelineByDate[dateKey] = {
           date: dateKey,
@@ -98,7 +112,7 @@ export class ActivitiesService {
           daycareActivities: [],
         };
       }
-      
+
       timelineByDate[dateKey].activities.push(activity);
     }
 
@@ -120,7 +134,7 @@ export class ActivitiesService {
 
   async createActivity(
     input: typeof createActivityInput._type,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     const user = context.user;
@@ -129,10 +143,32 @@ export class ActivitiesService {
     }
     const parsed = createActivityInput.parse(input);
     await activityCategoriesService.getDefaultFieldConfig(parsed.category);
+    if (parsed.daycareActivityId) {
+      if (!parsed.daycareId) {
+        throw new GraphQLError(
+          "daycareId wajib diisi ketika memakai daycareActivityId.",
+        );
+      }
+      if (
+        user.role !== UserRole.SUPER_ADMIN &&
+        user.daycareId?.toString() !== parsed.daycareId
+      ) {
+        throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
+      }
+      await daycareActivitiesService.assertBelongToDaycare(
+        parsed.daycareId,
+        [parsed.daycareActivityId],
+      );
+    }
 
-    const hasAccess = await activitiesRepository.userHasAccess(parsed.childId, user.id);
+    const hasAccess = await activitiesRepository.userHasAccess(
+      parsed.childId,
+      user.id,
+    );
     if (!hasAccess) {
-      throw new GraphQLError("You don't have permission to add activities for this child");
+      throw new GraphQLError(
+        "You don't have permission to add activities for this child",
+      );
     }
 
     // Get child to determine relation
@@ -142,7 +178,9 @@ export class ActivitiesService {
     }
 
     // Find user's guardian record
-    const guardian = child.guardians.find((g) => g.user.userId.toString() === user.id);
+    const guardian = child.guardians.find((g) =>
+      g.user.userId.toString() === user.id
+    );
 
     const activityData: typeof createActivityInput._type & {
       source: "daycare" | "parent";
@@ -156,7 +194,8 @@ export class ActivitiesService {
       duration?: number;
     } = {
       ...parsed,
-      source: user.role === UserRole.DAYCARE_SITTER || user.role === UserRole.DAYCARE_ADMIN
+      source: user.role === UserRole.DAYCARE_SITTER ||
+          user.role === UserRole.DAYCARE_ADMIN
         ? "daycare"
         : "parent",
       loggedBy: {
@@ -174,7 +213,9 @@ export class ActivitiesService {
     if (parsed.startTime && parsed.endTime) {
       const start = new Date(`2000-01-01 ${parsed.startTime}`);
       const end = new Date(`2000-01-01 ${parsed.endTime}`);
-      activityData.duration = Math.round((end.getTime() - start.getTime()) / 60000);
+      activityData.duration = Math.round(
+        (end.getTime() - start.getTime()) / 60000,
+      );
     }
 
     return await activitiesRepository.create(activityData);
@@ -183,7 +224,7 @@ export class ActivitiesService {
   async updateActivity(
     id: string,
     input: typeof updateActivityInput._type,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     const user = context.user;
@@ -197,16 +238,21 @@ export class ActivitiesService {
     }
 
     // Auto-calculate duration if startTime and endTime provided
-    const updateData: typeof updateActivityInput._type & { duration?: number } = {
-      ...updateActivityInput.parse(input),
-    };
+    const updateData: typeof updateActivityInput._type & { duration?: number } =
+      {
+        ...updateActivityInput.parse(input),
+      };
     if (updateData.category) {
-      await activityCategoriesService.getDefaultFieldConfig(updateData.category);
+      await activityCategoriesService.getDefaultFieldConfig(
+        updateData.category,
+      );
     }
     if (updateData.startTime && updateData.endTime) {
       const start = new Date(`2000-01-01 ${updateData.startTime}`);
       const end = new Date(`2000-01-01 ${updateData.endTime}`);
-      updateData.duration = Math.round((end.getTime() - start.getTime()) / 60000);
+      updateData.duration = Math.round(
+        (end.getTime() - start.getTime()) / 60000,
+      );
     }
 
     return await activitiesRepository.update(id, updateData);

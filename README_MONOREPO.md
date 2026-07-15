@@ -23,11 +23,16 @@ Monorepo ini berisi backend GraphQL berbasis Deno dan target aplikasi mobile unt
 
 ## Commands
 
-- `npm run admin:start` - Menjalankan admin app
-- `npm run admin:check` - Lint + typecheck admin app
-- `npm run parent:start` - Menjalankan parent app
-- `npm run daycare:start` - Menjalankan daycare app
-- `npm run build:packages` - Build shared packages
+- `pnpm install` - Install dependency frontend workspace
+- `pnpm admin:start` - Menjalankan admin app
+- `pnpm admin:check` - Lint + typecheck admin app
+- `pnpm parent:start` - Menjalankan parent app
+- `pnpm daycare:start` - Menjalankan daycare app
+- `pnpm daycare:desktop:dev` - Menjalankan daycare app sebagai desktop app Tauri
+- `pnpm daycare:desktop:build` - Build installer desktop daycare app
+- `pnpm build:packages` - Build shared packages
+
+Backend `mami-api` tetap memakai Deno dan Docker Compose, bukan pnpm.
 
 ## Dokumen Acuan
 

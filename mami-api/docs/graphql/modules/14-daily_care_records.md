@@ -73,3 +73,4 @@ Scalars:
 
 - Format jam memakai `HH:mm`.
 - `createDailyCareRecord` bersifat create/update record pada tanggal terkait.
+- `daycareActivityId` divalidasi aktif dan harus dimiliki daycare record.

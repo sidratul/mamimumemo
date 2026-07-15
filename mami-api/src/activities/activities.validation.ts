@@ -20,7 +20,7 @@ export const loggedByInput = z.object({
 export const createActivityInput = z.object({
   childId: z.string(),
   daycareId: z.string().optional(),
-  masterActivityId: z.string().optional(),
+  daycareActivityId: z.string().optional(),
   activityName: z.string().min(1, "Activity name is required"),
   category: storedCategoryCodeSchema,
   date: z.string().or(z.date()),
@@ -40,6 +40,14 @@ export const createActivityInput = z.object({
   intensity: z.nativeEnum(IntensityEnum).optional(),
   location: z.string().optional(),
   materials: z.string().optional(),
+  drinkName: z.string().optional(),
+  drinkAmountMl: z.number().positive().optional(),
+  hygieneType: z.string().optional(),
+  medicationName: z.string().optional(),
+  medicationDose: z.number().positive().optional(),
+  medicationUnit: z.string().optional(),
+  administeredAt: z.string().or(z.date()).optional(),
+  parentConsent: z.boolean().optional(),
   
   visibleTo: z.array(z.string()).optional(),
   notes: z.string().optional(),
@@ -64,6 +72,14 @@ export const updateActivityInput = z.object({
   intensity: z.nativeEnum(IntensityEnum).optional(),
   location: z.string().optional(),
   materials: z.string().optional(),
+  drinkName: z.string().optional(),
+  drinkAmountMl: z.number().positive().optional(),
+  hygieneType: z.string().optional(),
+  medicationName: z.string().optional(),
+  medicationDose: z.number().positive().optional(),
+  medicationUnit: z.string().optional(),
+  administeredAt: z.string().or(z.date()).optional(),
+  parentConsent: z.boolean().optional(),
   
   notes: z.string().optional(),
 });

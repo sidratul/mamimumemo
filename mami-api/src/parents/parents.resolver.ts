@@ -1,20 +1,44 @@
 import { ParentsService } from "./parents.service.ts";
-import { createParentInput, updateParentInput } from "./parents.validation.ts";
+import {
+  createParentAccountInput,
+  createParentInput,
+  updateParentAccountInput,
+  updateParentInput,
+} from "./parents.validation.ts";
 import { AppContext } from "#shared/config/context.ts";
 
 const parentsService = new ParentsService();
 
+type MongoRefValue = string | null | undefined | {
+  _id?: unknown;
+  id?: unknown;
+  toHexString?: () => string;
+};
+
+function resolveObjectIdRef(value: MongoRefValue): unknown {
+  if (!value || typeof value === "string") {
+    return value;
+  }
+
+  if (typeof value === "object" && typeof value.toHexString === "function") {
+    return value;
+  }
+
+  if (typeof value === "object" && value._id) {
+    return resolveObjectIdRef(value._id as MongoRefValue);
+  }
+
+  if (typeof value === "object" && typeof value.id === "string") {
+    return value.id;
+  }
+
+  return value;
+}
+
 export const resolvers = {
   Parent: {
-    childrenIds: (parent: { childrenIds?: Array<{ id?: string; _id?: string } | string> }) => {
-      return (parent.childrenIds || []).map((child) => {
-        if (typeof child === "string") {
-          return child;
-        }
-
-        return child.id || child._id || child;
-      });
-    },
+    childrenIds: (parent: { childrenIds?: MongoRefValue[] }) =>
+      (parent.childrenIds || []).map(resolveObjectIdRef),
   },
   ParentUser: {
     role: (parentUser: { role?: string }) => {
@@ -57,6 +81,14 @@ export const resolvers = {
       createParentInput.parse(input);
       return parentsService.createParent(input, context);
     },
+    createParentAccount: (
+      _: unknown,
+      { input }: { input: typeof createParentAccountInput._type },
+      context: AppContext,
+    ) => {
+      createParentAccountInput.parse(input);
+      return parentsService.createParentAccount(input, context);
+    },
     updateParent: (
       _: unknown,
       { id, input }: { id: string; input: typeof updateParentInput._type },
@@ -64,6 +96,14 @@ export const resolvers = {
     ) => {
       updateParentInput.parse(input);
       return parentsService.updateParent(id, input, context);
+    },
+    updateParentAccount: (
+      _: unknown,
+      { id, input }: { id: string; input: typeof updateParentAccountInput._type },
+      context: AppContext,
+    ) => {
+      updateParentAccountInput.parse(input);
+      return parentsService.updateParentAccount(id, input, context);
     },
     deactivateParent: (
       _: unknown,

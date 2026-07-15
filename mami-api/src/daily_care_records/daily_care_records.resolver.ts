@@ -11,15 +11,35 @@ import { AppContext } from "#shared/config/context.ts";
 
 const dailyCareRecordsService = new DailyCareRecordsService();
 
+type MongoRefValue = string | null | undefined | {
+  _id?: unknown;
+  id?: unknown;
+  toHexString?: () => string;
+};
+
+function resolveObjectIdRef(value: MongoRefValue): unknown {
+  if (!value || typeof value === "string") {
+    return value;
+  }
+
+  if (typeof value === "object" && typeof value.toHexString === "function") {
+    return value;
+  }
+
+  if (typeof value === "object" && value._id) {
+    return resolveObjectIdRef(value._id as MongoRefValue);
+  }
+
+  if (typeof value === "object" && typeof value.id === "string") {
+    return value.id;
+  }
+
+  return value;
+}
+
 export const resolvers = {
   ChildDailyRecord: {
-    childId: (childRecord: { childId?: { id?: string; _id?: string } | string }) => {
-      if (!childRecord.childId || typeof childRecord.childId === "string") {
-        return childRecord.childId;
-      }
-
-      return childRecord.childId.id || childRecord.childId._id || childRecord.childId;
-    },
+    childId: (childRecord: { childId?: MongoRefValue }) => resolveObjectIdRef(childRecord.childId),
   },
   Attendance: {
     status: (attendance: { status?: string }) => {

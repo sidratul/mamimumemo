@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const activitySchema = new mongoose.Schema({
   childId: { type: mongoose.Schema.Types.ObjectId, ref: "Child", required: true },
   daycareId: { type: mongoose.Schema.Types.ObjectId, ref: "Daycare" }, // null jika di rumah
-  masterActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "MasterActivity" },
+  daycareActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "DaycareActivity" },
   activityName: { type: String, required: true },
   category: { type: String, required: true },
   date: { type: Date, required: true },
@@ -24,6 +24,14 @@ const activitySchema = new mongoose.Schema({
   intensity: { type: String, enum: ["low", "medium", "high"] },
   location: String,
   materials: String,
+  drinkName: String,
+  drinkAmountMl: Number,
+  hygieneType: String,
+  medicationName: String,
+  medicationDose: Number,
+  medicationUnit: String,
+  administeredAt: Date,
+  parentConsent: Boolean,
   
   // Metadata
   source: { 

@@ -23,7 +23,7 @@ const attendanceSchema = new mongoose.Schema<Record<string, unknown>>({
 // Activity subdocument schema (sama seperti global activities tapi lebih simple)
 const dailyActivitySchema = new mongoose.Schema<Record<string, unknown>>({
   _id: false,
-  masterActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "MasterActivity" },
+  daycareActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "DaycareActivity" },
   activityName: { type: String, required: true },
   category: { type: String, required: true },
   startTime: { type: String, required: true },
@@ -43,6 +43,14 @@ const dailyActivitySchema = new mongoose.Schema<Record<string, unknown>>({
   intensity: { type: String, enum: ["low", "medium", "high"] },
   location: String,
   materials: String,
+  drinkName: String,
+  drinkAmountMl: Number,
+  hygieneType: String,
+  medicationName: String,
+  medicationDose: Number,
+  medicationUnit: String,
+  administeredAt: Date,
+  parentConsent: Boolean,
   
   loggedBy: { type: simpleUserRefSchema, required: true },
   loggedAt: { type: Date, default: Date.now },
@@ -50,7 +58,7 @@ const dailyActivitySchema = new mongoose.Schema<Record<string, unknown>>({
 
 const plannedDailyActivitySchema = new mongoose.Schema<Record<string, unknown>>({
   _id: false,
-  masterActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "MasterActivity" },
+  daycareActivityId: { type: mongoose.Schema.Types.ObjectId, ref: "DaycareActivity" },
   activityName: { type: String, required: true },
   category: { type: String, required: true },
   startTime: { type: String, required: true },

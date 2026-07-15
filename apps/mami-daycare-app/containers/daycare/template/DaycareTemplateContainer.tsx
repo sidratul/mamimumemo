@@ -14,7 +14,7 @@ import {
 import { Box, Text } from '../../../theme/theme';
 
 type TemplateActivityDraft = {
-  masterActivityId: string;
+  daycareActivityId: string;
   activityName: string;
   category: MasterActivity['category'];
   duration?: number;
@@ -92,7 +92,7 @@ export function DaycareTemplateContainer() {
   }, [session?.daycareId, session?.token]);
 
   const selectedMap = useMemo(
-    () => new Map(selectedActivities.map((item) => [item.masterActivityId, item])),
+    () => new Map(selectedActivities.map((item) => [item.daycareActivityId, item])),
     [selectedActivities]
   );
 
@@ -108,14 +108,14 @@ export function DaycareTemplateContainer() {
 
   function toggleActivity(activity: MasterActivity) {
     if (selectedMap.has(activity.id)) {
-      setSelectedActivities((current) => current.filter((item) => item.masterActivityId !== activity.id));
+      setSelectedActivities((current) => current.filter((item) => item.daycareActivityId !== activity.id));
       return;
     }
 
     setSelectedActivities((current) => [
       ...current,
       {
-        masterActivityId: activity.id,
+        daycareActivityId: activity.id,
         activityName: activity.name,
         category: activity.category,
         duration: activity.defaultDuration,
@@ -125,9 +125,9 @@ export function DaycareTemplateContainer() {
     ]);
   }
 
-  function updateSelectedActivity(masterActivityId: string, key: 'startTime' | 'endTime', value: string) {
+  function updateSelectedActivity(daycareActivityId: string, key: 'startTime' | 'endTime', value: string) {
     setSelectedActivities((current) =>
-      current.map((item) => (item.masterActivityId === masterActivityId ? { ...item, [key]: value } : item))
+      current.map((item) => (item.daycareActivityId === daycareActivityId ? { ...item, [key]: value } : item))
     );
   }
 
@@ -175,7 +175,7 @@ export function DaycareTemplateContainer() {
         endDate: targetType === 'DATE_RANGE' ? endDate : undefined,
         specificDate: targetType === 'SPECIFIC_DATE' ? specificDate : undefined,
         activities: selectedActivities.map((item) => ({
-          masterActivityId: item.masterActivityId,
+          daycareActivityId: item.daycareActivityId,
           activityName: item.activityName,
           category: item.category,
           startTime: item.startTime,

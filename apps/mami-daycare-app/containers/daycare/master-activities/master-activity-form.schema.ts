@@ -1,10 +1,12 @@
 import { z } from 'zod';
-import { SelectInput, TextField, type FormFieldProps, type SelectOption } from '@mami/ui';
+import { SelectInput, TextAreaField, TextField, type FormFieldProps, type SelectOption } from '@mami/ui';
 
 import type { MasterActivityCategory } from '../../../services/operations/master-activities';
+import { MasterActivityCategoryInput } from './master-activity-category-input';
 
 export const masterActivityFormSchema = z.object({
   name: z.string().min(1, 'Nama aktivitas wajib diisi.'),
+  description: z.string().optional(),
   category: z.string().min(1, 'Kategori wajib dipilih.'),
   defaultDuration: z
     .string()
@@ -16,14 +18,30 @@ export type MasterActivityFormValue = z.infer<typeof masterActivityFormSchema>;
 
 export const initialMasterActivityFormValue: MasterActivityFormValue = {
   name: '',
+  description: '',
   category: 'PLAY',
   defaultDuration: '30',
 };
 
 export function createMasterActivityFormFields(
   categoryOptions: SelectOption[],
+  options: { inlineCategoryOptions?: boolean; useBottomSheetInput?: boolean } = {},
 ): FormFieldProps<MasterActivityFormValue> {
+  const useBottomSheetInput = options.useBottomSheetInput ?? true;
+  const categoryInput = options.inlineCategoryOptions ? MasterActivityCategoryInput : SelectInput;
+
   return {
+  category: {
+    label: 'Kategori',
+    required: true,
+    helperText: 'Default field config akan mengikuti kategori ini.',
+    input: categoryInput,
+    props: {
+      placeholder: 'Pilih kategori',
+      title: 'Kategori',
+      options: categoryOptions,
+    },
+  },
   name: {
     label: 'Nama Aktivitas',
     required: true,
@@ -32,18 +50,19 @@ export function createMasterActivityFormFields(
       placeholder: 'Contoh: Circle Time Pagi',
       backgroundColor: '#FFFFFF',
       borderRadius: 14,
-      useBottomSheetInput: true,
+      useBottomSheetInput,
     },
   },
-  category: {
-    label: 'Kategori',
-    required: true,
-    helperText: 'Default field config akan mengikuti kategori ini.',
-    input: SelectInput,
+  description: {
+    label: 'Deskripsi',
+    helperText: 'Opsional. Jelaskan aktivitas ini untuk staff daycare.',
+    input: TextAreaField,
     props: {
-      placeholder: 'Pilih kategori',
-      title: 'Kategori',
-      options: categoryOptions,
+      placeholder: 'Contoh: Anak duduk melingkar, menyapa teman, dan membahas kegiatan hari ini.',
+      backgroundColor: '#FFFFFF',
+      borderRadius: 14,
+      numberOfLines: 3,
+      useBottomSheetInput,
     },
   },
   defaultDuration: {
@@ -56,7 +75,7 @@ export function createMasterActivityFormFields(
       keyboardType: 'numeric',
       backgroundColor: '#FFFFFF',
       borderRadius: 14,
-      useBottomSheetInput: true,
+      useBottomSheetInput,
     },
   },
   };

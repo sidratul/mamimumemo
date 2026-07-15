@@ -24,13 +24,25 @@ async function performGraphqlFetch<TData>(
   });
 }
 
+type GraphqlUrlResolver = string | (() => string | Promise<string>);
+
+async function resolveGraphqlUrl(graphqlUrl: GraphqlUrlResolver) {
+  const resolved = typeof graphqlUrl === 'function' ? await graphqlUrl() : graphqlUrl;
+
+  if (!resolved) {
+    throw new Error('URL GraphQL belum dikonfigurasi.');
+  }
+
+  return resolved;
+}
+
 export function createGraphqlRequester({
   graphqlUrl,
   session,
   refreshSession,
   onUnauthorized,
 }: {
-  graphqlUrl: string;
+  graphqlUrl: GraphqlUrlResolver;
   session: Pick<SessionStorageAdapter, 'getAccessToken' | 'clearSession'>;
   refreshSession: () => Promise<{ accessToken: string } | null>;
   onUnauthorized?: UnauthorizedHandler;
@@ -40,8 +52,9 @@ export function createGraphqlRequester({
     variables?: TVariables,
     tokenOverride?: string,
   ) {
+    const requestUrl = await resolveGraphqlUrl(graphqlUrl);
     const accessToken = tokenOverride ?? (await session.getAccessToken()) ?? undefined;
-    let response = await performGraphqlFetch<TData>(graphqlUrl, query, variables, accessToken ?? undefined);
+    let response = await performGraphqlFetch<TData>(requestUrl, query, variables, accessToken ?? undefined);
 
     if (response.status === 401) {
       const nextTokens = await refreshSession();
@@ -52,7 +65,7 @@ export function createGraphqlRequester({
         throw new Error('Sesi berakhir. Silakan masuk lagi.');
       }
 
-      response = await performGraphqlFetch<TData>(graphqlUrl, query, variables, nextTokens.accessToken);
+      response = await performGraphqlFetch<TData>(requestUrl, query, variables, nextTokens.accessToken);
 
       if (response.status === 401) {
         await session.clearSession();

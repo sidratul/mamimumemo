@@ -50,3 +50,4 @@ Scalars:
 - Jika target `DAY_OF_WEEK`, `dayOfWeek` wajib ada.
 - Jika target `DATE_RANGE`, `startDate` dan `endDate` wajib ada.
 - Jika target `SPECIFIC_DATE`, `specificDate` wajib ada.
+- Aktivitas template menggunakan `daycareActivityId` dan harus dimiliki tenant yang sama.

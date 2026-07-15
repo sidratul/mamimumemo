@@ -62,3 +62,4 @@ Scalars:
 
 - `deleteDaycare` soft delete.
 - `purgeDaycare` hard delete dan bisa ikut menghapus owner jika `deleteOwner = true`.
+- Saat status menjadi `APPROVED`, sistem membuat daycare config dan mengadopsi master aktivitas dengan `isStarter = true` secara idempotent.

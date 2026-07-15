@@ -15,6 +15,8 @@ import {
   DaycareMembershipAccess,
   DaycareMembershipStatus,
 } from "@/daycare_memberships/daycare_memberships.enum.ts";
+import { DaycareActivitiesService } from "@/daycare_activities/daycare_activities.service.ts";
+import { DaycareConfigsRepository } from "@/daycare_configs/daycare_configs.repository.ts";
 
 const MONGO_URI = Deno.env.get("MONGO_URI") ||
   "mongodb://localhost:27017/mami-db";
@@ -31,6 +33,9 @@ const SEED_DATA = {
     password: "Admin@2026",
   },
 } as const;
+
+const daycareActivitiesService = new DaycareActivitiesService();
+const daycareConfigsRepository = new DaycareConfigsRepository();
 
 async function seedDaycare() {
   try {
@@ -146,12 +151,23 @@ async function seedDaycare() {
       { upsert: true, new: true, setDefaultsOnInsert: true },
     );
 
+    await daycareConfigsRepository.ensure(daycare._id.toString());
+    const adoptedActivities = await daycareActivitiesService.bootstrapStarters(
+      daycare._id.toString(),
+      {
+        userId: owner._id,
+        name: owner.name,
+        role: "DAYCARE_OWNER",
+      },
+    );
+
     console.log("Daycare seed siap digunakan:");
     console.log(`Daycare: ${daycare.name}`);
     console.log(`Daycare ID: ${daycare._id}`);
     console.log(`Owner: ${owner.name}`);
     console.log(`Email: ${SEED_DATA.owner.email}`);
     console.log(`Password: ${SEED_DATA.owner.password}`);
+    console.log(`Starter activities: ${adoptedActivities.length}`);
   } catch (error) {
     console.error("Error seeding daycare:", error);
     Deno.exitCode = 1;

@@ -4,7 +4,7 @@ export interface IActivity {
   _id: Types.ObjectId;
   childId: Types.ObjectId;
   daycareId?: Types.ObjectId;
-  masterActivityId?: Types.ObjectId;
+  daycareActivityId?: Types.ObjectId;
   activityName: string;
   category: ActivityCategory;
   date: Date;
@@ -25,6 +25,14 @@ export interface IActivity {
   intensity?: Intensity;
   location?: string;
   materials?: string;
+  drinkName?: string;
+  drinkAmountMl?: number;
+  hygieneType?: string;
+  medicationName?: string;
+  medicationDose?: number;
+  medicationUnit?: string;
+  administeredAt?: Date;
+  parentConsent?: boolean;
   
   // Metadata
   source: ActivitySource;

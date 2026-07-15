@@ -37,7 +37,7 @@ const fields: FormFieldProps<LoginData> = {
   },
 };
 
-export function LoginForm() {
+export function LoginForm({ submitLabel = 'Masuk ke Dashboard' }: { submitLabel?: string }) {
   const { saveSession } = useSession();
   const { showToast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,7 +81,7 @@ export function LoginForm() {
         fields={fields}
         defaultValue={initialValues}
         schema={loginSchema}
-        submitLabel="Masuk ke Dashboard"
+        submitLabel={submitLabel}
         loading={isSubmitting}
         onSubmit={onSubmit}
       />

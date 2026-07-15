@@ -21,6 +21,14 @@ const categories = [
     defaultFieldConfig: { mealType: true, menu: true, eaten: true, mood: true },
   },
   {
+    code: "DRINK",
+    defaultLabel: "Minum",
+    behaviorType: "DRINK",
+    defaultColor: "#0EA5E9",
+    defaultIcon: "cup-water",
+    defaultFieldConfig: { drinkName: true, drinkAmountMl: true, mood: true },
+  },
+  {
     code: "NAP",
     defaultLabel: "Tidur",
     behaviorType: "NAP",
@@ -35,6 +43,29 @@ const categories = [
     defaultColor: "#14B8A6",
     defaultIcon: "toilet",
     defaultFieldConfig: { toiletingType: true, toiletingNotes: true },
+  },
+  {
+    code: "HYGIENE",
+    defaultLabel: "Kebersihan",
+    behaviorType: "HYGIENE",
+    defaultColor: "#06B6D4",
+    defaultIcon: "shower",
+    defaultFieldConfig: { hygieneType: true, description: true },
+  },
+  {
+    code: "MEDICATION",
+    defaultLabel: "Minum Obat",
+    behaviorType: "MEDICATION",
+    defaultColor: "#DC2626",
+    defaultIcon: "pill",
+    defaultFieldConfig: {
+      medicationName: true,
+      medicationDose: true,
+      medicationUnit: true,
+      administeredAt: true,
+      parentConsent: true,
+      description: true,
+    },
   },
   {
     code: "CARE",
@@ -85,14 +116,6 @@ const categories = [
     defaultFieldConfig: { location: true, photos: true, description: true },
   },
   {
-    code: "ROUTINE",
-    defaultLabel: "Rutinitas",
-    behaviorType: "GENERIC",
-    defaultColor: "#64748B",
-    defaultIcon: "calendar-check",
-    defaultFieldConfig: { mood: true, description: true },
-  },
-  {
     code: "SOCIAL",
     defaultLabel: "Sosial",
     behaviorType: "GENERIC",
@@ -110,9 +133,14 @@ const categories = [
   },
 ] as const;
 
-async function seedActivityCategories() {
+export async function seedActivityCategories(
+  options: { manageConnection?: boolean } = {},
+) {
+  const manageConnection = options.manageConnection ?? true;
   try {
-    await mongoose.connect(MONGO_URI);
+    if (manageConnection) {
+      await mongoose.connect(MONGO_URI);
+    }
 
     for (const [sortOrder, category] of categories.entries()) {
       await ActivityCategoryModel.findOneAndUpdate(
@@ -128,13 +156,26 @@ async function seedActivityCategories() {
       );
     }
 
+    await ActivityCategoryModel.updateOne(
+      { code: "ROUTINE" },
+      { $set: { isActive: false } },
+    );
+
     console.log(`Seeded ${categories.length} activity categories.`);
   } catch (error) {
     console.error("Error seeding activity categories:", error);
-    Deno.exitCode = 1;
+    throw error;
   } finally {
-    await mongoose.connection.close();
+    if (manageConnection) {
+      await mongoose.connection.close();
+    }
   }
 }
 
-await seedActivityCategories();
+if (import.meta.main) {
+  try {
+    await seedActivityCategories();
+  } catch {
+    Deno.exitCode = 1;
+  }
+}

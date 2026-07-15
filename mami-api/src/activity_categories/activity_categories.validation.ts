@@ -25,12 +25,23 @@ export const activityCategoryFieldConfigInput = z.object({
   intensity: z.boolean().optional(),
   location: z.boolean().optional(),
   materials: z.boolean().optional(),
+  drinkName: z.boolean().optional(),
+  drinkAmountMl: z.boolean().optional(),
+  hygieneType: z.boolean().optional(),
+  medicationName: z.boolean().optional(),
+  medicationDose: z.boolean().optional(),
+  medicationUnit: z.boolean().optional(),
+  administeredAt: z.boolean().optional(),
+  parentConsent: z.boolean().optional(),
 });
 
 export const createActivityCategoryInput = z.object({
   code: categoryCodeSchema,
   defaultLabel: z.string().trim().min(1),
-  behaviorType: z.enum(["MEAL", "NAP", "TOILETING", "CARE", "PLAY", "LEARNING", "GENERIC"]).optional(),
+  behaviorType: z.enum([
+    "MEAL", "DRINK", "NAP", "TOILETING", "HYGIENE",
+    "MEDICATION", "CARE", "PLAY", "LEARNING", "GENERIC",
+  ]).optional(),
   defaultColor: z.string().trim().optional(),
   defaultIcon: z.string().trim().optional(),
   defaultFieldConfig: activityCategoryFieldConfigInput.optional(),

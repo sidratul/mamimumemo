@@ -34,9 +34,11 @@ Server saat ini me-load modul berikut dari `main.ts`:
 - `children_daycare`
 - `contracts`
 - `master_activities`
+- `daycare_activities`
 - `daily_care_records`
 - `schedule_templates`
-- `weekly_schedules`
+- `activity_categories`
+- `daycare_configs`
 - `invoices`
 - `staff_payments`
 - `menus`
@@ -72,6 +74,21 @@ deno task start
 ```
 
 Endpoint GraphQL default: `http://localhost:8000/graphql`
+
+## Migrasi dan Data Awal
+
+Dengan Docker Compose yang sudah berjalan:
+
+```bash
+docker compose exec deno-app deno task migrate:all
+docker compose exec deno-app deno task seed:admin
+docker compose exec deno-app deno task seed:activity-catalog
+docker compose exec deno-app deno task seed:daycare
+```
+
+`seed:activity-catalog` mengisi kategori dan master aktivitas global.
+`seed:daycare` membuat Saldira Daycare beserta owner, config, dan salinan starter.
+Semua seeder bersifat idempotent.
 
 ## Testing
 

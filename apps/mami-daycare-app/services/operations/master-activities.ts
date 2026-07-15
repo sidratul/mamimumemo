@@ -5,7 +5,10 @@ export type MasterActivityCategory = string;
 export type MasterActivity = {
   id: string;
   daycareId: string;
+  sourceMasterActivityId?: string | null;
+  sourceMasterVersion?: number | null;
   name: string;
+  description?: string | null;
   category: MasterActivityCategory;
   defaultDuration: number;
   icon?: string | null;
@@ -13,28 +16,47 @@ export type MasterActivity = {
   active: boolean;
 };
 
+export type GlobalMasterActivity = Omit<
+  MasterActivity,
+  'daycareId' | 'sourceMasterActivityId' | 'sourceMasterVersion'
+> & {
+  version: number;
+  isStarter: boolean;
+};
+
 type MasterActivitiesResponse = {
-  masterActivities: MasterActivity[];
+  daycareActivities: MasterActivity[];
 };
 
 type CreateMasterActivityResponse = {
-  createMasterActivity: MasterActivity;
+  createDaycareActivity: MasterActivity;
 };
 
 type UpdateMasterActivityResponse = {
-  updateMasterActivity: MasterActivity;
+  updateDaycareActivity: MasterActivity;
 };
 
 type DeactivateMasterActivityResponse = {
-  deactivateMasterActivity: MasterActivity;
+  deactivateDaycareActivity: MasterActivity;
+};
+
+type GlobalMasterActivitiesResponse = {
+  masterActivities: GlobalMasterActivity[];
+};
+
+type AdoptMasterActivityResponse = {
+  adoptMasterActivity: MasterActivity;
 };
 
 const MASTER_ACTIVITIES_QUERY = `
-  query MasterActivities($daycareId: ObjectId!, $active: Boolean) {
-    masterActivities(daycareId: $daycareId, active: $active) {
+  query DaycareActivities($daycareId: ObjectId!, $active: Boolean) {
+    daycareActivities(daycareId: $daycareId, active: $active) {
       id
       daycareId
+      sourceMasterActivityId
+      sourceMasterVersion
       name
+      description
       category
       defaultDuration
       icon
@@ -45,11 +67,14 @@ const MASTER_ACTIVITIES_QUERY = `
 `;
 
 const CREATE_MASTER_ACTIVITY_MUTATION = `
-  mutation CreateMasterActivity($input: CreateMasterActivityInput!) {
-    createMasterActivity(input: $input) {
+  mutation CreateDaycareActivity($input: CreateDaycareActivityInput!) {
+    createDaycareActivity(input: $input) {
       id
       daycareId
+      sourceMasterActivityId
+      sourceMasterVersion
       name
+      description
       category
       defaultDuration
       icon
@@ -60,11 +85,14 @@ const CREATE_MASTER_ACTIVITY_MUTATION = `
 `;
 
 const UPDATE_MASTER_ACTIVITY_MUTATION = `
-  mutation UpdateMasterActivity($id: ObjectId!, $input: UpdateMasterActivityInput!) {
-    updateMasterActivity(id: $id, input: $input) {
+  mutation UpdateDaycareActivity($id: ObjectId!, $input: UpdateDaycareActivityInput!) {
+    updateDaycareActivity(id: $id, input: $input) {
       id
       daycareId
+      sourceMasterActivityId
+      sourceMasterVersion
       name
+      description
       category
       defaultDuration
       icon
@@ -75,11 +103,49 @@ const UPDATE_MASTER_ACTIVITY_MUTATION = `
 `;
 
 const DEACTIVATE_MASTER_ACTIVITY_MUTATION = `
-  mutation DeactivateMasterActivity($id: ObjectId!) {
-    deactivateMasterActivity(id: $id) {
+  mutation DeactivateDaycareActivity($id: ObjectId!) {
+    deactivateDaycareActivity(id: $id) {
       id
       daycareId
+      sourceMasterActivityId
+      sourceMasterVersion
       name
+      description
+      category
+      defaultDuration
+      icon
+      color
+      active
+    }
+  }
+`;
+
+const GLOBAL_MASTER_ACTIVITIES_QUERY = `
+  query GlobalMasterActivities($active: Boolean) {
+    masterActivities(active: $active) {
+      id
+      name
+      description
+      category
+      defaultDuration
+      icon
+      color
+      active
+      version
+      isStarter
+    }
+  }
+`;
+
+const ADOPT_MASTER_ACTIVITY_MUTATION = `
+  mutation AdoptMasterActivity($input: AdoptMasterActivityInput!) {
+    adoptMasterActivity(input: $input) {
+      id
+      daycareId
+      sourceMasterActivityId
+      sourceMasterVersion
+      name
+      description
       category
       defaultDuration
       icon
@@ -96,7 +162,7 @@ export async function listMasterActivities(token: string, daycareId: string, act
     token
   );
 
-  return data.masterActivities;
+  return data.daycareActivities;
 }
 
 export async function createMasterActivity(
@@ -104,6 +170,7 @@ export async function createMasterActivity(
   input: {
     daycareId: string;
     name: string;
+    description?: string;
     category: MasterActivityCategory;
     defaultDuration?: number;
     icon?: string;
@@ -116,7 +183,7 @@ export async function createMasterActivity(
     token
   );
 
-  return data.createMasterActivity;
+  return data.createDaycareActivity;
 }
 
 export async function updateMasterActivity(
@@ -124,6 +191,7 @@ export async function updateMasterActivity(
   id: string,
   input: {
     name?: string;
+    description?: string;
     category?: MasterActivityCategory;
     defaultDuration?: number;
     icon?: string;
@@ -137,7 +205,7 @@ export async function updateMasterActivity(
     token
   );
 
-  return data.updateMasterActivity;
+  return data.updateDaycareActivity;
 }
 
 export async function deactivateMasterActivity(token: string, id: string) {
@@ -147,5 +215,29 @@ export async function deactivateMasterActivity(token: string, id: string) {
     token
   );
 
-  return data.deactivateMasterActivity;
+  return data.deactivateDaycareActivity;
+}
+
+export async function listGlobalMasterActivities(token: string) {
+  const data = await graphqlRequest<
+    GlobalMasterActivitiesResponse,
+    { active: boolean }
+  >(GLOBAL_MASTER_ACTIVITIES_QUERY, { active: true }, token);
+  return data.masterActivities;
+}
+
+export async function adoptMasterActivity(
+  token: string,
+  daycareId: string,
+  masterActivityId: string,
+) {
+  const data = await graphqlRequest<
+    AdoptMasterActivityResponse,
+    { input: { daycareId: string; masterActivityId: string } }
+  >(
+    ADOPT_MASTER_ACTIVITY_MUTATION,
+    { input: { daycareId, masterActivityId } },
+    token,
+  );
+  return data.adoptMasterActivity;
 }

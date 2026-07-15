@@ -101,7 +101,10 @@ export class ChildrenDaycareService {
       customData: input.customData || {},
     };
 
-    return await childrenDaycareRepository.create(childData);
+    const child = await childrenDaycareRepository.create(childData);
+    await childrenDaycareRepository.attachToParent(input.parentId, child._id);
+
+    return child;
   }
 
   async updateChildrenDaycare(
@@ -137,6 +140,35 @@ export class ChildrenDaycareService {
     return await childrenDaycareRepository.deactivate(id);
   }
 
+  async purgeChildrenDaycare(id: string, context: AppContext) {
+    isAuthenticated(context);
+    if (!context.user) {
+      throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
+    }
+
+    this.requirePurgeAccess(context);
+
+    const child = await childrenDaycareRepository.findById(id);
+    if (!child) {
+      throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
+    }
+
+    const hasReferences = await childrenDaycareRepository.hasOperationalReferences(id);
+    if (hasReferences) {
+      throw new GraphQLError(
+        "Anak sudah memiliki riwayat operasional. Gunakan nonaktifkan agar riwayat tetap utuh.",
+      );
+    }
+
+    await childrenDaycareRepository.detachFromParents(child._id);
+    await childrenDaycareRepository.hardDelete(id);
+
+    return {
+      id: child._id,
+      message: "Anak berhasil dihapus permanen.",
+    };
+  }
+
   private requireReadAccess(context: AppContext) {
     if (!context.user || !this.daycareReadRoles.includes(context.user.role as UserRole)) {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
@@ -145,6 +177,13 @@ export class ChildrenDaycareService {
 
   private requireWriteAccess(context: AppContext) {
     if (!context.user || !this.daycareWriteRoles.includes(context.user.role as UserRole)) {
+      throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
+    }
+  }
+
+  private requirePurgeAccess(context: AppContext) {
+    const allowedRoles = [UserRole.DAYCARE_OWNER, UserRole.SUPER_ADMIN];
+    if (!context.user || !allowedRoles.includes(context.user.role as UserRole)) {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }
   }

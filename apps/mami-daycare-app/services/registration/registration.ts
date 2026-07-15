@@ -45,7 +45,7 @@ type LoginMutationResponse = {
 
 type ProfileQueryResponse = {
   profile: {
-    _id: string;
+    id: string;
     name: string;
     email: string;
     accesses: string[];
@@ -54,7 +54,6 @@ type ProfileQueryResponse = {
 
 type MyDaycareQueryResponse = {
   myDaycare: {
-    _id: string;
     id: string;
     name: string;
   } | null;
@@ -81,7 +80,7 @@ const LOGIN_MUTATION = `
 const PROFILE_QUERY = `
   query Profile {
     profile {
-      _id
+      id
       name
       email
       accesses
@@ -92,7 +91,6 @@ const PROFILE_QUERY = `
 const MY_DAYCARE_QUERY = `
   query MyDaycare {
     myDaycare {
-      _id
       id
       name
     }
@@ -181,7 +179,7 @@ export async function signInDaycareOwner(input: { email: string; password: strin
   }
 
   const daycareResult = await graphqlRequest<MyDaycareQueryResponse>(MY_DAYCARE_QUERY, undefined, token);
-  const daycareId = daycareResult.myDaycare?.id || daycareResult.myDaycare?._id || '';
+  const daycareId = daycareResult.myDaycare?.id || '';
 
   return {
     token,

@@ -4,7 +4,7 @@ Jadwal mingguan daycare, assignment sitter, dan schedule per child.
 
 Source schema: `src/weekly_schedules/weekly_schedules.typedef.ts`
 
-Status: **Belum exposed di GraphQL schema**
+Status: **Exposed di GraphQL schema**
 
 ## Access
 

@@ -1,11 +1,11 @@
 import { DailyCareRecordsRepository } from "./daily_care_records.repository.ts";
 import {
-  createDailyCareRecordInput,
-  updateDailyCareRecordInput,
+  applyScheduleTemplateInput,
   checkInChildInput,
   checkOutChildInput,
+  createDailyCareRecordInput,
   logDailyActivityInput,
-  applyScheduleTemplateInput,
+  updateDailyCareRecordInput,
 } from "./daily_care_records.validation.ts";
 import { GraphQLError } from "graphql";
 import { AppContext } from "#shared/config/context.ts";
@@ -15,10 +15,12 @@ import { UserRole } from "#shared/enums/enum.ts";
 import { ActivityCategoriesService } from "@/activity_categories/activity_categories.service.ts";
 import ChildrenDaycareModel from "@/children_daycare/children_daycare.schema.ts";
 import { ScheduleTemplatesRepository } from "@/schedule_templates/schedule_templates.repository.ts";
+import { DaycareActivitiesService } from "@/daycare_activities/daycare_activities.service.ts";
 
 const dailyCareRecordsRepository = new DailyCareRecordsRepository();
 const activityCategoriesService = new ActivityCategoriesService();
 const scheduleTemplatesRepository = new ScheduleTemplatesRepository();
+const daycareActivitiesService = new DaycareActivitiesService();
 
 export class DailyCareRecordsService {
   private readonly daycareAccessRoles = [
@@ -31,23 +33,26 @@ export class DailyCareRecordsService {
   async getDailyCareRecord(
     daycareId: string,
     date: Date,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     if (!context.user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    this.requireDaycareAccess(context);
+    this.requireDaycareAccess(context, daycareId);
 
-    return await dailyCareRecordsRepository.findByDaycareAndDate(daycareId, date);
+    return await dailyCareRecordsRepository.findByDaycareAndDate(
+      daycareId,
+      date,
+    );
   }
 
   async getDailyCareRecords(
     daycareId: string,
     startDate: Date,
     endDate: Date,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     if (!context.user) {
@@ -55,16 +60,20 @@ export class DailyCareRecordsService {
     }
 
     // Only daycare staff can view all records
-    this.requireDaycareAccess(context);
+    this.requireDaycareAccess(context, daycareId);
 
-    return await dailyCareRecordsRepository.findByDaycareAndDateRange(daycareId, startDate, endDate);
+    return await dailyCareRecordsRepository.findByDaycareAndDateRange(
+      daycareId,
+      startDate,
+      endDate,
+    );
   }
 
   async getChildDailyRecords(
     childId: string,
     startDate: Date,
     endDate: Date,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     if (!context.user) {
@@ -73,7 +82,11 @@ export class DailyCareRecordsService {
 
     this.requireDaycareAccess(context);
 
-    return await dailyCareRecordsRepository.findByChildIdAndDateRange(childId, startDate, endDate);
+    return await dailyCareRecordsRepository.findByChildIdAndDateRange(
+      childId,
+      startDate,
+      endDate,
+    );
   }
 
   async getTodayDailyCare(daycareId: string, context: AppContext) {
@@ -84,7 +97,7 @@ export class DailyCareRecordsService {
 
   async createDailyCareRecord(
     input: typeof createDailyCareRecordInput._type,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     if (!context.user) {
@@ -92,8 +105,8 @@ export class DailyCareRecordsService {
     }
 
     // Only daycare staff can create daily care records
-    this.requireDaycareAccess(context);
     const parsed = createDailyCareRecordInput.parse(input);
+    this.requireDaycareAccess(context, parsed.daycareId);
     await Promise.all([
       ...(parsed.plannedActivities ?? []).map((activity) =>
         activityCategoriesService.getDefaultFieldConfig(activity.category)
@@ -104,6 +117,17 @@ export class DailyCareRecordsService {
         )
       ),
     ]);
+    await daycareActivitiesService.assertBelongToDaycare(
+      parsed.daycareId,
+      [
+        ...(parsed.plannedActivities ?? []).map((item) =>
+          item.daycareActivityId
+        ),
+        ...parsed.children.flatMap((child) =>
+          (child.activities ?? []).map((item) => item.daycareActivityId)
+        ),
+      ],
+    );
 
     const date = new Date(parsed.date);
     date.setHours(0, 0, 0, 0);
@@ -121,15 +145,20 @@ export class DailyCareRecordsService {
   async updateDailyCareRecord(
     id: string,
     input: typeof updateDailyCareRecordInput._type,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     if (!context.user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    this.requireDaycareAccess(context);
     const parsed = updateDailyCareRecordInput.parse(input);
+    const record = await dailyCareRecordsRepository.findById(id);
+    if (!record) {
+      throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
+    }
+    const recordDaycareId = String(record.get("daycareId"));
+    this.requireDaycareAccess(context, recordDaycareId);
     await Promise.all([
       ...(parsed.plannedActivities ?? []).map((activity) =>
         activityCategoriesService.getDefaultFieldConfig(activity.category)
@@ -140,30 +169,46 @@ export class DailyCareRecordsService {
         )
       ),
     ]);
+    await daycareActivitiesService.assertBelongToDaycare(
+      recordDaycareId,
+      [
+        ...(parsed.plannedActivities ?? []).map((item) =>
+          item.daycareActivityId
+        ),
+        ...(parsed.children ?? []).flatMap((child) =>
+          (child.activities ?? []).map((item) => item.daycareActivityId)
+        ),
+      ],
+    );
     return await dailyCareRecordsRepository.update(id, parsed);
   }
 
   async applyScheduleTemplate(
     input: typeof applyScheduleTemplateInput._type,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     if (!context.user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    this.requireDaycareAccess(context);
+    this.requireDaycareAccess(context, input.daycareId);
 
-    const template = await scheduleTemplatesRepository.findById(input.templateId);
+    const template = await scheduleTemplatesRepository.findById(
+      input.templateId,
+    );
     if (!template) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
+    }
+    if (template.daycareId.toString() !== input.daycareId) {
+      throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }
 
     const date = new Date(input.date);
     date.setHours(0, 0, 0, 0);
 
     const plannedActivities = template.activities.map((activity) => ({
-      masterActivityId: activity.masterActivityId,
+      daycareActivityId: activity.daycareActivityId,
       activityName: activity.activityName,
       category: activity.category,
       startTime: activity.startTime,
@@ -186,20 +231,23 @@ export class DailyCareRecordsService {
 
   async checkInChild(
     input: typeof checkInChildInput._type,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     if (!context.user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    this.requireDaycareAccess(context);
+    this.requireDaycareAccess(context, input.daycareId);
 
     const date = new Date(input.date);
     date.setHours(0, 0, 0, 0);
 
     // Get or create daily care record
-    let record = await dailyCareRecordsRepository.findByDaycareAndDate(input.daycareId, date);
+    let record = await dailyCareRecordsRepository.findByDaycareAndDate(
+      input.daycareId,
+      date,
+    );
 
     if (!record) {
       // Create new record
@@ -210,15 +258,17 @@ export class DailyCareRecordsService {
       });
     }
 
-    const recordChildren = record.children as Array<{
-      childId: { toString(): string };
-    }> & {
-      push(value: unknown): number;
-    };
+    const recordChildren = record.children as
+      & Array<{
+        childId: { toString(): string };
+      }>
+      & {
+        push(value: unknown): number;
+      };
 
     // Check if child already exists in record
     const childExists = recordChildren.some(
-      (c) => c.childId.toString() === input.childId
+      (c) => c.childId.toString() === input.childId,
     );
 
     if (!childExists) {
@@ -250,11 +300,14 @@ export class DailyCareRecordsService {
         {
           checkIn: input.checkIn,
           status: "present",
-        }
+        },
       );
     }
 
-    const updatedRecord = await dailyCareRecordsRepository.findByDaycareAndDate(input.daycareId, date);
+    const updatedRecord = await dailyCareRecordsRepository.findByDaycareAndDate(
+      input.daycareId,
+      date,
+    );
     if (!updatedRecord) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -264,14 +317,14 @@ export class DailyCareRecordsService {
 
   async checkOutChild(
     input: typeof checkOutChildInput._type,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     if (!context.user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    this.requireDaycareAccess(context);
+    this.requireDaycareAccess(context, input.daycareId);
 
     const date = new Date(input.date);
     date.setHours(0, 0, 0, 0);
@@ -283,10 +336,13 @@ export class DailyCareRecordsService {
       {
         checkOut: input.checkOut,
         status: "present",
-      }
+      },
     );
 
-    const updatedRecord = await dailyCareRecordsRepository.findByDaycareAndDate(input.daycareId, date);
+    const updatedRecord = await dailyCareRecordsRepository.findByDaycareAndDate(
+      input.daycareId,
+      date,
+    );
     if (!updatedRecord) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -296,19 +352,31 @@ export class DailyCareRecordsService {
 
   async logDailyActivity(
     input: typeof logDailyActivityInput._type,
-    context: AppContext
+    context: AppContext,
   ) {
     isAuthenticated(context);
     if (!context.user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    const allowedRoles = [UserRole.DAYCARE_ADMIN, UserRole.DAYCARE_OWNER, UserRole.SUPER_ADMIN, UserRole.DAYCARE_SITTER];
+    const allowedRoles = [
+      UserRole.DAYCARE_ADMIN,
+      UserRole.DAYCARE_OWNER,
+      UserRole.SUPER_ADMIN,
+      UserRole.DAYCARE_SITTER,
+    ];
     if (!allowedRoles.includes(context.user.role as UserRole)) {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }
     const parsed = logDailyActivityInput.parse(input);
-    await activityCategoriesService.getDefaultFieldConfig(parsed.activity.category);
+    this.requireDaycareAccess(context, parsed.daycareId);
+    await activityCategoriesService.getDefaultFieldConfig(
+      parsed.activity.category,
+    );
+    await daycareActivitiesService.assertBelongToDaycare(
+      parsed.daycareId,
+      [parsed.activity.daycareActivityId],
+    );
 
     const date = new Date(parsed.date);
     date.setHours(0, 0, 0, 0);
@@ -322,17 +390,23 @@ export class DailyCareRecordsService {
       loggedAt: new Date(),
     };
 
-    const currentRecord = await dailyCareRecordsRepository.findByDaycareAndDate(parsed.daycareId, date);
+    const currentRecord = await dailyCareRecordsRepository.findByDaycareAndDate(
+      parsed.daycareId,
+      date,
+    );
     this.requireChildAccess(context, currentRecord, parsed.childId);
 
     await dailyCareRecordsRepository.addChildActivity(
       parsed.daycareId,
       date,
       parsed.childId,
-      activity
+      activity,
     );
 
-    const updatedRecord = await dailyCareRecordsRepository.findByDaycareAndDate(parsed.daycareId, date);
+    const updatedRecord = await dailyCareRecordsRepository.findByDaycareAndDate(
+      parsed.daycareId,
+      date,
+    );
     if (!updatedRecord) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
@@ -340,15 +414,27 @@ export class DailyCareRecordsService {
     return updatedRecord;
   }
 
-  private requireDaycareAccess(context: AppContext) {
-    if (!context.user || !this.daycareAccessRoles.includes(context.user.role as UserRole)) {
+  private requireDaycareAccess(context: AppContext, daycareId?: string) {
+    if (
+      !context.user ||
+      !this.daycareAccessRoles.includes(context.user.role as UserRole)
+    ) {
+      throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
+    }
+    if (
+      daycareId &&
+      context.user.role !== UserRole.SUPER_ADMIN &&
+      context.user.daycareId?.toString() !== daycareId
+    ) {
       throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
     }
   }
 
   private requireChildAccess(
     context: AppContext,
-    record: Awaited<ReturnType<DailyCareRecordsRepository["findByDaycareAndDate"]>> | null,
+    record:
+      | Awaited<ReturnType<DailyCareRecordsRepository["findByDaycareAndDate"]>>
+      | null,
     childId: string,
   ) {
     if (!context.user || context.user.role !== UserRole.DAYCARE_SITTER) {

@@ -13,6 +13,14 @@ export const activityCategoryFieldConfigSchema = new mongoose.Schema({
   intensity: { type: Boolean, default: false },
   location: { type: Boolean, default: false },
   materials: { type: Boolean, default: false },
+  drinkName: { type: Boolean, default: false },
+  drinkAmountMl: { type: Boolean, default: false },
+  hygieneType: { type: Boolean, default: false },
+  medicationName: { type: Boolean, default: false },
+  medicationDose: { type: Boolean, default: false },
+  medicationUnit: { type: Boolean, default: false },
+  administeredAt: { type: Boolean, default: false },
+  parentConsent: { type: Boolean, default: false },
 }, { _id: false });
 
 const activityCategorySchema = new mongoose.Schema({
@@ -26,7 +34,10 @@ const activityCategorySchema = new mongoose.Schema({
   defaultLabel: { type: String, required: true, trim: true },
   behaviorType: {
     type: String,
-    enum: ["MEAL", "NAP", "TOILETING", "CARE", "PLAY", "LEARNING", "GENERIC"],
+    enum: [
+      "MEAL", "DRINK", "NAP", "TOILETING", "HYGIENE",
+      "MEDICATION", "CARE", "PLAY", "LEARNING", "GENERIC",
+    ],
     default: "GENERIC",
   },
   defaultColor: { type: String, default: "" },

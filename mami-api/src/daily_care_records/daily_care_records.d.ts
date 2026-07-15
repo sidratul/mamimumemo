@@ -20,7 +20,7 @@ export interface IAppliedScheduleTemplate {
 }
 
 export interface IPlannedDailyActivity {
-  masterActivityId?: Types.ObjectId;
+  daycareActivityId?: Types.ObjectId;
   activityName: string;
   category: ActivityCategory;
   startTime: string;
@@ -72,7 +72,7 @@ export interface IAssignedSitter {
 }
 
 export interface IDailyActivity {
-  masterActivityId?: Types.ObjectId;
+  daycareActivityId?: Types.ObjectId;
   activityName: string;
   category: ActivityCategory;
   startTime: string;
@@ -92,6 +92,14 @@ export interface IDailyActivity {
   intensity?: Intensity;
   location?: string;
   materials?: string;
+  drinkName?: string;
+  drinkAmountMl?: number;
+  hygieneType?: string;
+  medicationName?: string;
+  medicationDose?: number;
+  medicationUnit?: string;
+  administeredAt?: Date;
+  parentConsent?: boolean;
   
   loggedBy: IUserRef;
   loggedAt: Date;

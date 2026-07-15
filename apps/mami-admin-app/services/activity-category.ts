@@ -5,7 +5,17 @@ export type ActivityCategoryDefinition = {
   _id: string;
   code: string;
   defaultLabel: string;
-  behaviorType: 'MEAL' | 'NAP' | 'TOILETING' | 'CARE' | 'PLAY' | 'LEARNING' | 'GENERIC';
+  behaviorType:
+    | 'MEAL'
+    | 'DRINK'
+    | 'NAP'
+    | 'TOILETING'
+    | 'HYGIENE'
+    | 'MEDICATION'
+    | 'CARE'
+    | 'PLAY'
+    | 'LEARNING'
+    | 'GENERIC';
   defaultColor?: string | null;
   defaultIcon?: string | null;
   sortOrder: number;

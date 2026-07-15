@@ -3,10 +3,13 @@ import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Platform, Pressable } from 'react-native';
 
+import { useDaycareLayoutMode } from '../../../services/desktop/layout';
 import { useAppTheme } from '../../../theme/theme';
 
 export default function TabsLayout() {
   const theme = useAppTheme();
+  const layoutMode = useDaycareLayoutMode();
+  const showMobileTabs = layoutMode === 'mobile';
 
   return (
     <Tabs
@@ -29,16 +32,23 @@ export default function TabsLayout() {
           bottom: 0,
           left: 0,
           right: 0,
+          display: showMobileTabs ? 'flex' : 'none',
         },
         tabBarItemStyle: {
           paddingVertical: 4,
         },
-        tabBarButton: (props) => (
+        tabBarButton: ({ children, onPress, onLongPress, accessibilityState, accessibilityLabel, testID, style }) => (
           <Pressable
-            {...props}
+            accessibilityState={accessibilityState}
+            accessibilityLabel={accessibilityLabel}
+            testID={testID}
+            onPress={onPress}
+            onLongPress={onLongPress}
             hitSlop={10}
-            style={[props.style, { justifyContent: 'center', alignItems: 'center' }]}
-          />
+            style={[style, { justifyContent: 'center', alignItems: 'center' }]}
+          >
+            {children}
+          </Pressable>
         ),
         tabBarLabelStyle: {
           fontSize: 11,

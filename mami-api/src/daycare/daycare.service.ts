@@ -7,6 +7,8 @@ import { UserRole } from "#shared/enums/enum.ts";
 import { ObjectId } from "#shared/types/objectid.type.ts";
 import UsersService from "@/users/users.service.ts";
 import DaycareMembershipsService from "@/daycare_memberships/daycare_memberships.service.ts";
+import { DaycareActivitiesService } from "@/daycare_activities/daycare_activities.service.ts";
+import { DaycareConfigsRepository } from "@/daycare_configs/daycare_configs.repository.ts";
 import UploadsService from "@/uploads/uploads.service.ts";
 import { DaycareApprovalStatus } from "./daycare.enum.ts";
 import {
@@ -27,6 +29,8 @@ import {
 const repository = new DaycareRepository();
 const usersService = new UsersService();
 const daycareMembershipsService = new DaycareMembershipsService();
+const daycareActivitiesService = new DaycareActivitiesService();
+const daycareConfigsRepository = new DaycareConfigsRepository();
 const uploadsService = new UploadsService();
 
 const REVIEW_REQUIRED_STATUSES = [
@@ -287,6 +291,16 @@ export class DaycareService {
       },
       changedAt: new Date(),
     });
+
+    if (nextStatus === DaycareApprovalStatus.APPROVED) {
+      const daycareId = daycare._id.toString();
+      await daycareConfigsRepository.ensure(daycareId);
+      await daycareActivitiesService.bootstrapStarters(daycareId, {
+        userId: context.user!._id,
+        name: context.user!.name,
+        role: context.user!.role ?? UserRole.SUPER_ADMIN,
+      });
+    }
 
     await daycare.save();
 

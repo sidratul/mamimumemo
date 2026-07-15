@@ -14,26 +14,36 @@ const fieldConfigSchema = new mongoose.Schema({
   intensity: { type: Boolean, default: false },
   location: { type: Boolean, default: false },
   materials: { type: Boolean, default: false },
+  drinkName: { type: Boolean, default: false },
+  drinkAmountMl: { type: Boolean, default: false },
+  hygieneType: { type: Boolean, default: false },
+  medicationName: { type: Boolean, default: false },
+  medicationDose: { type: Boolean, default: false },
+  medicationUnit: { type: Boolean, default: false },
+  administeredAt: { type: Boolean, default: false },
+  parentConsent: { type: Boolean, default: false },
 }, { _id: false });
 
 const masterActivitySchema = new mongoose.Schema({
-  daycareId: { type: mongoose.Schema.Types.ObjectId, ref: "Daycare", required: true },
   name: { type: String, required: true }, // Free text, contoh: "Makan Pagi Ceria"
+  description: { type: String, default: "" },
   category: { type: String, required: true },
   defaultDuration: { type: Number, default: 30 }, // menit
   icon: String,
   color: String,
   active: { type: Boolean, default: true },
+  version: { type: Number, default: 1 },
+  isStarter: { type: Boolean, default: false },
   fieldConfig: { type: fieldConfigSchema, default: () => ({}) },
   createdBy: { type: userRefSchema, required: true },
-}, { 
+}, {
   timestamps: true,
   toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  toObject: { virtuals: true },
 });
 
 // Index untuk query yang sering digunakan
-masterActivitySchema.index({ daycareId: 1, active: 1 });
+masterActivitySchema.index({ active: 1, isStarter: 1 });
 masterActivitySchema.index({ category: 1 });
 
 export default mongoose.model("MasterActivity", masterActivitySchema);

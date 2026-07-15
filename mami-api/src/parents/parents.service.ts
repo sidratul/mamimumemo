@@ -1,12 +1,20 @@
 import { ParentsRepository } from "./parents.repository.ts";
-import { createParentInput, updateParentInput } from "./parents.validation.ts";
+import {
+  createParentAccountInput,
+  createParentInput,
+  updateParentAccountInput,
+  updateParentInput,
+} from "./parents.validation.ts";
 import { GraphQLError } from "graphql";
 import { AppContext } from "#shared/config/context.ts";
 import { isAuthenticated } from "#shared/guards/authorization.guard.ts";
 import { MESSAGES } from "#shared/enums/constant.ts";
 import { UserRole } from "#shared/enums/enum.ts";
+import UsersService from "@/users/users.service.ts";
+import usersRepository from "@/users/users.repository.ts";
 
 const parentsRepository = new ParentsRepository();
+const usersService = new UsersService();
 
 function normalizeParentUserRole<T extends { role: string }>(user: T): T & { role: UserRole.PARENT } {
   return {
@@ -104,6 +112,43 @@ export class ParentsService {
     return await parentsRepository.create(parentData);
   }
 
+  async createParentAccount(
+    input: typeof createParentAccountInput._type,
+    context: AppContext,
+  ) {
+    isAuthenticated(context);
+    if (!context.user) {
+      throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
+    }
+
+    this.requireDaycareStaff(context);
+    const parsed = createParentAccountInput.parse(input);
+    const user = await usersService.createUser({
+      name: parsed.name.trim(),
+      email: parsed.email.trim().toLowerCase(),
+      phone: parsed.phone.trim(),
+      password: parsed.password,
+      systemRole: null,
+    });
+
+    return await this.createParent(
+      {
+        daycareId: parsed.daycareId,
+        user: {
+          userId: user.id,
+          name: user.name,
+          email: user.email,
+          phone: user.phone || parsed.phone.trim(),
+          role: UserRole.PARENT,
+        },
+        customData: {
+          notes: parsed.notes?.trim() || undefined,
+        },
+      },
+      context,
+    );
+  }
+
   async updateParent(
     id: string,
     input: typeof updateParentInput._type,
@@ -127,6 +172,45 @@ export class ParentsService {
     }
 
     return await parentsRepository.update(id, input);
+  }
+
+  async updateParentAccount(
+    id: string,
+    input: typeof updateParentAccountInput._type,
+    context: AppContext,
+  ) {
+    isAuthenticated(context);
+    if (!context.user) {
+      throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
+    }
+
+    const parent = await parentsRepository.findById(id);
+    if (!parent) {
+      throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
+    }
+
+    this.requireDaycareStaff(context);
+    const parsed = updateParentAccountInput.parse(input);
+    const name = parsed.name.trim();
+    const notes = parsed.notes?.trim() || "";
+
+    await usersRepository.update(parent.user.userId, { name });
+
+    return await parentsRepository.update(id, {
+      user: {
+        userId: parent.user.userId,
+        name,
+        email: parent.user.email,
+        phone: parent.user.phone,
+        role: parent.user.role,
+      },
+      customData: {
+        emergencyContact: parent.customData?.emergencyContact,
+        pickupAuthorization: parent.customData?.pickupAuthorization ?? [],
+        notes: notes || null,
+        deskripsi: notes || null,
+      },
+    });
   }
 
   async deactivateParent(id: string, context: AppContext) {

@@ -32,7 +32,7 @@ export class ActivitiesRepository {
     return await ActivityModel.find(query)
       .sort({ startTime: 1 })
       .populate("daycareId")
-      .populate("masterActivityId")
+      .populate("daycareActivityId")
       .exec();
   }
 
@@ -40,7 +40,7 @@ export class ActivitiesRepository {
     return await ActivityModel.findById(id)
       .populate("childId")
       .populate("daycareId")
-      .populate("masterActivityId")
+      .populate("daycareActivityId")
       .exec();
   }
 

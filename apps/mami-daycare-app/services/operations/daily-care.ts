@@ -2,7 +2,7 @@ import { graphqlRequest } from '../graphql/client';
 
 type ViewerProfileResponse = {
   profile: {
-    _id: string;
+    id: string;
     name: string;
   };
 };
@@ -36,7 +36,7 @@ export type DailyCareRecord = {
     appliedAt: string;
   } | null;
   plannedActivities: Array<{
-    masterActivityId?: string | null;
+    daycareActivityId?: string | null;
     activityName: string;
     category: string;
     startTime: string;
@@ -82,7 +82,7 @@ export type DailyCareChildRecord = {
 };
 
 export type ViewerProfile = {
-  _id: string;
+  id: string;
   name: string;
 };
 
@@ -98,7 +98,7 @@ export type QuickActivityInput = {
 const PROFILE_QUERY = `
   query ViewerProfile {
     profile {
-      _id
+      id
       name
     }
   }
@@ -115,7 +115,7 @@ const TODAY_DAILY_CARE_QUERY = `
         appliedAt
       }
       plannedActivities {
-        masterActivityId
+        daycareActivityId
         activityName
         category
         startTime
@@ -171,7 +171,7 @@ const CHILD_DAILY_RECORDS_QUERY = `
         appliedAt
       }
       plannedActivities {
-        masterActivityId
+        daycareActivityId
         activityName
         category
         startTime
@@ -227,7 +227,7 @@ const CHECK_IN_CHILD_MUTATION = `
         appliedAt
       }
       plannedActivities {
-        masterActivityId
+        daycareActivityId
         activityName
         category
         startTime
@@ -283,7 +283,7 @@ const CHECK_OUT_CHILD_MUTATION = `
         appliedAt
       }
       plannedActivities {
-        masterActivityId
+        daycareActivityId
         activityName
         category
         startTime
@@ -339,7 +339,7 @@ const LOG_DAILY_ACTIVITY_MUTATION = `
         appliedAt
       }
       plannedActivities {
-        masterActivityId
+        daycareActivityId
         activityName
         category
         startTime
@@ -432,7 +432,7 @@ export async function checkInChildForToday(token: string, daycareId: string, chi
           time: currentTimeLabel(),
           photo: 'https://placehold.co/1200x800/png?text=Check-In',
           by: {
-            userId: viewer._id,
+            userId: viewer.id,
             name: viewer.name,
           },
         },
@@ -456,7 +456,7 @@ export async function checkOutChildForToday(token: string, daycareId: string, ch
           time: currentTimeLabel(),
           photo: 'https://placehold.co/1200x800/png?text=Check-Out',
           by: {
-            userId: viewer._id,
+            userId: viewer.id,
             name: viewer.name,
           },
         },

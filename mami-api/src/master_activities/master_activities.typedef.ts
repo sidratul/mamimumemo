@@ -1,13 +1,15 @@
 export const typeDefs = `
   type MasterActivity {
     id: ObjectId!
-    daycareId: ObjectId!
     name: String!
+    description: String
     category: String!
     defaultDuration: Int!
     icon: String
     color: String
     active: Boolean!
+    version: Int!
+    isStarter: Boolean!
     fieldConfig: FieldConfig!
     createdBy: CreatedBy!
     createdAt: Date!
@@ -27,6 +29,14 @@ export const typeDefs = `
     intensity: Boolean!
     location: Boolean!
     materials: Boolean!
+    drinkName: Boolean!
+    drinkAmountMl: Boolean!
+    hygieneType: Boolean!
+    medicationName: Boolean!
+    medicationDose: Boolean!
+    medicationUnit: Boolean!
+    administeredAt: Boolean!
+    parentConsent: Boolean!
   }
 
   type CreatedBy {
@@ -48,31 +58,42 @@ export const typeDefs = `
     intensity: Boolean
     location: Boolean
     materials: Boolean
+    drinkName: Boolean
+    drinkAmountMl: Boolean
+    hygieneType: Boolean
+    medicationName: Boolean
+    medicationDose: Boolean
+    medicationUnit: Boolean
+    administeredAt: Boolean
+    parentConsent: Boolean
   }
 
   input CreateMasterActivityInput {
-    daycareId: ObjectId!
     name: String!
+    description: String
     category: String!
     defaultDuration: Int
     icon: String
     color: String
     fieldConfig: FieldConfigInput
+    isStarter: Boolean
   }
 
   input UpdateMasterActivityInput {
     name: String
+    description: String
     category: String
     defaultDuration: Int
     icon: String
     color: String
     active: Boolean
     fieldConfig: FieldConfigInput
+    isStarter: Boolean
   }
 
   extend type Query {
-    "Get master activities for a daycare"
-    masterActivities(daycareId: ObjectId!, active: Boolean, category: String): [MasterActivity!]!
+    "Get global master activity catalog"
+    masterActivities(active: Boolean, category: String, isStarter: Boolean): [MasterActivity!]!
     
     "Get master activity by ID"
     masterActivity(id: ObjectId!): MasterActivity

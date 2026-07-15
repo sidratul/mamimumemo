@@ -4,7 +4,7 @@ Master kategori aktivitas global yang dikelola system admin dan di-resolve denga
 
 Source schema: `src/activity_categories/activity_categories.typedef.ts`
 
-Status: **Belum exposed di GraphQL schema**
+Status: **Exposed di GraphQL schema**
 
 ## Access
 
@@ -43,3 +43,4 @@ Scalars:
 
 - `code` adalah identifier stabil yang digunakan pada activity, master activity, dan schedule.
 - Label efektif menggunakan override `daycare_configs` jika tersedia.
+- `DRINK`, `HYGIENE`, dan `MEDICATION` memiliki field behavior khusus; `ROUTINE` legacy dinonaktifkan oleh seeder.

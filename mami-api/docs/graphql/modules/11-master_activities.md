@@ -1,6 +1,6 @@
 # Master Activities
 
-Master aktivitas daycare dan konfigurasi field per kategori.
+Katalog aktivitas global yang dikelola system admin.
 
 Source schema: `src/master_activities/master_activities.typedef.ts`
 
@@ -9,11 +9,11 @@ Status: **Exposed di GraphQL schema**
 ## Access
 
 - Query butuh login.
-- Create/update/deactivate: `SUPER_ADMIN`, `DAYCARE_OWNER`, `DAYCARE_ADMIN`.
+- Create/update/deactivate hanya `SUPER_ADMIN`.
 
 ## Queries
 
-- `masterActivities(daycareId: ObjectId!, active: Boolean, category: String): [MasterActivity!]!`
+- `masterActivities(active: Boolean, category: String, isStarter: Boolean): [MasterActivity!]!`
 - `masterActivity(id: ObjectId!): MasterActivity`
 - `defaultFieldConfig(category: String!): FieldConfig!`
 
@@ -48,3 +48,5 @@ Scalars:
 ## Notes
 
 - `defaultFieldConfig` mengembalikan konfigurasi field default untuk kategori aktivitas.
+- `isStarter` menentukan master yang otomatis diadopsi saat daycare disetujui.
+- Update menaikkan `version`, tetapi tidak menimpa salinan tenant.

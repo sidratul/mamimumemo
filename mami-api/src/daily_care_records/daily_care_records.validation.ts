@@ -41,7 +41,7 @@ export const checkOutInput = z.object({
 
 // Activity schema
 export const dailyActivityInput = z.object({
-  masterActivityId: z.string().optional(),
+  daycareActivityId: z.string().optional(),
   activityName: z.string().min(1, "Activity name is required"),
   category: storedCategoryCodeSchema,
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),
@@ -61,10 +61,18 @@ export const dailyActivityInput = z.object({
   intensity: normalizeEnumValue(z.nativeEnum(IntensityEnum)).optional(),
   location: z.string().optional(),
   materials: z.string().optional(),
+  drinkName: z.string().optional(),
+  drinkAmountMl: z.number().positive().optional(),
+  hygieneType: z.string().optional(),
+  medicationName: z.string().optional(),
+  medicationDose: z.number().positive().optional(),
+  medicationUnit: z.string().optional(),
+  administeredAt: z.string().or(z.date()).optional(),
+  parentConsent: z.boolean().optional(),
 });
 
 export const plannedDailyActivityInput = z.object({
-  masterActivityId: z.string().optional(),
+  daycareActivityId: z.string().optional(),
   activityName: z.string().min(1, "Activity name is required"),
   category: storedCategoryCodeSchema,
   startTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Invalid time format (HH:mm)"),

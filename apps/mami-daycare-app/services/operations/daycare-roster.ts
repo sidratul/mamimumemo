@@ -25,8 +25,27 @@ export type DaycareChild = {
     birthDate: string;
     gender: 'MALE' | 'FEMALE';
   };
+  medical: {
+    allergies: string[];
+    medicalNotes?: string | null;
+    medications: Array<{
+      name: string;
+      dosage: string;
+      schedule: string;
+    }>;
+  };
+  preferences: {
+    favoriteFoods: string[];
+    favoriteActivities: string[];
+    comfortItems: string[];
+    napRoutine?: string | null;
+  };
   customData: {
     notes?: string | null;
+    cognitiveNotes?: string | null;
+    developmentNotes?: string | null;
+    strengths: string[];
+    weaknesses: string[];
   };
   active: boolean;
 };
@@ -36,15 +55,8 @@ type RosterQueryResponse = {
   daycareChildren: DaycareChild[];
 };
 
-type RegisterParentResponse = {
-  register: {
-    id: string;
-    message: string;
-  };
-};
-
-type CreateParentResponse = {
-  createParent: DaycareParent;
+type CreateParentAccountResponse = {
+  createParentAccount: DaycareParent;
 };
 
 type CreateChildResponse = {
@@ -53,6 +65,10 @@ type CreateChildResponse = {
 
 type UpdateParentResponse = {
   updateParent: DaycareParent;
+};
+
+type UpdateParentAccountResponse = {
+  updateParentAccount: DaycareParent;
 };
 
 type DeactivateParentResponse = {
@@ -67,6 +83,15 @@ type DeactivateChildResponse = {
   deactivateChildrenDaycare: DaycareChild;
 };
 
+type ActionResponse = {
+  id?: string | null;
+  message?: string | null;
+};
+
+type PurgeChildResponse = {
+  purgeChildrenDaycare: ActionResponse;
+};
+
 export type FamilyEnrollmentInput = {
   daycareId: string;
   parentName: string;
@@ -78,6 +103,49 @@ export type FamilyEnrollmentInput = {
   childBirthDate: string;
   childGender: 'MALE' | 'FEMALE';
   childNotes?: string;
+};
+
+export type CreateDaycareParentInput = {
+  daycareId: string;
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  notes?: string;
+};
+
+export type CreateDaycareChildInput = {
+  daycareId: string;
+  parentId: string;
+  name: string;
+  birthDate: string;
+  gender: 'MALE' | 'FEMALE';
+  notes?: string;
+};
+
+export type UpdateDaycareChildDetailsInput = {
+  medical?: {
+    allergies?: string[];
+    medicalNotes?: string | null;
+    medications?: Array<{
+      name: string;
+      dosage: string;
+      schedule: string;
+    }>;
+  };
+  preferences?: {
+    favoriteFoods?: string[];
+    favoriteActivities?: string[];
+    comfortItems?: string[];
+    napRoutine?: string | null;
+  };
+  customData?: {
+    notes?: string | null;
+    cognitiveNotes?: string | null;
+    developmentNotes?: string | null;
+    strengths?: string[];
+    weaknesses?: string[];
+  };
 };
 
 const DAYCARE_ROSTER_QUERY = `
@@ -107,25 +175,35 @@ const DAYCARE_ROSTER_QUERY = `
         birthDate
         gender
       }
+      medical {
+        allergies
+        medicalNotes
+        medications {
+          name
+          dosage
+          schedule
+        }
+      }
+      preferences {
+        favoriteFoods
+        favoriteActivities
+        comfortItems
+        napRoutine
+      }
       customData {
         notes
+        cognitiveNotes
+        developmentNotes
+        strengths
+        weaknesses
       }
     }
   }
 `;
 
-const REGISTER_PARENT_MUTATION = `
-  mutation RegisterParent($input: RegisterInput!) {
-    register(input: $input) {
-      id
-      message
-    }
-  }
-`;
-
-const CREATE_PARENT_MUTATION = `
-  mutation CreateParent($input: CreateParentInput!) {
-    createParent(input: $input) {
+const CREATE_PARENT_ACCOUNT_MUTATION = `
+  mutation CreateParentAccount($input: CreateParentAccountInput!) {
+    createParentAccount(input: $input) {
       id
       active
       user {
@@ -155,8 +233,27 @@ const CREATE_CHILD_MUTATION = `
         birthDate
         gender
       }
+      medical {
+        allergies
+        medicalNotes
+        medications {
+          name
+          dosage
+          schedule
+        }
+      }
+      preferences {
+        favoriteFoods
+        favoriteActivities
+        comfortItems
+        napRoutine
+      }
       customData {
         notes
+        cognitiveNotes
+        developmentNotes
+        strengths
+        weaknesses
       }
     }
   }
@@ -165,6 +262,27 @@ const CREATE_CHILD_MUTATION = `
 const UPDATE_PARENT_MUTATION = `
   mutation UpdateParent($id: ObjectId!, $input: UpdateParentInput!) {
     updateParent(id: $id, input: $input) {
+      id
+      active
+      user {
+        userId
+        name
+        email
+        phone
+        role
+      }
+      customData {
+        deskripsi
+        notes
+      }
+      childrenIds
+    }
+  }
+`;
+
+const UPDATE_PARENT_ACCOUNT_MUTATION = `
+  mutation UpdateParentAccount($id: ObjectId!, $input: UpdateParentAccountInput!) {
+    updateParentAccount(id: $id, input: $input) {
       id
       active
       user {
@@ -203,8 +321,27 @@ const UPDATE_CHILD_MUTATION = `
         birthDate
         gender
       }
+      medical {
+        allergies
+        medicalNotes
+        medications {
+          name
+          dosage
+          schedule
+        }
+      }
+      preferences {
+        favoriteFoods
+        favoriteActivities
+        comfortItems
+        napRoutine
+      }
       customData {
         notes
+        cognitiveNotes
+        developmentNotes
+        strengths
+        weaknesses
       }
     }
   }
@@ -215,6 +352,15 @@ const DEACTIVATE_CHILD_MUTATION = `
     deactivateChildrenDaycare(id: $id) {
       id
       active
+    }
+  }
+`;
+
+const PURGE_CHILD_MUTATION = `
+  mutation PurgeChildrenDaycare($id: ObjectId!) {
+    purgeChildrenDaycare(id: $id) {
+      id
+      message
     }
   }
 `;
@@ -233,35 +379,16 @@ export async function getDaycareRoster(token: string, daycareId: string) {
 }
 
 export async function onboardFamily(token: string, input: FamilyEnrollmentInput) {
-  const registerResult = await graphqlRequest<RegisterParentResponse, { input: Record<string, string> }>(
-    REGISTER_PARENT_MUTATION,
-    {
-      input: {
-        name: input.parentName.trim(),
-        email: input.parentEmail.trim().toLowerCase(),
-        password: input.parentPassword,
-        phone: input.parentPhone.trim(),
-        role: 'PARENT',
-      },
-    },
-    token
-  );
-
-  const parentResult = await graphqlRequest<CreateParentResponse, { input: Record<string, unknown> }>(
-    CREATE_PARENT_MUTATION,
+  const parentResult = await graphqlRequest<CreateParentAccountResponse, { input: Record<string, unknown> }>(
+    CREATE_PARENT_ACCOUNT_MUTATION,
     {
       input: {
         daycareId: input.daycareId,
-        user: {
-          userId: registerResult.register.id,
-          name: input.parentName.trim(),
-          email: input.parentEmail.trim().toLowerCase(),
-          phone: input.parentPhone.trim(),
-          role: 'PARENT',
-        },
-        customData: {
-          notes: input.parentNotes?.trim() || null,
-        },
+        name: input.parentName.trim(),
+        email: input.parentEmail.trim().toLowerCase(),
+        phone: input.parentPhone.trim(),
+        password: input.parentPassword,
+        notes: input.parentNotes?.trim() || undefined,
       },
     },
     token
@@ -272,7 +399,7 @@ export async function onboardFamily(token: string, input: FamilyEnrollmentInput)
     {
       input: {
         daycareId: input.daycareId,
-        parentId: parentResult.createParent.id,
+        parentId: parentResult.createParentAccount.id,
         profile: {
           name: input.childName.trim(),
           birthDate: input.childBirthDate,
@@ -287,9 +414,28 @@ export async function onboardFamily(token: string, input: FamilyEnrollmentInput)
   );
 
   return {
-    parent: parentResult.createParent,
+    parent: parentResult.createParentAccount,
     child: childResult.createChildrenDaycare,
   };
+}
+
+export async function createDaycareParent(token: string, input: CreateDaycareParentInput) {
+  const data = await graphqlRequest<CreateParentAccountResponse, { input: Record<string, unknown> }>(
+    CREATE_PARENT_ACCOUNT_MUTATION,
+    {
+      input: {
+        name: input.name.trim(),
+        email: input.email.trim().toLowerCase(),
+        password: input.password,
+        phone: input.phone.trim(),
+        daycareId: input.daycareId,
+        notes: input.notes?.trim() || undefined,
+      },
+    },
+    token,
+  );
+
+  return data.createParentAccount;
 }
 
 export async function updateDaycareParentNotes(token: string, parentId: string, notes: string) {
@@ -309,6 +455,29 @@ export async function updateDaycareParentNotes(token: string, parentId: string, 
   return data.updateParent;
 }
 
+export async function updateDaycareParentProfile(
+  token: string,
+  parentId: string,
+  input: {
+    name: string;
+    notes?: string;
+  },
+) {
+  const data = await graphqlRequest<UpdateParentAccountResponse, { id: string; input: Record<string, unknown> }>(
+    UPDATE_PARENT_ACCOUNT_MUTATION,
+    {
+      id: parentId,
+      input: {
+        name: input.name.trim(),
+        notes: input.notes?.trim() || '',
+      },
+    },
+    token,
+  );
+
+  return data.updateParentAccount;
+}
+
 export async function deactivateDaycareParent(token: string, parentId: string) {
   const data = await graphqlRequest<DeactivateParentResponse, { id: string }>(
     DEACTIVATE_PARENT_MUTATION,
@@ -317,6 +486,29 @@ export async function deactivateDaycareParent(token: string, parentId: string) {
   );
 
   return data.deactivateParent;
+}
+
+export async function createDaycareChild(token: string, input: CreateDaycareChildInput) {
+  const data = await graphqlRequest<CreateChildResponse, { input: Record<string, unknown> }>(
+    CREATE_CHILD_MUTATION,
+    {
+      input: {
+        daycareId: input.daycareId,
+        parentId: input.parentId,
+        profile: {
+          name: input.name.trim(),
+          birthDate: input.birthDate,
+          gender: input.gender,
+        },
+        customData: {
+          notes: input.notes?.trim() || '',
+        },
+      },
+    },
+    token,
+  );
+
+  return data.createChildrenDaycare;
 }
 
 export async function updateDaycareChild(
@@ -350,6 +542,23 @@ export async function updateDaycareChild(
   return data.updateChildrenDaycare;
 }
 
+export async function updateDaycareChildDetails(
+  token: string,
+  childId: string,
+  input: UpdateDaycareChildDetailsInput,
+) {
+  const data = await graphqlRequest<UpdateChildResponse, { id: string; input: UpdateDaycareChildDetailsInput }>(
+    UPDATE_CHILD_MUTATION,
+    {
+      id: childId,
+      input,
+    },
+    token,
+  );
+
+  return data.updateChildrenDaycare;
+}
+
 export async function deactivateDaycareChild(token: string, childId: string) {
   const data = await graphqlRequest<DeactivateChildResponse, { id: string }>(
     DEACTIVATE_CHILD_MUTATION,
@@ -358,4 +567,14 @@ export async function deactivateDaycareChild(token: string, childId: string) {
   );
 
   return data.deactivateChildrenDaycare;
+}
+
+export async function purgeDaycareChild(token: string, childId: string) {
+  const data = await graphqlRequest<PurgeChildResponse, { id: string }>(
+    PURGE_CHILD_MUTATION,
+    { id: childId },
+    token,
+  );
+
+  return data.purgeChildrenDaycare;
 }
