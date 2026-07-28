@@ -1,10 +1,11 @@
 import { z } from "zod";
 import { ServiceTypeEnum, ContractStatusEnum } from "#shared/types/enums.ts";
+import { objectIdString } from "#shared/validation/object-id.validation.ts";
 
 export const createContractInput = z.object({
-  daycareId: z.string(),
-  parentId: z.string(),
-  childIds: z.array(z.string()),
+  daycareId: objectIdString,
+  parentId: objectIdString,
+  childIds: z.array(objectIdString),
   serviceType: z.nativeEnum(ServiceTypeEnum),
   price: z.number().positive("Price must be positive"),
   startDate: z.string().or(z.date()),

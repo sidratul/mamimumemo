@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { InvoiceStatusEnum } from "#shared/types/enums.ts";
+import { objectIdString } from "#shared/validation/object-id.validation.ts";
 
 export const invoiceItemInput = z.object({
   description: z.string().min(1, "Description is required"),
@@ -9,14 +10,14 @@ export const invoiceItemInput = z.object({
 });
 
 export const parentRefInput = z.object({
-  userId: z.string(),
+  userId: objectIdString,
   name: z.string().min(1, "Name is required"),
   email: z.string().email("Invalid email"),
 });
 
 export const createInvoiceInput = z.object({
-  daycareId: z.string(),
-  contractId: z.string(),
+  daycareId: objectIdString,
+  contractId: objectIdString,
   parent: parentRefInput,
   period: z.object({
     start: z.string().or(z.date()),

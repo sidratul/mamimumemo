@@ -1,4 +1,5 @@
 import { graphqlRequest } from '../graphql/client';
+import { normalizeObjectId } from './object-id';
 
 export type ResolvedActivityCategory = {
   _id: string;
@@ -47,7 +48,7 @@ export async function getResolvedActivityCategories(token: string, daycareId: st
   const result = await graphqlRequest<
     { activityCategories: ResolvedActivityCategory[] },
     { daycareId: string }
-  >(CATEGORIES_QUERY, { daycareId }, token);
+  >(CATEGORIES_QUERY, { daycareId: normalizeObjectId(daycareId) }, token);
   return result.activityCategories;
 }
 
@@ -69,5 +70,5 @@ export async function updateDaycareActivityCategory(
       categoryId: string;
       input: Record<string, unknown>;
     }
-  >(UPDATE_CATEGORY_MUTATION, { daycareId, categoryId, input }, token);
+  >(UPDATE_CATEGORY_MUTATION, { daycareId: normalizeObjectId(daycareId), categoryId, input }, token);
 }

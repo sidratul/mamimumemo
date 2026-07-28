@@ -1,4 +1,5 @@
 import { graphqlRequest } from '../graphql/client';
+import { normalizeObjectId } from './object-id';
 
 export type MasterActivityCategory = string;
 
@@ -158,7 +159,7 @@ const ADOPT_MASTER_ACTIVITY_MUTATION = `
 export async function listMasterActivities(token: string, daycareId: string, active?: boolean) {
   const data = await graphqlRequest<MasterActivitiesResponse, { daycareId: string; active?: boolean }>(
     MASTER_ACTIVITIES_QUERY,
-    { daycareId, active },
+    { daycareId: normalizeObjectId(daycareId), active },
     token
   );
 
@@ -179,7 +180,7 @@ export async function createMasterActivity(
 ) {
   const data = await graphqlRequest<CreateMasterActivityResponse, { input: Record<string, unknown> }>(
     CREATE_MASTER_ACTIVITY_MUTATION,
-    { input },
+    { input: { ...input, daycareId: normalizeObjectId(input.daycareId) } },
     token
   );
 
@@ -236,7 +237,7 @@ export async function adoptMasterActivity(
     { input: { daycareId: string; masterActivityId: string } }
   >(
     ADOPT_MASTER_ACTIVITY_MUTATION,
-    { input: { daycareId, masterActivityId } },
+    { input: { daycareId: normalizeObjectId(daycareId), masterActivityId } },
     token,
   );
   return data.adoptMasterActivity;

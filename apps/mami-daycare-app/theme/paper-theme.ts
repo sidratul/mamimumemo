@@ -11,7 +11,7 @@ export const paperTheme: MD3Theme = {
     background: theme.colors.background,
     surface: theme.colors.surface,
     error: theme.colors.danger,
-    onPrimary: '#FFFFFF',
+    onPrimary: theme.colors.onPrimary,
     onSurface: theme.colors.textPrimary,
     onBackground: theme.colors.textPrimary,
   },

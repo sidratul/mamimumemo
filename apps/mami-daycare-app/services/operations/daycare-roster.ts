@@ -1,4 +1,5 @@
 import { graphqlRequest } from '../graphql/client';
+import { normalizeObjectId } from './object-id';
 
 export type DaycareParent = {
   id: string;
@@ -36,6 +37,7 @@ export type DaycareChild = {
   };
   preferences: {
     favoriteFoods: string[];
+    dislikedFoods: string[];
     favoriteActivities: string[];
     comfortItems: string[];
     napRoutine?: string | null;
@@ -124,6 +126,11 @@ export type CreateDaycareChildInput = {
 };
 
 export type UpdateDaycareChildDetailsInput = {
+  profile?: {
+    name: string;
+    birthDate: string;
+    gender: 'MALE' | 'FEMALE';
+  };
   medical?: {
     allergies?: string[];
     medicalNotes?: string | null;
@@ -135,6 +142,7 @@ export type UpdateDaycareChildDetailsInput = {
   };
   preferences?: {
     favoriteFoods?: string[];
+    dislikedFoods?: string[];
     favoriteActivities?: string[];
     comfortItems?: string[];
     napRoutine?: string | null;
@@ -186,6 +194,7 @@ const DAYCARE_ROSTER_QUERY = `
       }
       preferences {
         favoriteFoods
+        dislikedFoods
         favoriteActivities
         comfortItems
         napRoutine
@@ -244,6 +253,7 @@ const CREATE_CHILD_MUTATION = `
       }
       preferences {
         favoriteFoods
+        dislikedFoods
         favoriteActivities
         comfortItems
         napRoutine
@@ -332,6 +342,7 @@ const UPDATE_CHILD_MUTATION = `
       }
       preferences {
         favoriteFoods
+        dislikedFoods
         favoriteActivities
         comfortItems
         napRoutine
@@ -368,7 +379,7 @@ const PURGE_CHILD_MUTATION = `
 export async function getDaycareRoster(token: string, daycareId: string) {
   const data = await graphqlRequest<RosterQueryResponse, { daycareId: string }>(
     DAYCARE_ROSTER_QUERY,
-    { daycareId },
+    { daycareId: normalizeObjectId(daycareId) },
     token
   );
 
@@ -383,7 +394,7 @@ export async function onboardFamily(token: string, input: FamilyEnrollmentInput)
     CREATE_PARENT_ACCOUNT_MUTATION,
     {
       input: {
-        daycareId: input.daycareId,
+        daycareId: normalizeObjectId(input.daycareId),
         name: input.parentName.trim(),
         email: input.parentEmail.trim().toLowerCase(),
         phone: input.parentPhone.trim(),
@@ -398,7 +409,7 @@ export async function onboardFamily(token: string, input: FamilyEnrollmentInput)
     CREATE_CHILD_MUTATION,
     {
       input: {
-        daycareId: input.daycareId,
+        daycareId: normalizeObjectId(input.daycareId),
         parentId: parentResult.createParentAccount.id,
         profile: {
           name: input.childName.trim(),
@@ -428,7 +439,7 @@ export async function createDaycareParent(token: string, input: CreateDaycarePar
         email: input.email.trim().toLowerCase(),
         password: input.password,
         phone: input.phone.trim(),
-        daycareId: input.daycareId,
+        daycareId: normalizeObjectId(input.daycareId),
         notes: input.notes?.trim() || undefined,
       },
     },
@@ -493,7 +504,7 @@ export async function createDaycareChild(token: string, input: CreateDaycareChil
     CREATE_CHILD_MUTATION,
     {
       input: {
-        daycareId: input.daycareId,
+        daycareId: normalizeObjectId(input.daycareId),
         parentId: input.parentId,
         profile: {
           name: input.name.trim(),

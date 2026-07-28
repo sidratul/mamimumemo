@@ -8,6 +8,7 @@ import {
   IntensityEnum,
   SitterRoleEnum,
 } from "#shared/types/enums.ts";
+import { objectIdString } from "#shared/validation/object-id.validation.ts";
 import { storedCategoryCodeSchema } from "@/activity_categories/activity_categories.validation.ts";
 
 function normalizeEnumValue<TSchema extends z.ZodTypeAny>(schema: TSchema) {
@@ -105,7 +106,7 @@ export const childDailyRecordInput = z.object({
 
 // Create Daily Care Record schema
 export const createDailyCareRecordInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   date: z.string().or(z.date()),
   templateId: z.string().optional(),
   plannedActivities: z.array(plannedDailyActivityInput).optional(),
@@ -120,14 +121,14 @@ export const updateDailyCareRecordInput = z.object({
 });
 
 export const applyScheduleTemplateInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   date: z.string().or(z.date()),
   templateId: z.string(),
 });
 
 // Check-in mutation input
 export const checkInChildInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   childId: z.string(),
   date: z.string().or(z.date()),
   checkIn: checkInInput,
@@ -135,7 +136,7 @@ export const checkInChildInput = z.object({
 
 // Check-out mutation input
 export const checkOutChildInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   childId: z.string(),
   date: z.string().or(z.date()),
   checkOut: checkOutInput,
@@ -143,7 +144,7 @@ export const checkOutChildInput = z.object({
 
 // Log activity input
 export const logDailyActivityInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   childId: z.string(),
   date: z.string().or(z.date()),
   activity: dailyActivityInput,

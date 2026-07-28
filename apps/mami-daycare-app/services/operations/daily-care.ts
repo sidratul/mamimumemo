@@ -1,4 +1,5 @@
 import { graphqlRequest } from '../graphql/client';
+import { normalizeObjectId } from './object-id';
 
 type ViewerProfileResponse = {
   profile: {
@@ -404,7 +405,7 @@ export async function getViewerProfile(token: string) {
 export async function getTodayDailyCare(token: string, daycareId: string) {
   const data = await graphqlRequest<TodayDailyCareResponse, { daycareId: string }>(
     TODAY_DAILY_CARE_QUERY,
-    { daycareId },
+    { daycareId: normalizeObjectId(daycareId) },
     token
   );
   return data.todayDailyCare;
@@ -425,7 +426,7 @@ export async function checkInChildForToday(token: string, daycareId: string, chi
     CHECK_IN_CHILD_MUTATION,
     {
       input: {
-        daycareId,
+        daycareId: normalizeObjectId(daycareId),
         childId,
         date: todayIsoDate(),
         checkIn: {
@@ -449,7 +450,7 @@ export async function checkOutChildForToday(token: string, daycareId: string, ch
     CHECK_OUT_CHILD_MUTATION,
     {
       input: {
-        daycareId,
+        daycareId: normalizeObjectId(daycareId),
         childId,
         date: todayIsoDate(),
         checkOut: {
@@ -473,7 +474,7 @@ export async function logQuickDailyActivity(token: string, input: QuickActivityI
     LOG_DAILY_ACTIVITY_MUTATION,
     {
       input: {
-        daycareId: input.daycareId,
+        daycareId: normalizeObjectId(input.daycareId),
         childId: input.childId,
         date: todayIsoDate(),
         activity: {

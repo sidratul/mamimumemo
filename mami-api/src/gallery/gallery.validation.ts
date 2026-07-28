@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { objectIdString } from "#shared/validation/object-id.validation.ts";
 
 export const uploadedByInput = z.object({
   userId: z.string(),
@@ -6,7 +7,7 @@ export const uploadedByInput = z.object({
 });
 
 export const createGalleryInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   childName: z.string().optional(),
   photos: z.array(z.string().url("Must be a valid URL")),
   caption: z.string().optional(),

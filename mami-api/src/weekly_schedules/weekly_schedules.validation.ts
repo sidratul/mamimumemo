@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { DayOfWeekEnum, ShiftTypeEnum } from "#shared/types/enums.ts";
+import { objectIdString } from "#shared/validation/object-id.validation.ts";
 import { storedCategoryCodeSchema } from "@/activity_categories/activity_categories.validation.ts";
 
 export const weeklyActivityInput = z.object({
@@ -35,7 +36,7 @@ export const weeklyScheduleDayInput = z.object({
 });
 
 export const createWeeklyScheduleInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   weekStart: z.string().or(z.date()),
   weekEnd: z.string().or(z.date()),
   days: z.array(weeklyScheduleDayInput),
@@ -46,7 +47,7 @@ export const updateWeeklyScheduleInput = z.object({
 });
 
 export const assignSitterInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   weekStart: z.string().or(z.date()),
   date: z.string().or(z.date()),
   childId: z.string(),

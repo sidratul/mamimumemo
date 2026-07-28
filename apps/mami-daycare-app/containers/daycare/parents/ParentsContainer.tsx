@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 import { Redirect } from 'expo-router';
+import { CONTROL_HEIGHT } from '@mami/ui';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import {
@@ -626,7 +627,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: 'row',
     gap: 8,
-    height: 42,
+    height: CONTROL_HEIGHT,
     paddingLeft: 12,
     paddingRight: 6,
     width: 300,
@@ -636,7 +637,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: '700',
-    height: 40,
+    height: CONTROL_HEIGHT - 2,
     lineHeight: 18,
     minWidth: 0,
     padding: 0,

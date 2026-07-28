@@ -36,6 +36,7 @@ export const typeDefs = `
 
   type ChildPreferences {
     favoriteFoods: [String!]!
+    dislikedFoods: [String!]!
     favoriteActivities: [String!]!
     comfortItems: [String!]!
     napRoutine: String
@@ -72,6 +73,7 @@ export const typeDefs = `
 
   input ChildPreferencesInput {
     favoriteFoods: [String!]
+    dislikedFoods: [String!]
     favoriteActivities: [String!]
     comfortItems: [String!]
     napRoutine: String

@@ -1,6 +1,7 @@
 import { Pressable, StyleSheet, View } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import type { InputComponentProps, SelectOption } from '@mami/ui';
+import { CONTROL_BORDER_RADIUS, CONTROL_HEIGHT } from '@mami/ui';
 
 import { Text } from '../../../theme/theme';
 
@@ -49,12 +50,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#FFFFFF',
     borderColor: '#CBD5E1',
-    borderRadius: 8,
+    borderRadius: CONTROL_BORDER_RADIUS,
     borderWidth: 1,
     flexDirection: 'row',
     gap: 6,
-    minHeight: 36,
-    paddingHorizontal: 10,
+    minHeight: CONTROL_HEIGHT,
+    paddingHorizontal: 12,
     width: 132,
   },
   optionActive: {

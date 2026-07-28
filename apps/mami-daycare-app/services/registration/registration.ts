@@ -54,10 +54,28 @@ type ProfileQueryResponse = {
 
 type MyDaycareQueryResponse = {
   myDaycare: {
-    id: string;
+    id: string | { _id?: string; id?: string; toString?: () => string };
     name: string;
   } | null;
 };
+
+function normalizeObjectId(value: unknown) {
+  if (typeof value === 'string') {
+    return value;
+  }
+
+  if (value && typeof value === 'object') {
+    const candidate = value as { id?: unknown; _id?: unknown; toString?: unknown };
+    if (typeof candidate.id === 'string') return candidate.id;
+    if (typeof candidate._id === 'string') return candidate._id;
+    if (typeof candidate.toString === 'function') {
+      const next = candidate.toString();
+      if (next && next !== '[object Object]') return next;
+    }
+  }
+
+  return '';
+}
 
 const REGISTER_DAYCARE_MUTATION = `
   mutation RegisterDaycare($input: RegisterDaycareInput!) {
@@ -179,7 +197,7 @@ export async function signInDaycareOwner(input: { email: string; password: strin
   }
 
   const daycareResult = await graphqlRequest<MyDaycareQueryResponse>(MY_DAYCARE_QUERY, undefined, token);
-  const daycareId = daycareResult.myDaycare?.id || '';
+  const daycareId = normalizeObjectId(daycareResult.myDaycare?.id);
 
   return {
     token,

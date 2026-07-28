@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 import { Modal as RNModal, Pressable, Text, View } from 'react-native';
 
 import { brandColors } from '../../theme/brand';
+import { CONTROL_BORDER_RADIUS, CONTROL_HEIGHT } from '../../theme/dimensions';
 
 export type PrimitiveSelectOption = {
   label: string;
@@ -28,11 +29,11 @@ export function Select({ value, placeholder, options, onChange, disabled, error,
         disabled={disabled}
         onPress={() => setVisible(true)}
         style={{
-          minHeight: 56,
+          minHeight: CONTROL_HEIGHT,
           borderWidth: 1,
           borderColor: error ? brandColors.danger : brandColors.border,
-          borderRadius: 12,
-          paddingHorizontal: 14,
+          borderRadius: CONTROL_BORDER_RADIUS,
+          paddingHorizontal: 12,
           justifyContent: 'center',
           backgroundColor: '#FFFFFF',
           opacity: disabled ? 0.6 : 1,
@@ -73,10 +74,10 @@ export function Select({ value, placeholder, options, onChange, disabled, error,
                     setVisible(false);
                   }}
                   style={{
-                    minHeight: 52,
-                    borderRadius: 12,
+                    minHeight: CONTROL_HEIGHT,
+                    borderRadius: CONTROL_BORDER_RADIUS,
                     justifyContent: 'center',
-                    paddingHorizontal: 16,
+                    paddingHorizontal: 12,
                     backgroundColor: active ? '#EEF2FF' : 'transparent',
                   }}>
                   <Text style={{ color: active ? '#4F46E5' : '#0F172A', fontWeight: active ? '800' : '600', fontSize: 15 }}>{option.label}</Text>

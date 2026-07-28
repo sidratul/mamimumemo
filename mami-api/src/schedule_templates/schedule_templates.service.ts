@@ -15,7 +15,22 @@ const scheduleTemplatesRepository = new ScheduleTemplatesRepository();
 const activityCategoriesService = new ActivityCategoriesService();
 const daycareActivitiesService = new DaycareActivitiesService();
 
+type DaycareIdLike = string | { toString(): string };
+
 export class ScheduleTemplatesService {
+  private readonly readRoles = [
+    UserRole.SUPER_ADMIN,
+    UserRole.DAYCARE_OWNER,
+    UserRole.DAYCARE_ADMIN,
+    UserRole.DAYCARE_SITTER,
+  ];
+
+  private readonly writeRoles = [
+    UserRole.SUPER_ADMIN,
+    UserRole.DAYCARE_OWNER,
+    UserRole.DAYCARE_ADMIN,
+  ];
+
   async getScheduleTemplates(
     daycareId: string,
     active: boolean | undefined,
@@ -25,7 +40,7 @@ export class ScheduleTemplatesService {
     if (!context.user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
-    this.requireDaycareAccess(daycareId, context);
+    this.requireRead(daycareId, context);
 
     return await scheduleTemplatesRepository.findByDaycareId(daycareId, active);
   }
@@ -40,7 +55,7 @@ export class ScheduleTemplatesService {
     if (!template) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
-    this.requireDaycareAccess(template.daycareId.toString(), context);
+    this.requireRead(template.daycareId.toString(), context);
 
     return template;
   }
@@ -54,7 +69,7 @@ export class ScheduleTemplatesService {
     if (!context.user) {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
-    this.requireDaycareAccess(daycareId, context);
+    this.requireRead(daycareId, context);
 
     return await scheduleTemplatesRepository.findByDayOfWeek(
       daycareId,
@@ -71,18 +86,8 @@ export class ScheduleTemplatesService {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    // Only daycare staff can create templates
-    const allowedRoles = [
-      UserRole.DAYCARE_ADMIN,
-      UserRole.DAYCARE_OWNER,
-      UserRole.SUPER_ADMIN,
-    ];
-    if (!allowedRoles.includes(context.user.role as UserRole)) {
-      throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
-    }
-
     const parsed = createScheduleTemplateInput.parse(input);
-    this.requireDaycareAccess(parsed.daycareId, context);
+    this.requireWrite(parsed.daycareId, context);
     await Promise.all(
       parsed.activities.map((activity) =>
         activityCategoriesService.getDefaultFieldConfig(activity.category)
@@ -110,17 +115,7 @@ export class ScheduleTemplatesService {
     if (!template) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
-    this.requireDaycareAccess(template.daycareId.toString(), context);
-
-    // Only daycare staff can update templates
-    const allowedRoles = [
-      UserRole.DAYCARE_ADMIN,
-      UserRole.DAYCARE_OWNER,
-      UserRole.SUPER_ADMIN,
-    ];
-    if (!allowedRoles.includes(context.user.role as UserRole)) {
-      throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
-    }
+    this.requireWrite(template.daycareId.toString(), context);
 
     const parsed = updateScheduleTemplateInput.parse(input);
     if (parsed.activities) {
@@ -147,27 +142,32 @@ export class ScheduleTemplatesService {
     if (!template) {
       throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
     }
-    this.requireDaycareAccess(template.daycareId.toString(), context);
-
-    // Only daycare staff can deactivate templates
-    const allowedRoles = [
-      UserRole.DAYCARE_ADMIN,
-      UserRole.DAYCARE_OWNER,
-      UserRole.SUPER_ADMIN,
-    ];
-    if (!allowedRoles.includes(context.user.role as UserRole)) {
-      throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
-    }
+    this.requireWrite(template.daycareId.toString(), context);
 
     return await scheduleTemplatesRepository.deactivate(id);
   }
 
-  private requireDaycareAccess(daycareId: string, context: AppContext) {
+  private requireRead(daycareId: DaycareIdLike, context: AppContext) {
+    isAuthenticated(context);
+    if (!context.user?.role || !this.readRoles.includes(context.user.role as UserRole)) {
+      throw new GraphQLError("Akses ditolak.");
+    }
+
+    if (context.user.role === UserRole.SUPER_ADMIN) {
+      return;
+    }
+
     if (
-      context.user?.role !== UserRole.SUPER_ADMIN &&
-      context.user?.daycareId?.toString() !== daycareId
+      context.user?.daycareId?.toString() !== daycareId.toString()
     ) {
-      throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
+      throw new GraphQLError("Akses ditolak.");
+    }
+  }
+
+  private requireWrite(daycareId: DaycareIdLike, context: AppContext) {
+    this.requireRead(daycareId, context);
+    if (!context.user?.role || !this.writeRoles.includes(context.user.role as UserRole)) {
+      throw new GraphQLError("Akses ditolak.");
     }
   }
 }

@@ -1,4 +1,5 @@
 export * from './theme/brand';
+export * from './theme/dimensions';
 export * from './components/status-color';
 export * from './components/primitives';
 export * from './components/inputs';

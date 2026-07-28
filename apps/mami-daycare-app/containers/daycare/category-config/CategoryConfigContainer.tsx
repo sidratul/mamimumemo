@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { Modal, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
+import { CONTROL_HEIGHT } from '@mami/ui';
 import {
   BottomDrawer,
   Button,
@@ -540,7 +541,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexShrink: 0,
     gap: 8,
-    height: 42,
+    height: CONTROL_HEIGHT,
     paddingLeft: 12,
     paddingRight: 6,
     width: 300,
@@ -550,7 +551,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: '700',
-    height: 40,
+    height: CONTROL_HEIGHT - 2,
     lineHeight: 18,
     minWidth: 0,
     padding: 0,

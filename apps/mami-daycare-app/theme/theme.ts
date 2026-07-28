@@ -5,9 +5,11 @@ export const theme = createTheme({
     background: '#F8FAFC',
     surface: '#FFFFFF',
     primary: '#4F46E5', // Indigo 600
+    onPrimary: '#FFFFFF',
     textPrimary: '#0F172A', // Slate 900
     textSecondary: '#64748B', // Slate 500
     border: '#E2E8F0', // Slate 200
+    backdrop: 'rgba(15, 23, 42, 0.42)',
     success: '#10B981', // Emerald 500
     danger: '#EF4444', // Red 500
   },

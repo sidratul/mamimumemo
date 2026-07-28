@@ -14,6 +14,7 @@ import { MESSAGES } from "#shared/enums/constant.ts";
 import { UserRole } from "#shared/enums/enum.ts";
 import { ActivityCategoriesService } from "@/activity_categories/activity_categories.service.ts";
 import ChildrenDaycareModel from "@/children_daycare/children_daycare.schema.ts";
+import ParentModel from "@/parents/parents.schema.ts";
 import { ScheduleTemplatesRepository } from "@/schedule_templates/schedule_templates.repository.ts";
 import { DaycareActivitiesService } from "@/daycare_activities/daycare_activities.service.ts";
 
@@ -80,7 +81,24 @@ export class DailyCareRecordsService {
       throw new GraphQLError(MESSAGES.AUTH.UNAUTHORIZED);
     }
 
-    this.requireDaycareAccess(context);
+    const child = await ChildrenDaycareModel.findById(childId).exec();
+    if (!child) {
+      throw new GraphQLError(MESSAGES.GENERAL.NOT_FOUND);
+    }
+
+    if (context.user.role === UserRole.PARENT) {
+      const parent = await ParentModel.findOne({
+        _id: child.parentId,
+        "user.userId": context.user._id,
+        active: true,
+      }).exec();
+
+      if (!parent) {
+        throw new GraphQLError(MESSAGES.AUTH.FORBIDDEN);
+      }
+    } else {
+      this.requireDaycareAccess(context, child.daycareId.toString());
+    }
 
     return await dailyCareRecordsRepository.findByChildIdAndDateRange(
       childId,

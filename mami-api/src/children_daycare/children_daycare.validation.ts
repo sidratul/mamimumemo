@@ -34,6 +34,7 @@ export const childMedicalInput = z.object({
 
 export const childPreferencesInput = z.object({
   favoriteFoods: z.array(z.string()).optional(),
+  dislikedFoods: z.array(z.string()).optional(),
   favoriteActivities: z.array(z.string()).optional(),
   comfortItems: z.array(z.string()).optional(),
   napRoutine: z.string().optional(),

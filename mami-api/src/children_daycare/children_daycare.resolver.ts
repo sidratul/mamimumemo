@@ -50,6 +50,7 @@ export const resolvers = {
   },
   ChildPreferences: {
     favoriteFoods: (preferences: { favoriteFoods?: string[] | null }) => preferences.favoriteFoods ?? [],
+    dislikedFoods: (preferences: { dislikedFoods?: string[] | null }) => preferences.dislikedFoods ?? [],
     favoriteActivities: (preferences: { favoriteActivities?: string[] | null }) => preferences.favoriteActivities ?? [],
     comfortItems: (preferences: { comfortItems?: string[] | null }) => preferences.comfortItems ?? [],
   },

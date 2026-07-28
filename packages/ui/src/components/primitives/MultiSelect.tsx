@@ -3,6 +3,7 @@ import { Modal as RNModal, Pressable, ScrollView, Text, View } from 'react-nativ
 import { Checkbox } from 'react-native-paper';
 
 import { brandColors } from '../../theme/brand';
+import { CONTROL_BORDER_RADIUS, CONTROL_HEIGHT } from '../../theme/dimensions';
 import { Button } from './Button';
 
 export type PrimitiveMultiSelectOption = {
@@ -46,11 +47,11 @@ export function MultiSelect({
             disabled={disabled}
             onPress={() => setVisible(true)}
             style={{
-              minHeight: 56,
+              minHeight: CONTROL_HEIGHT,
               borderWidth: 1,
               borderColor: error ? brandColors.danger : brandColors.border,
-              borderRadius: 12,
-              paddingHorizontal: 14,
+              borderRadius: CONTROL_BORDER_RADIUS,
+              paddingHorizontal: 12,
               justifyContent: 'center',
               backgroundColor: '#FFFFFF',
               opacity: disabled ? 0.6 : 1,
@@ -106,15 +107,15 @@ export function MultiSelect({
                       <Pressable
                         key={option.value}
                         onPress={() =>
-                          onChange(
+                        onChange(
                             active ? values.filter((item) => item !== option.value) : [...values, option.value]
                           )
                         }
                         style={{
-                          minHeight: 56,
-                          borderRadius: 14,
+                          minHeight: CONTROL_HEIGHT,
+                          borderRadius: CONTROL_BORDER_RADIUS,
                           paddingHorizontal: 12,
-                          paddingVertical: 10,
+                          paddingVertical: 8,
                           backgroundColor: active ? '#EEF2FF' : '#FFFFFF',
                           borderWidth: 1,
                           borderColor: active ? '#C7D2FE' : '#E2E8F0',
@@ -159,13 +160,13 @@ export function MultiSelect({
               <Pressable
                 key={option.value}
                 onPress={() =>
-                  onChange(active ? values.filter((item) => item !== option.value) : [...values, option.value])
+                onChange(active ? values.filter((item) => item !== option.value) : [...values, option.value])
                 }
                 style={{
-                  minHeight: 56,
-                  borderRadius: 14,
+                  minHeight: CONTROL_HEIGHT,
+                  borderRadius: CONTROL_BORDER_RADIUS,
                   paddingHorizontal: 12,
-                  paddingVertical: 10,
+                  paddingVertical: 8,
                   backgroundColor: active ? '#EEF2FF' : '#FFFFFF',
                   borderWidth: 1,
                   borderColor: active ? '#C7D2FE' : error ? brandColors.danger : '#E2E8F0',

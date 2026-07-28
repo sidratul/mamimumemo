@@ -1,4 +1,5 @@
 import { graphqlRequest } from '../graphql/client';
+import { normalizeObjectId } from './object-id';
 
 export type StaffAccess = 'ADMIN' | 'SITTER';
 
@@ -62,7 +63,7 @@ const DEACTIVATE_MEMBERSHIP_MUTATION = `
 export async function getStaffMemberships(token: string, daycareId: string) {
   const result = await graphqlRequest<MembershipsResponse, { daycareId: string }>(
     MEMBERSHIPS_QUERY,
-    { daycareId },
+    { daycareId: normalizeObjectId(daycareId) },
     token,
   );
   return result.daycareMemberships.filter(
@@ -89,7 +90,7 @@ export async function createStaffUser(
     ADD_USER_MUTATION,
     {
       input: {
-        daycareId: input.daycareId,
+        daycareId: normalizeObjectId(input.daycareId),
         access: input.access,
         notes: input.notes,
         userData: {
@@ -120,7 +121,7 @@ export async function addExistingStaffByEmail(
     ADD_USER_MUTATION,
     {
       input: {
-        daycareId: input.daycareId,
+        daycareId: normalizeObjectId(input.daycareId),
         access: input.access,
         notes: input.notes,
         userEmail: input.email,

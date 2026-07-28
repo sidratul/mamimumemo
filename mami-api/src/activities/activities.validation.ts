@@ -8,6 +8,7 @@ import {
   IntensityEnum,
   ActivitySourceEnum,
 } from "#shared/types/enums.ts";
+import { objectIdString } from "#shared/validation/object-id.validation.ts";
 import { storedCategoryCodeSchema } from "@/activity_categories/activity_categories.validation.ts";
 
 export const loggedByInput = z.object({
@@ -19,7 +20,7 @@ export const loggedByInput = z.object({
 
 export const createActivityInput = z.object({
   childId: z.string(),
-  daycareId: z.string().optional(),
+  daycareId: objectIdString.optional(),
   daycareActivityId: z.string().optional(),
   activityName: z.string().min(1, "Activity name is required"),
   category: storedCategoryCodeSchema,

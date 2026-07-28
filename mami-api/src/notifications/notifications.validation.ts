@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { NotificationTypeEnum } from "#shared/types/enums.ts";
+import { objectIdString } from "#shared/validation/object-id.validation.ts";
 
 export const createNotificationInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   userId: z.string(),
   type: z.nativeEnum(NotificationTypeEnum),
   title: z.string().min(1, "Title is required"),
@@ -12,7 +13,7 @@ export const createNotificationInput = z.object({
 });
 
 export const createBulkNotificationsInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   userIds: z.array(z.string()),
   type: z.nativeEnum(NotificationTypeEnum),
   title: z.string().min(1, "Title is required"),

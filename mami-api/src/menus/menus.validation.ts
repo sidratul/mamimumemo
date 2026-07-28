@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { MealTypeEnum } from "#shared/types/enums.ts";
+import { objectIdString } from "#shared/validation/object-id.validation.ts";
 
 export const mealInput = z.object({
   type: z.nativeEnum(MealTypeEnum),
@@ -10,7 +11,7 @@ export const mealInput = z.object({
 });
 
 export const createMenuInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   date: z.string().or(z.date()),
   meals: z.array(mealInput),
 });

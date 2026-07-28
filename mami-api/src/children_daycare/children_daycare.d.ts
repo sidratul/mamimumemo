@@ -35,6 +35,7 @@ export interface IChildMedical {
 
 export interface IChildPreferences {
   favoriteFoods: string[];
+  dislikedFoods: string[];
   favoriteActivities: string[];
   comfortItems: string[];
   napRoutine?: string;

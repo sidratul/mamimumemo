@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { StaffPaymentStatusEnum } from "#shared/types/enums.ts";
+import { objectIdString } from "#shared/validation/object-id.validation.ts";
 
 export const deductionInput = z.object({
   description: z.string().min(1, "Description is required"),
@@ -7,13 +8,13 @@ export const deductionInput = z.object({
 });
 
 export const staffRefInput = z.object({
-  userId: z.string(),
+  userId: objectIdString,
   name: z.string().min(1, "Name is required"),
   role: z.string().min(1, "Role is required"),
 });
 
 export const createStaffPaymentInput = z.object({
-  daycareId: z.string(),
+  daycareId: objectIdString,
   staff: staffRefInput,
   period: z.object({
     start: z.string().or(z.date()),

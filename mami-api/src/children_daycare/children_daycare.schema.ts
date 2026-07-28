@@ -22,6 +22,7 @@ const childMedicalSchema = new mongoose.Schema({
 
 const childPreferencesSchema = new mongoose.Schema({
   favoriteFoods: { type: [String], default: [] },
+  dislikedFoods: { type: [String], default: [] },
   favoriteActivities: { type: [String], default: [] },
   comfortItems: { type: [String], default: [] }, // selimut, boneka, dll
   napRoutine: String,

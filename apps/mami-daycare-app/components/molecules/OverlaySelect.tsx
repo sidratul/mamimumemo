@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { CONTROL_HEIGHT } from '@mami/ui';
 
 import { Text } from '../../theme/theme';
 
@@ -125,7 +126,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     justifyContent: 'center',
-    minHeight: 56,
+    minHeight: CONTROL_HEIGHT,
     paddingHorizontal: 12,
   },
   triggerCompact: {
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     flexDirection: 'row',
     gap: 8,
-    height: 56,
+    height: CONTROL_HEIGHT,
     justifyContent: 'space-between',
     paddingHorizontal: 12,
     width: 210,
@@ -179,11 +180,11 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowOpacity: 0.12,
     shadowRadius: 18,
-    top: 56,
+    top: CONTROL_HEIGHT,
     zIndex: 500,
   },
   dropdownCompact: {
-    top: 58,
+    top: CONTROL_HEIGHT + 2,
   },
   scroller: {
     maxHeight: 220,

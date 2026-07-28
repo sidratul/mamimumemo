@@ -2,6 +2,7 @@ import { TextInput as PaperTextInput } from 'react-native-paper';
 import { BottomSheetTextInput } from '@gorhom/bottom-sheet';
 
 import type { SharedTextInputProps } from './TextInput';
+import { brandColors } from '../../theme/brand';
 
 export type SharedTextAreaInputProps = Omit<SharedTextInputProps, 'multiline' | 'numberOfLines'> & {
   numberOfLines?: number;
@@ -26,6 +27,7 @@ export function TextAreaInput({
       mode="outlined"
       disabled={disabled}
       placeholder={placeholder}
+      placeholderTextColor={brandColors.textSecondary}
       multiline
       numberOfLines={numberOfLines}
       onChangeText={onChangeText}

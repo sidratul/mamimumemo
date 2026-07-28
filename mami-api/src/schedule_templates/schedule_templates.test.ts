@@ -4,7 +4,7 @@
  * Run with: deno test -A src/schedule_templates/schedule_templates.test.ts
  */
 
-import { assertEquals, assertRejects, assertExists } from "jsr:@std/assert";
+import { assertEquals, assertExists } from "jsr:@std/assert";
 import { ScheduleTemplatesService } from "./schedule_templates.service.ts";
 import { connectTestDatabase, teardownTestDatabase, createMockContext } from "../../tests/test-utils.ts";
 import { mockUsers, mockDaycares } from "../../mocks/index.ts";
@@ -19,7 +19,7 @@ Deno.test({
     const adminContext = createMockContext({
       id: mockUsers.daycareAdmin._id,
       name: mockUsers.daycareAdmin.name,
-      role: mockUsers.daycareAdmin.role,
+      role: mockUsers.daycareAdmin.role as any,
     });
     
     await t.step("Create Schedule Template", async (step) => {
@@ -27,6 +27,7 @@ Deno.test({
         const input = {
           daycareId: mockDaycares.active._id,
           name: "Routine Harian",
+          targetType: "day_of_week",
           dayOfWeek: [1, 2, 3, 4, 5], // Mon-Fri
           activities: [
             {
@@ -52,19 +53,19 @@ Deno.test({
         assertEquals(result.dayOfWeek.length, 5);
       });
       
-      await step.test("should fail without activities", async () => {
+      await step.test("should create without activities", async () => {
         const input = {
           daycareId: mockDaycares.active._id,
           name: "Empty Template",
+          targetType: "day_of_week",
           dayOfWeek: [1],
           activities: [],
         };
         
-        await assertRejects(
-          async () => await scheduleTemplatesService.createScheduleTemplate(input, adminContext as any),
-          Error,
-          "Activities are required"
-        );
+        const result = await scheduleTemplatesService.createScheduleTemplate(input, adminContext as any);
+
+        assertExists(result.id);
+        assertEquals(result.activities.length, 0);
       });
     });
     
@@ -73,14 +74,14 @@ Deno.test({
         const templates = await scheduleTemplatesService.getScheduleTemplates(mockDaycares.active._id, undefined, adminContext as any);
         
         assertEquals(Array.isArray(templates), true);
-        assertEquals(templates.length, 1);
+        assertEquals(templates.length, 2);
       });
       
       await step.test("should get only active templates", async () => {
         const templates = await scheduleTemplatesService.getScheduleTemplates(mockDaycares.active._id, true, adminContext as any);
         
         assertEquals(Array.isArray(templates), true);
-        assertEquals(templates.length, 1);
+        assertEquals(templates.length, 2);
       });
       
       await step.test("should get templates for specific day", async () => {
@@ -134,7 +135,7 @@ Deno.test({
     });
     
     await t.step("Deactivate Schedule Template", async (step) => {
-      const templates = await scheduleTemplatesService.getScheduleTemplates(mockDaycares.active._id, undefined, adminContext as any);
+      const templates = await scheduleTemplatesService.getScheduleTemplates(mockDaycares.active._id, true, adminContext as any);
       const templateId = templates[0].id;
       
       await step.test("should deactivate successfully", async () => {

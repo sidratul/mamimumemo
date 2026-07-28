@@ -5,8 +5,12 @@ import { AppContext } from "#shared/config/context.ts";
 const scheduleTemplatesService = new ScheduleTemplatesService();
 
 export const resolvers = {
+  ScheduleTemplate: {
+    targetType: (template: { targetType?: string }) => template.targetType?.toUpperCase(),
+  },
   TemplateActivity: {
     category: (activity: { category?: string }) => activity.category?.toUpperCase(),
+    defaultSitterRole: (activity: { defaultSitterRole?: string }) => activity.defaultSitterRole?.toUpperCase(),
   },
   Query: {
     scheduleTemplates: (

@@ -1,5 +1,6 @@
 import { useMemo, useRef } from 'react';
 import { StyleSheet, TextInput, View } from 'react-native';
+import { CONTROL_HEIGHT } from '@mami/ui';
 
 import { Text } from '../../theme/theme';
 
@@ -105,7 +106,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     borderWidth: 1,
     flexDirection: 'row',
-    minHeight: 56,
+    minHeight: CONTROL_HEIGHT,
     paddingHorizontal: 12,
   },
   inputRowError: {
@@ -119,7 +120,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 13,
     fontWeight: '800',
-    height: 54,
+    height: CONTROL_HEIGHT,
     lineHeight: 18,
     minWidth: 0,
     padding: 0,
